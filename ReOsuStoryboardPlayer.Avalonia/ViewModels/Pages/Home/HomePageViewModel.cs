@@ -1,9 +1,18 @@
 ﻿using System;
+using CommunityToolkit.Mvvm.Input;
+using ReOsuStoryboardPlayer.Avalonia.Services.Dialog;
 
 namespace ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Home;
 
-public class HomePageViewModel : PageViewModelBase
+public partial class HomePageViewModel : PageViewModelBase
 {
+    private readonly IDialogManager dialogManager;
+
+    public HomePageViewModel(IDialogManager dialogManager)
+    {
+        this.dialogManager = dialogManager;
+    }
+
     public override string Title => "主页";
 
     public string ProgramCommitId => ThisAssembly.GitCommitId;
@@ -21,5 +30,11 @@ public class HomePageViewModel : PageViewModelBase
                 ?.ToString();
             return prop;
         }
+    }
+
+    [RelayCommand]
+    private void OpenDialog()
+    {
+        dialogManager.ShowMessageDialog("Good Dialog!");
     }
 }

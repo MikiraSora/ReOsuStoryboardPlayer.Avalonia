@@ -1,0 +1,94 @@
+<UserControl
+    x:Class="ReOsuStoryboardPlayer.Avalonia.Views.Pages.Home.HomePageView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:home="clr-namespace:ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Home"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Design.DataContext>
+        <home:HomePageViewModel />
+    </Design.DataContext>
+    <StackPanel Margin="10">
+        <Border Classes="ContentContainer">
+            <StackPanel>
+                <Label Content="ReOsuStoryboardPlayer Online" FontSize="25" />
+            </StackPanel>
+        </Border>
+        <Grid ColumnDefinitions="*,Auto">
+            <Grid>
+                <Button Command="{Binding OpenDialogCommand}" Content="Open Dialog" />
+            </Grid>
+            <Border
+                Grid.Column="1"
+                Margin="5,10,0,0"
+                Classes="ContentContainer">
+                <StackPanel>
+                    <Label
+                        Content="Program Build Infomation"
+                        FontSize="18"
+                        FontWeight="Bold" />
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="*,*,*,*,*">
+                        <!--    -->
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            HorizontalAlignment="Right"
+                            Content="CommitHash:" />
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Content="{Binding ProgramCommitIdShort}"
+                            FontWeight="Bold" />
+                        <!--    -->
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            HorizontalAlignment="Right"
+                            Content="CommitTime:" />
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Content="{Binding ProgramCommitDate, StringFormat=yyyy/M/dd H:mm:ss.fff}"
+                            FontWeight="Bold" />
+                        <!--    -->
+                        <Label
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            HorizontalAlignment="Right"
+                            Content="BuildTime:" />
+                        <Label
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Content="{Binding ProgramBuildTime}"
+                            FontWeight="Bold" />
+                        <!--    -->
+                        <Label
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            HorizontalAlignment="Right"
+                            Content="BuildConfiguration:" />
+                        <Label
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Content="{Binding ProgramBuildConfiguration}"
+                            FontWeight="Bold" />
+                        <!--    -->
+                        <Label
+                            Grid.Row="4"
+                            Grid.Column="0"
+                            HorizontalAlignment="Right"
+                            Content="BuildVersion:" />
+                        <Label
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Content="{Binding AssemblyVersion}"
+                            FontWeight="Bold" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </StackPanel>
+</UserControl>

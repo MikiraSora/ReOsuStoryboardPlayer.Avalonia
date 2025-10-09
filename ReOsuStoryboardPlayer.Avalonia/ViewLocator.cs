@@ -8,6 +8,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels;
 using ReOsuStoryboardPlayer.Avalonia.Views.Attributes;
 

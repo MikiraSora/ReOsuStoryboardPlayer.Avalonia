@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
 using ReOsuStoryboardPlayer.Avalonia.Utils;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages;
+using ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Home;
 
 namespace ReOsuStoryboardPlayer.Avalonia.ViewModels;
 
