@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReOsuStoryboardPlayer.Avalonia", "ReOsuStoryboardPlayer.Avalonia\ReOsuStoryboardPlayer.Avalonia.csproj", "{C13A07A0-B461-903F-F2E0-1F945F3297DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReOsuStoryboardPlayer.Avalonia.Android", "ReOsuStoryboardPlayer.Avalonia.Android\ReOsuStoryboardPlayer.Avalonia.Android.csproj", "{C1CE4DFF-6BC3-69E1-4A7F-7BE4EE7A64B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReOsuStoryboardPlayer.Avalonia.Browser", "ReOsuStoryboardPlayer.Avalonia.Browser\ReOsuStoryboardPlayer.Avalonia.Browser.csproj", "{8D5933C4-317E-D9F1-9A29-BB18AD2027BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReOsuStoryboardPlayer.Avalonia.Desktop", "ReOsuStoryboardPlayer.Avalonia.Desktop\ReOsuStoryboardPlayer.Avalonia.Desktop.csproj", "{47CA1996-BEC8-69AE-6839-DDDDF72E8600}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C13A07A0-B461-903F-F2E0-1F945F3297DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C13A07A0-B461-903F-F2E0-1F945F3297DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C13A07A0-B461-903F-F2E0-1F945F3297DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C13A07A0-B461-903F-F2E0-1F945F3297DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1CE4DFF-6BC3-69E1-4A7F-7BE4EE7A64B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1CE4DFF-6BC3-69E1-4A7F-7BE4EE7A64B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1CE4DFF-6BC3-69E1-4A7F-7BE4EE7A64B1}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{C1CE4DFF-6BC3-69E1-4A7F-7BE4EE7A64B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1CE4DFF-6BC3-69E1-4A7F-7BE4EE7A64B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1CE4DFF-6BC3-69E1-4A7F-7BE4EE7A64B1}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{8D5933C4-317E-D9F1-9A29-BB18AD2027BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D5933C4-317E-D9F1-9A29-BB18AD2027BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D5933C4-317E-D9F1-9A29-BB18AD2027BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D5933C4-317E-D9F1-9A29-BB18AD2027BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47CA1996-BEC8-69AE-6839-DDDDF72E8600}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47CA1996-BEC8-69AE-6839-DDDDF72E8600}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47CA1996-BEC8-69AE-6839-DDDDF72E8600}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47CA1996-BEC8-69AE-6839-DDDDF72E8600}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FD10A6B8-0598-4C70-BE81-74CD270120EA}
+	EndGlobalSection
+EndGlobal

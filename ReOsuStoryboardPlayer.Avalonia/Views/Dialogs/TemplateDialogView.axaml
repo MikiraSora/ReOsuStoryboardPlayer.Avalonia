@@ -1,0 +1,27 @@
+﻿<UserControl
+    x:Class="ReOsuStoryboardPlayer.Avalonia.Views.Dialogs.TemplateDialogView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dialogs="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Views.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    x:DataType="dialogs:TemplateDialogView"
+    Background="Black"
+    mc:Ignorable="d">
+    <Design.DataContext>
+        <dialogs:TemplateDialogView />
+    </Design.DataContext>
+    <Border>
+        <StackPanel>
+            <Label
+                Margin="5"
+                Content="{Binding MainPageContent.Title}"
+                FontSize="25"
+                FontWeight="Bold" />
+            <Rectangle Height="2" Fill="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
+            <ContentControl Margin="5" Content="{Binding MainPageContent}" />
+        </StackPanel>
+    </Border>
+</UserControl>

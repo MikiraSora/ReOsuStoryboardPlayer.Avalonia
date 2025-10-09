@@ -1,0 +1,20 @@
+﻿<UserControl
+    x:Class="ReOsuStoryboardPlayer.Avalonia.Views.Dialogs.Hello.HelloDialogView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:hello="clr-namespace:ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs.Hello"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:DataType="hello:HelloDialogViewModel"
+    mc:Ignorable="d">
+	<Design.DataContext>
+		<hello:HelloDialogViewModel />
+	</Design.DataContext>
+	<Border Padding="20" CornerRadius="10">
+		<StackPanel>
+			<Label>Welcome to Avalonia!</Label>
+			<TextBox Width="150" Text="{Binding Content}" />
+			<Button Command="{Binding CloseCommand}" Content="CLOSE 1" />
+		</StackPanel>
+	</Border>
+</UserControl>
