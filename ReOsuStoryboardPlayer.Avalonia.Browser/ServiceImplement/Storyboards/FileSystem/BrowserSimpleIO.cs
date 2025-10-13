@@ -65,7 +65,7 @@ public static class BrowserSimpleIO
 
         return dir.ChildFiles
             .Where(f => regex.IsMatch(f.FileName))
-            .Select(f => f.FileName)
+            .Select(f => f.FullPath)
             .ToArray();
     }
 

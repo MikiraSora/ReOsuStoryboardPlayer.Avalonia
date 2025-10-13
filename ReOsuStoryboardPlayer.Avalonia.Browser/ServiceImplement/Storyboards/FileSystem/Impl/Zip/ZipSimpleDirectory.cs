@@ -24,7 +24,7 @@ public class ZipSimpleDirectory : ISimpleDirectory
     public ISimpleDirectory[] ChildDictionaries => _dirs.Values.ToArray();
 
     public ISimpleFile[] ChildFiles => _files.Values.ToArray();
-    public string FullPath => System.IO.Path.Combine(ParentDictionary?.FullPath, DirectoryName);
+    public string FullPath => Path.Combine(ParentDictionary?.FullPath ?? string.Empty, DirectoryName);
 
     public string DirectoryName { get; }
 
@@ -132,5 +132,11 @@ public class ZipSimpleDirectory : ISimpleDirectory
         }
 
         return root;
+    }
+
+    public override string ToString()
+    {
+        return
+            $"Directory: {FullPath}, ChildDirsCount: {ChildDictionaries.Length}, ChildFilesCount: {ChildFiles.Length}";
     }
 }

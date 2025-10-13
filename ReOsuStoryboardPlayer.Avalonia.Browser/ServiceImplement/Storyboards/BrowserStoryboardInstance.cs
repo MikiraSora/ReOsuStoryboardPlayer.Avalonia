@@ -8,7 +8,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards;
 
 public class BrowserStoryboardInstance : IStoryboardInstance
 {
-    public ISimpleDirectory storyboardFileSystemRootDirectory { get; set; }
+    public ISimpleDirectory StoryboardFileSystemRootDirectory { get; set; }
 
     public BeatmapFolderInfoEx InfoEx { get; set; }
     public StoryboardInfo StoryboardInfo { get; set; }

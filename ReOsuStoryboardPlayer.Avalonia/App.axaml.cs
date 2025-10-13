@@ -10,6 +10,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels;
 using ReOsuStoryboardPlayer.Avalonia.Views;
+using ReOsuStoryboardPlayer.Core.Utils;
 
 namespace ReOsuStoryboardPlayer.Avalonia;
 
@@ -29,13 +30,26 @@ public class App : Application
         DataTemplates.Add(ActivatorUtilities.CreateInstance<ViewLocator>(RootServiceProvider));
 
         var logger = RootServiceProvider.GetService<ILogger<App>>();
+        var osblogger = RootServiceProvider.GetService<ILoggerFactory>().CreateLogger("OsuStoryboardPlayerCoreLog");
+        Log.LogImplement = (caller, message, level) =>
+        {
+            var logLevl = level switch
+            {
+                Log.LogLevel.Debug => LogLevel.Debug,
+                Log.LogLevel.None => LogLevel.Information,
+                Log.LogLevel.Error => LogLevel.Error,
+                Log.LogLevel.User => LogLevel.Information,
+                Log.LogLevel.Warn => LogLevel.Warning
+            };
+            osblogger.Log(logLevl, $"{caller}(): {message}");
+        };
 
         var injectableConverters = RootServiceProvider.GetServices<IInjectableValueConverter>();
         var injectableMultiValueConverters = RootServiceProvider.GetServices<IInjectableMultiValueConverter>();
 
         foreach (var converter in injectableConverters.AsEnumerable<object>().Concat(injectableMultiValueConverters))
         {
-            var key = converter.GetType().Name/*.Replace("ValueConverter", string.Empty)*/;
+            var key = converter.GetType().Name /*.Replace("ValueConverter", string.Empty)*/;
 
             logger.LogInformationEx($"add injectable converter, key: {key} -> {converter.GetType().FullName}");
             Resources[key] = converter;

@@ -22,7 +22,7 @@ public class BrowserAudioManager(ILogger<BrowserAudioManager> logger, IServicePr
             return default;
 
         var audioPath = instance.InfoEx.audio_file_path;
-        using var fs = await BrowserSimpleIO.OpenRead(instance.storyboardFileSystemRootDirectory, audioPath);
+        using var fs = await BrowserSimpleIO.OpenRead(instance.StoryboardFileSystemRootDirectory, audioPath);
         return await LoadAudio(fs);
     }
 

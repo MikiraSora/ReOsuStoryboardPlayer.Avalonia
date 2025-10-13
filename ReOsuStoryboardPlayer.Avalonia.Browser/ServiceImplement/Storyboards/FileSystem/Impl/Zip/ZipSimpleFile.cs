@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,7 +17,7 @@ public class ZipSimpleFile : ISimpleFile
     }
 
     public ISimpleDirectory ParentDictionary { get; }
-    public string FullPath => System.IO.Path.Combine(ParentDictionary?.FullPath, FileName);
+    public string FullPath => Path.Combine(ParentDictionary?.FullPath ?? string.Empty, FileName);
 
     public string FileName { get; }
 
@@ -32,5 +33,10 @@ public class ZipSimpleFile : ISimpleFile
         var text = Encoding.UTF8.GetString(_data);
         var lines = text.Split(new[] {"\r\n", "\n"}, StringSplitOptions.None);
         return Task.FromResult(lines);
+    }
+
+    public override string ToString()
+    {
+        return $"File: {FullPath}, Length: {FileLength}";
     }
 }

@@ -60,7 +60,7 @@ public partial class HomePageViewModel(
         catch (Exception e)
         {
             var msg = e.Message;
-            logger.LogErrorEx($"open storyboard dialog exception: {e.Message}");
+            logger.LogErrorEx(e, $"open storyboard dialog exception: {e.Message}");
             await dialogManager.ShowMessageDialog(msg, DialogMessageType.Error);
         }
     }
