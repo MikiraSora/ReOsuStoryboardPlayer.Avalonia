@@ -8,7 +8,5 @@
         x:Class="ReOsuStoryboardPlayer.Avalonia.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="ReOsuStoryboardPlayer.Avalonia">
-    <views1:ReactiveDialogHost OverlayBackground="WhiteSmoke" CloseOnClickAway="True">
         <views:MainView />
-    </views1:ReactiveDialogHost>
 </Window>

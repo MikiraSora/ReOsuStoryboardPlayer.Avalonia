@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="ReOsuStoryboardPlayer.Avalonia.Views.Dialogs.CommonMessage.CommonComfirmDialogView"
+    x:Class="ReOsuStoryboardPlayer.Avalonia.Views.Dialogs.CommonMessage.AboutView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:commonMessage="clr-namespace:ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs.CommonMessage"

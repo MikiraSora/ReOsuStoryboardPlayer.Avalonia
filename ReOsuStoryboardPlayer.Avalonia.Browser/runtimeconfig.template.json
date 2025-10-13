@@ -1,10 +1,12 @@
 {
-    "wasmHostProperties": {
-        "perHostConfig": [
-            {
-                "name": "browser",
-                "host": "browser"
-            }
-        ]
-    }
+  "wasmHostProperties": {
+    "perHostConfig": [
+      {
+        "name": "browser",
+        "host": "browser"
+      }
+    ],
+    "webServerPort": 12999,
+    "chromeDebuggingPort": 13000
+  }
 }

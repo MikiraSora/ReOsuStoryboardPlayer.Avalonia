@@ -4,12 +4,43 @@
     <OutputType>Exe</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DefineConstants>TRACE;AVALONIA_BROWSER;</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DefineConstants>AVALONIA_BROWSER;</DefineConstants>
+  </PropertyGroup>
 
+
+  <PropertyGroup>
+    <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+    <!--
+    <WasmDebugLevel>1</WasmDebugLevel>
+    <WasmProfilers>browser;</WasmProfilers>
+    <WasmNativeDebugSymbols>true</WasmNativeDebugSymbols>
+    <WasmEmitSymbolMap>true</WasmEmitSymbolMap>
+    <WasmEmitSourceMap>true</WasmEmitSourceMap>
+    <RunAOTCompilation>true</RunAOTCompilation>
+    <WasmNativeDebugSymbols>true</WasmNativeDebugSymbols>
+    <WasmEmitSymbolMap>true</WasmEmitSymbolMap>
+    <WasmEmitSourceMap>true</WasmEmitSourceMap>
+    <WasmEnableSIMD>true</WasmEnableSIMD>
+    <WasmAllowUndefinedSymbols>true</WasmAllowUndefinedSymbols>
+    -->
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Avalonia.Browser" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ReOsuStoryboardPlayer.Avalonia\ReOsuStoryboardPlayer.Avalonia.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\Fonts\NotoSansSC-VariableFont_wght.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\NotoSansSC-VariableFont_wght.ttf" />
   </ItemGroup>
 </Project>

@@ -16,7 +16,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Services.Dialog.DefaultImpl;
 [RegisterInjectable(typeof(IDialogManager), ServiceLifetime.Singleton)]
 public class DefaultDialogManager : IDialogManager
 {
-    private readonly Stack<Window> dialogWindowStack = new();
+    private readonly Stack<global::Avalonia.Controls.Window> dialogWindowStack = new();
     private readonly ILogger<DefaultDialogManager> logger;
     private readonly ViewModelFactory viewModelFactory;
 

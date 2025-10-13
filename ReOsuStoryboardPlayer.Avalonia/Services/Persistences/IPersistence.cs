@@ -1,13 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace ReOsuStoryboardPlayer.Avalonia.Services.Persistences
+namespace ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
+
+public interface IPersistence
 {
-    public interface IPersistence
-    {
-        Task Save<T>(T obj);
-        Task<T> Load<T>();
-    }
+    Task Save<T>(T obj);
+    Task<T> Load<T>() where T : new();
 }

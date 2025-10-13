@@ -3,11 +3,17 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
+    xmlns:valueConverters="clr-namespace:ReOsuStoryboardPlayer.Avalonia.UI.ValueConverters"
     RequestedThemeVariant="Default">
     <!--  "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options.  -->
 
+    <Application.Resources>
+        <valueConverters:TimeSpanToStringValueConverter x:Key="TimeSpanToStringValueConverter" />
+    </Application.Resources>
+
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="UI/Styles/IconButton.axaml" />
         <StyleInclude Source="avares://DataBox/Themes/DataBoxFluentTheme.axaml" />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
         <StyleInclude Source="avares://FluentAvalonia.ProgressRing/Styling/Controls/ProgressRing.axaml" />

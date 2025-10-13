@@ -60,8 +60,6 @@ public partial class MainViewModel : ViewModelBase
         if (!DesignModeHelper.IsDesignMode)
         {
             var setting = await persistence.Load<ApplicationSettings>();
-
-            //using var disp = notification.BeginLoadingNotification("自动登录中", out var cancellationToken);
         }
 
         //load default page.

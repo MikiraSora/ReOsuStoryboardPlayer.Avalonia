@@ -63,7 +63,7 @@ public class DesktopPersistence : IPersistence
         });
     }
 
-    public Task<T> Load<T>()
+    public Task<T> Load<T>() where T : new()
     {
         return Task.Run(() =>
         {

@@ -1,15 +1,15 @@
-﻿using Avalonia;
+﻿using System;
+using System.Linq;
+using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ReOsuStoryboardPlayer.Avalonia.UI.ValueConverters;
 using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
-using ReOsuStoryboardPlayer.Avalonia.ValueConverters;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels;
 using ReOsuStoryboardPlayer.Avalonia.Views;
-using System;
-using System.Linq;
 
 namespace ReOsuStoryboardPlayer.Avalonia;
 
@@ -35,8 +35,9 @@ public class App : Application
 
         foreach (var converter in injectableConverters.AsEnumerable<object>().Concat(injectableMultiValueConverters))
         {
-            var key = converter.GetType().Name;
-            logger.LogInformationEx($"add injectable converter: {key}");
+            var key = converter.GetType().Name/*.Replace("ValueConverter", string.Empty)*/;
+
+            logger.LogInformationEx($"add injectable converter, key: {key} -> {converter.GetType().FullName}");
             Resources[key] = converter;
         }
 

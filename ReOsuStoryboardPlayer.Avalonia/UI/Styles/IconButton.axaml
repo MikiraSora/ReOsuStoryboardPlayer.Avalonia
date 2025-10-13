@@ -1,0 +1,48 @@
+﻿<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <!-- 基础 icon-button 样式 -->
+    <Style Selector="Button.IconButton">
+        <!-- 强制常态为透明背景/无边框，避免被主题覆盖 -->
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="8" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <!-- pointerover: 不改颜色，只做放大（scale） -->
+    <Style Selector="Button.IconButton:pointerover">
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <ScaleTransform ScaleX="1.08" ScaleY="1.08" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <!-- pressed: 稍微缩小表示按下反馈 -->
+    <Style Selector="Button.IconButton:pressed">
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <ScaleTransform ScaleX="0.96" ScaleY="0.96" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+
+    <!-- 可选：禁用高亮改变 Foreground（若主题会改 foreground） -->
+    <Style Selector="Button.IconButton:pointerover /template/ ContentPresenter">
+        <Setter Property="Foreground" Value="{TemplateBinding Foreground}" />
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+</Styles>

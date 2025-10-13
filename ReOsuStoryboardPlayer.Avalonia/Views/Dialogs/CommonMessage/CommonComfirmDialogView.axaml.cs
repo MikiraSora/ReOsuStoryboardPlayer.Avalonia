@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Views.Dialogs.CommonMessage;
 
-public partial class CommonComfirmDialogView : UserControl
+public partial class AboutView : UserControl
 {
-    public CommonComfirmDialogView()
+    public AboutView()
     {
         InitializeComponent();
     }
