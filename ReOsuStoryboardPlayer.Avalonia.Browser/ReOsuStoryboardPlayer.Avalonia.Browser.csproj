@@ -43,6 +43,5 @@
     <None Remove="Assets\Fonts\NotoSansSC-VariableFont_wght.ttf" />
     <AvaloniaResource Include="Assets\Fonts\NotoSansSC-VariableFont_wght.ttf" />
     <None Remove="Assets\test.osz" />
-    <AvaloniaResource Include="Assets\test.osz" />
   </ItemGroup>
 </Project>

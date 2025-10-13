@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Avalonia.Platform;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSystem;
 using ReOsuStoryboardPlayer.Avalonia.Browser.Utils;
+using ReOsuStoryboardPlayer.Avalonia.Browser.ViewModels.Dialogs;
 using ReOsuStoryboardPlayer.Avalonia.Services.Dialog;
 using ReOsuStoryboardPlayer.Avalonia.Services.Parameters;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
@@ -32,28 +33,59 @@ public class BrowserStoryboardLoader(
 
     public async ValueTask<IStoryboardInstance> OpenLoaderDialog()
     {
-        //var openDialog = await dialogManager.ShowDialog<BrowserOpenStoryboardDialogViewModel>();
-        var assetUri = new Uri("avares://ReOsuStoryboardPlayer.Avalonia.Browser/Assets/test.osz");
-        using var stream = AssetLoader.Open(assetUri);
-        using var ms = new MemoryStream();
-        stream.CopyTo(ms);
-
-        logger.LogInformationEx($"ms:{ms}");
-        var instance = await OpenLoaderFromZipFileBytes(ms.ToArray());
-        return instance;
+        var openDialog = await dialogManager.ShowDialog<BrowserOpenStoryboardDialogViewModel>();
+        return openDialog.SelectedStoryboardInstance;
     }
 
-    private async ValueTask<IStoryboardInstance> OpenLoaderFromZipFileBytes(byte[] zipFileBytes)
+    public async ValueTask<IStoryboardInstance> OpenLoaderFromZipFileBytes(byte[] zipFileBytes)
     {
-        var selectDirPath = string.Empty;
         var fsRoot = BrowserFileSystemBuilder.LoadFromZipFileBytes(zipFileBytes);
-        logger.LogInformationEx($"fsRoot loaded: {fsRoot}, seachDirPath: {selectDirPath}");
+        return await LoadStoryboardInstance(fsRoot);
+    }
+
+    public async ValueTask<IStoryboardInstance> OpenLoaderFromLocalFileSystem(
+        LocalFileSystemInterop.JSDirectory jsDirRoot)
+    {
+        var fsRoot = BrowserFileSystemBuilder.LoadFromLocalFileSystem(jsDirRoot);
+        return await LoadStoryboardInstance(fsRoot);
+    }
+
+    private void dumpDirectory(StringBuilder sb, ISimpleDirectory fsRoot, int tabCount = 0)
+    {
+        if (fsRoot == null)
+            return;
+
+        var indent = new string(' ', tabCount * 4);
+        sb.AppendLine($"{indent}[DIR] {fsRoot.DirectoryName}");
+        sb.AppendLine();
+
+        // 打印所有文件
+        if (fsRoot.ChildFiles?.Length > 0)
+        {
+            foreach (var file in fsRoot.ChildFiles)
+                sb.AppendLine($"{indent}  - {file.FileName} ({file.FileLength} bytes)");
+            sb.AppendLine();
+        }
+
+        // 递归打印子目录
+        if (fsRoot.ChildDictionaries != null)
+            foreach (var subDir in fsRoot.ChildDictionaries)
+                dumpDirectory(sb, subDir, tabCount + 1);
+    }
+
+    private async ValueTask<IStoryboardInstance> LoadStoryboardInstance(ISimpleDirectory fsRoot)
+    {
+        logger.LogInformationEx($"fsRoot loaded: {fsRoot}");
+
+        var sb = new StringBuilder();
+        dumpDirectory(sb, fsRoot);
+        logger.LogDebugEx(sb.ToString());
 
         var instance = BrowserStoryboardInstance.CreateInstance();
         instance.StoryboardFileSystemRootDirectory = fsRoot;
         logger.LogInformationEx($"instance loaded: {instance}.");
 
-        instance.InfoEx = await BeatmapFolderInfoEx.Parse(fsRoot, selectDirPath, parameterManager.Parameters);
+        instance.InfoEx = await BeatmapFolderInfoEx.Parse(fsRoot, string.Empty, parameterManager.Parameters);
         if (instance.Info == null)
         {
             logger?.LogErrorEx("can't create BeatmapFolderInfo");
@@ -133,7 +165,7 @@ public class BrowserStoryboardLoader(
         instance.ObjectList = temp_objs_list;
         logger.LogInformationEx($"loaded {instance.ObjectList.Count} storybaord objects totally.");
 
-        instance.Resource = await BuildStoryboardResource(fsRoot, instance.ObjectList, selectDirPath);
+        instance.Resource = await BuildStoryboardResource(fsRoot, instance.ObjectList, string.Empty);
         logger.LogInformationEx("BuildStoryboardResource() successfully");
 
         return instance;
@@ -269,14 +301,14 @@ public class BrowserStoryboardLoader(
             return group;
         }
 
-        async Task<SKBitmap> _load_tex(string file_path)
+        async Task<SKImage> _load_tex(string file_path)
         {
             try
             {
                 if (!BrowserSimpleIO.ExistFile(fsRoot, file_path))
                     return null;
                 using var fs = await BrowserSimpleIO.OpenRead(fsRoot, file_path);
-                return SKBitmap.Decode(fs);
+                return SKImage.FromEncodedData(fs);
             }
             catch (Exception e)
             {

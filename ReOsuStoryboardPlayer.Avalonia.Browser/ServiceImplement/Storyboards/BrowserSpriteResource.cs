@@ -6,12 +6,12 @@ namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards;
 
 public class BrowserSpriteResource : ISpriteResource
 {
-    public BrowserSpriteResource(string fixImage, SKBitmap texture)
+    public BrowserSpriteResource(string fixImage, SKImage texture)
     {
         Name = fixImage;
         Image = texture;
     }
 
     public string Name { get; }
-    public SKBitmap Image { get; }
+    public SKImage Image { get; }
 }

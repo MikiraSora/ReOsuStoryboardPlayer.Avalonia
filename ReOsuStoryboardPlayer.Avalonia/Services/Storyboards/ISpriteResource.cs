@@ -6,5 +6,5 @@ namespace ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 public interface ISpriteResource
 {
     string Name { get; }
-    SKBitmap Image { get; }
+    SKImage Image { get; }
 }

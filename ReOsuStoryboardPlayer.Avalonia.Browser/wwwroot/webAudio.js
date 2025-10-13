@@ -88,6 +88,8 @@
             const player = players.get(id);
             if (!player?.source) return;
 
+            //这里先清空onended避免误触发
+            player.onEnd = null;
             try {
                 player.source.stop();
             } catch {
@@ -102,8 +104,6 @@
             const player = players.get(id);
             if (!player?.buffer) return;
 
-            //这里先清空onended避免误触发
-            player.onEnd = undefined;
             // 停止当前播放
             stop(id);
             player.offset = Math.min(seconds, player.duration);

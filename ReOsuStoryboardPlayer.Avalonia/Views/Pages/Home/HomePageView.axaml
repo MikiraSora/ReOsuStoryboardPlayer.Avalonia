@@ -29,6 +29,7 @@
                 <TextBlock Text="Fasdqweniowijrwerwer" TextWrapping="WrapWithOverflow" />
                 <TextBlock Text="Fasdqweniowijrwerwer" TextWrapping="WrapWithOverflow" />
                 <Button Content="Load Storyboard" Command="{Binding LoadStoryboardInstanceCommand}" />
+                <!--
                 <Button Content="SayHello" Command="{Binding SayHelloCommand}" />
                 <Button Content="LoadAudio" Command="{Binding LoadAudioCommand}" />
                 <Button Content="PlayAudio" Command="{Binding PlayAudioCommand}" />
@@ -37,6 +38,7 @@
                 <Button Content="StopAudio" Command="{Binding StopAudioCommand}" />
                 <Button Content="SeekAudio" Command="{Binding SeekAudioCommand}" />
                 <Button Content="PrintAudioCurrentTime" Command="{Binding PrintAudioCurrentTimeCommand}" />
+                -->
             </StackPanel>
         </Grid>
         <Grid IsVisible="{Binding StoryboardInstance,Converter={x:Static ObjectConverters.IsNotNull}}">

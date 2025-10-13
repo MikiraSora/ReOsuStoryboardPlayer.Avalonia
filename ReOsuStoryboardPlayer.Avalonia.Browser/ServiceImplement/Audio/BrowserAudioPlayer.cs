@@ -51,29 +51,35 @@ public partial class BrowserAudioPlayer : ObservableObject, IAudioPlayer, IDispo
             return;
         if (IsPlaying)
             return;
-        WebAudioInterop.Play(id);
         IsPlaying = true;
+        WebAudioInterop.Play(id);
         logger.LogInformationEx($"called by id:{id}");
     }
 
     public void Pause()
     {
-        WebAudioInterop.Pause(id);
+        if (!IsAvaliable)
+            return;
+        if (!IsPlaying)
+            return;
         IsPlaying = false;
+        WebAudioInterop.Pause(id);
         logger.LogInformationEx($"called by id:{id}");
     }
 
     public void Stop()
     {
-        WebAudioInterop.Stop(id);
+        if (!IsAvaliable)
+            return;
         IsPlaying = false;
+        WebAudioInterop.Stop(id);
         logger.LogInformationEx($"called by id:{id}");
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
-
     public void Seek(TimeSpan timeSpan, bool pause)
     {
+        if (!IsAvaliable)
+            return;
         WebAudioInterop.JumpToTime(id, timeSpan.TotalSeconds, pause);
         logger.LogInformationEx($"called by id:{id}");
         IsPlaying = !pause;
@@ -104,6 +110,7 @@ public partial class BrowserAudioPlayer : ObservableObject, IAudioPlayer, IDispo
         Duration = TimeSpan.FromSeconds(GetDuration());
         logger.LogInformationEx($"Duration: {Duration}");
         logger.LogInformationEx($"called by id:{id}");
+        
         IsAvaliable = true;
     }
 

@@ -1,37 +1,242 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Net.Http;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
+using ReOsuStoryboardPlayer.Avalonia.Browser.Models;
+using ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards;
+using ReOsuStoryboardPlayer.Avalonia.Browser.Utils;
+using ReOsuStoryboardPlayer.Avalonia.Services.Dialog;
+using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
+using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Browser.ViewModels.Dialogs;
 
-public partial class BrowserOpenStoryboardDialogViewModel : DialogViewModelBase
+public partial class BrowserOpenStoryboardDialogViewModel(
+    IStoryboardLoader storyboardLoader,
+    ILogger<BrowserOpenStoryboardDialogViewModel> logger,
+    IDialogManager dialogManager) : DialogViewModelBase
 {
+    [ObservableProperty]
+    private IStoryboardInstance downloadInstance;
+
+    [ObservableProperty]
+    private string downloadUrl;
+
+    [ObservableProperty]
+    private IStoryboardInstance folderLoadInstance;
+
     [ObservableProperty]
     private bool loadFromUrl;
 
     [ObservableProperty]
-    private string url;
-    
+    private OpenStoryboardMethods openMethod;
+
     [ObservableProperty]
-    private string diskPath;
+    private IStoryboardInstance parseInstance;
+
+    [ObservableProperty]
+    private string parseUrl;
+
+    [ObservableProperty]
+    private IStoryboardInstance selectedStoryboardInstance;
+
+    [ObservableProperty]
+    private IStoryboardInstance zipLoadInstance;
 
     public override string DialogIdentifier => nameof(BrowserOpenStoryboardDialogViewModel);
 
     public override string Title => "Open storyboard from...";
 
     [RelayCommand]
-    private void OpenFromUserDisk()
+    private async Task OpenZipFromLocalFileSystem(CancellationToken cancellationToken)
     {
+        if (storyboardLoader is not BrowserStoryboardLoader browserStoryboardLoader)
+        {
+            logger.LogErrorEx($"current loader is not supported: {storyboardLoader?.GetType()?.FullName}");
+            return;
+        }
+
+        try
+        {
+            var zipFileBytes = await LocalFileSystemInterop.PickFile();
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            var instance = await browserStoryboardLoader.OpenLoaderFromZipFileBytes(zipFileBytes);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            ZipLoadInstance = instance;
+        }
+        catch (Exception e)
+        {
+            logger.LogErrorEx(e, $"can't load storyboard from local .zip:{e.Message}");
+            await dialogManager.ShowMessageDialog($"Can't load storyboard from local .zip/.osz file: {e.Message}",
+                DialogMessageType.Error);
+        }
     }
 
     [RelayCommand]
-    private void Comfirm()
+    private void SwitchMethod(string methodName)
     {
-        
-        
-        Close();
+        OpenMethod = Enum.TryParse<OpenStoryboardMethods>(methodName, true, out var d) ? d : OpenMethod;
+        logger.LogInformationEx($"cuurent OpenMethod: {OpenMethod}");
     }
-    
+
+    [RelayCommand]
+    private async Task OpenFolderFromLocalFileSystem(CancellationToken cancellationToken)
+    {
+        if (storyboardLoader is not BrowserStoryboardLoader browserStoryboardLoader)
+        {
+            logger.LogErrorEx($"current loader is not supported: {storyboardLoader?.GetType()?.FullName}");
+            return;
+        }
+
+        try
+        {
+            var folder = await LocalFileSystemInterop.PickDirectory();
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            var instance = await browserStoryboardLoader.OpenLoaderFromLocalFileSystem(folder);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            FolderLoadInstance = instance;
+        }
+        catch (Exception e)
+        {
+            logger.LogErrorEx(e, $"can't load storyboard from local folder:{e.Message}");
+            await dialogManager.ShowMessageDialog($"Can't load storyboard from local folder: {e.Message}",
+                DialogMessageType.Error);
+        }
+    }
+
+    [RelayCommand]
+    private async Task Comfirm(CancellationToken cancellationToken)
+    {
+        logger.LogInformationEx($"current open method: {OpenMethod}");
+
+        if (OpenMethod == OpenStoryboardMethods.ParseUrl)
+        {
+            if (!await TryLoadFromParsingBeatmapUrl(ParseUrl))
+            {
+                await dialogManager.ShowMessageDialog($"can't load storyboard from parsing beatmap url:{ParseUrl}",
+                    DialogMessageType.Error);
+                return;
+            }
+
+            SelectedStoryboardInstance = ParseInstance;
+        }
+        else if (OpenMethod == OpenStoryboardMethods.DownloadZipFile)
+        {
+            if (!await LoadFromDownloadingZipUrl(DownloadUrl))
+            {
+                await dialogManager.ShowMessageDialog($"can't load storyboard from parsing beatmap url:{DownloadUrl}",
+                    DialogMessageType.Error);
+                return;
+            }
+
+            SelectedStoryboardInstance = DownloadInstance;
+        }
+        else if (OpenMethod == OpenStoryboardMethods.OpenLocalBeatmapFolder)
+        {
+            if (FolderLoadInstance is null)
+            {
+                await dialogManager.ShowMessageDialog("local beatmap folder hasn't select/load yet",
+                    DialogMessageType.Error);
+                return;
+            }
+
+            SelectedStoryboardInstance = FolderLoadInstance;
+        }
+        else if (OpenMethod == OpenStoryboardMethods.OpenLocalZipFile)
+        {
+            if (ZipLoadInstance is null)
+            {
+                await dialogManager.ShowMessageDialog("local .zip/.osz file hasn't select/load yet",
+                    DialogMessageType.Error);
+                return;
+            }
+
+            SelectedStoryboardInstance = ZipLoadInstance;
+        }
+
+        CloseDialog();
+    }
+
+    private async Task<byte[]> DownloadFile(string downloadUrl)
+    {
+        using var httpClient = new HttpClient();
+        var startTime = DateTime.Now;
+        logger.LogInformation($"begin download url: {downloadUrl}");
+        var bytes = await httpClient.GetByteArrayAsync(downloadUrl);
+        var downloadTime = DateTime.Now;
+        logger.LogInformation($"download done, cost time: {(downloadTime - startTime).TotalMilliseconds:F2}ms");
+        return bytes;
+    }
+
+    private async Task<bool> LoadFromDownloadingZipUrl(string downloadUrl)
+    {
+        if (storyboardLoader is not BrowserStoryboardLoader browserStoryboardLoader)
+        {
+            logger.LogErrorEx($"current loader is not supported: {storyboardLoader?.GetType()?.FullName}");
+            return false;
+        }
+
+        try
+        {
+            var zipFileBytes = await DownloadFile(downloadUrl);
+            var instance = await browserStoryboardLoader.OpenLoaderFromZipFileBytes(zipFileBytes);
+
+            DownloadInstance = instance;
+            return true;
+        }
+        catch (Exception e)
+        {
+            logger.LogErrorEx(e, $"can't load storyboard from .zip/.osz download:{downloadUrl} {e.Message}");
+            return false;
+        }
+    }
+
+    private async Task<bool> TryLoadFromParsingBeatmapUrl(string beatmapUrl)
+    {
+        if (storyboardLoader is not BrowserStoryboardLoader browserStoryboardLoader)
+        {
+            logger.LogErrorEx($"current loader is not supported: {storyboardLoader?.GetType()?.FullName}");
+            return false;
+        }
+
+        try
+        {
+            var match = Regex.Match(beatmapUrl, @"beatmapsets/(\d+)", RegexOptions.IgnoreCase);
+            if (!match.Success)
+            {
+                logger.LogErrorEx($"beatmapset can't be matched: {beatmapUrl}");
+                return false;
+            }
+
+            var beatmapSetId = int.Parse(match.Groups[1].Value);
+            var buildDownloadUrl = $"https://txy1.sayobot.cn/beatmaps/download/full/{beatmapSetId}?server=auto";
+
+            var zipFileBytes = await DownloadFile(buildDownloadUrl);
+            var instance = await browserStoryboardLoader.OpenLoaderFromZipFileBytes(zipFileBytes);
+
+            ParseInstance = instance;
+            return true;
+        }
+        catch (Exception e)
+        {
+            logger.LogErrorEx(e, $"can't load storyboard from parsing url:{beatmapUrl} {e.Message}");
+            return false;
+        }
+    }
+
     [RelayCommand]
     private void Close()
     {

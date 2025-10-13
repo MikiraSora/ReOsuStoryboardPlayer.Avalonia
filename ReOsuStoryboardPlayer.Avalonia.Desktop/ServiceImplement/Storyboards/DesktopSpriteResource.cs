@@ -1,17 +1,16 @@
-﻿using Avalonia.Media;
-using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
+﻿using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 using SkiaSharp;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Storyboards;
 
 public class DesktopSpriteResource : ISpriteResource
 {
-    public DesktopSpriteResource(string fixImage, SKBitmap texture)
+    public DesktopSpriteResource(string fixImage, SKImage image)
     {
         Name = fixImage;
-        Image = texture;
+        Image = image;
     }
 
     public string Name { get; }
-    public SKBitmap Image { get; }
+    public SKImage Image { get; }
 }

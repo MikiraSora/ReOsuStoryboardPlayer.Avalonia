@@ -5,17 +5,17 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using ReOsuStoryboardPlayer.Avalonia.Services.Window;
 using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 
-namespace ReOsuStoryboardPlayer.Avalonia.ServiceImplement.Window;
+namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Window;
 
 [RegisterInjectable(typeof(IWindowManager))]
-public partial class DefaultWindowManager : ObservableObject, IWindowManager
+public partial class DesktopWindowManager : ObservableObject, IWindowManager
 {
     [ObservableProperty]
     private bool isFullScreen;
 
     private WindowState prevWindowState = WindowState.Normal;
 
-    public DefaultWindowManager()
+    public DesktopWindowManager()
     {
         if (GetMainWindow() is global::Avalonia.Controls.Window mainWindow)
             prevWindowState = mainWindow.WindowState;

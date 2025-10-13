@@ -64,7 +64,7 @@ public partial class HomePageViewModel(
             await dialogManager.ShowMessageDialog(msg, DialogMessageType.Error);
         }
     }
-
+/*
     [RelayCommand]
     private async Task SayHello(CancellationToken token = default)
     {
@@ -114,13 +114,13 @@ public partial class HomePageViewModel(
     [RelayCommand]
     private async Task StopAudio(CancellationToken token = default)
     {
-        audioPlayer?.Stop();
+        AudioPlayer?.Stop();
     }
-
+*/
     [RelayCommand]
     private void Play()
     {
-        audioPlayer.Play();
+        AudioPlayer.Play();
         timerDispose?.Dispose();
         timerDispose = DispatcherTimer.Run(() =>
             {
@@ -135,7 +135,7 @@ public partial class HomePageViewModel(
     [RelayCommand]
     private void Pause()
     {
-        audioPlayer.Pause();
+        AudioPlayer.Pause();
 
         timerDispose?.Dispose();
         timerDispose = default;
@@ -144,7 +144,7 @@ public partial class HomePageViewModel(
     [RelayCommand]
     private void Stop()
     {
-        audioPlayer?.Stop();
+        AudioPlayer?.Stop();
 
         timerDispose?.Dispose();
         timerDispose = default;

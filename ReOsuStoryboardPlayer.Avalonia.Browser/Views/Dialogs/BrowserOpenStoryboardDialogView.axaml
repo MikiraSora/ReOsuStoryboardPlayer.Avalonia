@@ -9,25 +9,50 @@
         <dialogs:BrowserOpenStoryboardDialogViewModel />
     </Design.DataContext>
 
-    <StackPanel>
-        <StackPanel Margin="0,10,0,0">
-            <RadioButton x:Name="zipUrlRadio" Content="Load from osu beatmap .zip file url:" GroupName="SelectMethod" />
-            <TextBox Watermark="https://example.url/download/L2857.zip" MinWidth="200"
-                     IsEnabled="{Binding ElementName=zipUrlRadio, Path=IsChecked}" />
-        </StackPanel>
-
-        <StackPanel Margin="0,10,0,0">
-            <RadioButton x:Name="beatmapUrlRadio" Content="Load from osu beatmap url:" GroupName="SelectMethod" />
-            <TextBox Watermark="https://osu.ppy.sh/beatmapsets/559622" MinWidth="200"
-                     IsEnabled="{Binding ElementName=beatmapUrlRadio, Path=IsChecked}" />
-        </StackPanel>
-
-        <StackPanel Margin="0,10,0,0">
-            <RadioButton x:Name="diskPathRadio" Content="Load from osu beatmap url:" GroupName="SelectMethod" />
-            <StackPanel IsEnabled="{Binding ElementName=diskPathRadio,Path= IsChecked}">
-                <Button Command="{Binding OpenFromUserDiskCommand}" />
-                <TextBlock Text="{Binding DiskPath}" />
+    <Border Padding="20,10">
+        <StackPanel>
+            <StackPanel Margin="0,10,0,0">
+                <RadioButton Command="{Binding SwitchMethodCommand}" CommandParameter="DownloadZipFile"
+                             x:Name="zipUrlRadio" Content="Load .zip/.osz file from url:"
+                             GroupName="SelectMethod" />
+                <TextBox Watermark="https://example.url/download/L2857.zip" MinWidth="200"
+                         Text="{Binding DownloadUrl}"
+                         IsEnabled="{Binding ElementName=zipUrlRadio, Path=IsChecked}" />
             </StackPanel>
+
+            <StackPanel Margin="0,10,0,0">
+                <RadioButton Command="{Binding SwitchMethodCommand}" CommandParameter="ParseUrl"
+                             x:Name="beatmapUrlRadio" Content="Load from osu beatmap url:" GroupName="SelectMethod" />
+                <TextBox Watermark="https://osu.ppy.sh/beatmapsets/559622" MinWidth="200"
+                         Text="{Binding ParseUrl}"
+                         IsEnabled="{Binding ElementName=beatmapUrlRadio, Path=IsChecked}" />
+            </StackPanel>
+
+            <StackPanel Margin="0,10,0,0">
+                <RadioButton Command="{Binding SwitchMethodCommand}" CommandParameter="DownloadZipFile"
+                             x:Name="zipFSPathRadio" Content="Load .zip/.osz file from local filesystem:"
+                             GroupName="SelectMethod" />
+                <StackPanel IsEnabled="{Binding ElementName=zipFSPathRadio,Path= IsChecked}">
+                    <Button Content="Open..." Command="{Binding OpenZipFromLocalFileSystemCommand}" />
+                    <TextBlock Text="{Binding ZipLoadInstance.StoryboardInfo.DisplayName}" />
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Margin="0,10,0,0">
+                <RadioButton Command="{Binding SwitchMethodCommand}" CommandParameter="OpenLocalBeatmapFolder"
+                             x:Name="dirFSPathRadio" Content="Load beatmap folder from local filesystem:"
+                             GroupName="SelectMethod" />
+                <StackPanel IsEnabled="{Binding ElementName=dirFSPathRadio,Path= IsChecked}">
+                    <Button Content="Open..." Command="{Binding OpenFolderFromLocalFileSystemCommand}" />
+                    <TextBlock Text="{Binding FolderLoadInstance.StoryboardInfo.DisplayName}" />
+                </StackPanel>
+            </StackPanel>
+
+            <Grid ColumnDefinitions="3*,1*" Margin="5,10,5,5">
+                <Button HorizontalContentAlignment="Center" HorizontalAlignment="Stretch"
+                        Command="{Binding ComfirmCommand}" Content="Comfirm" />
+                <Button Grid.Column="1" Content="Cancel" Command="{Binding CloseCommand}" />
+            </Grid>
         </StackPanel>
-    </StackPanel>
+    </Border>
 </UserControl>

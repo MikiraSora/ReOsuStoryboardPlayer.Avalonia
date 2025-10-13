@@ -17,6 +17,7 @@ namespace ReOsuStoryboardPlayer.Avalonia;
 internal class ViewLocator : IDataTemplate
 {
     private readonly Dictionary<Type, Control> cachedViewMap = new();
+    private readonly Dictionary<string, Type> cacheStringToViewType = new();
     private readonly ILogger<ViewLocator> logger;
 
     public ViewLocator(ILogger<ViewLocator> logger)
@@ -30,12 +31,19 @@ internal class ViewLocator : IDataTemplate
     public Control Build(object d)
     {
         if (d is not ViewModelBase viewModel)
+        {
+            logger.LogErrorEx($"viewModel is null: {new Exception().StackTrace}");
             return null;
+        }
 
+        logger.LogDebugEx($"viewModel fullName: {viewModel.GetType().FullName}");
         var viewTypeName = GetViewTypeName(viewModel.GetType());
+        logger.LogDebugEx($"viewTypeName: {viewTypeName}");
         var viewType = GetViewType(viewTypeName);
+        logger.LogDebugEx($"viewType: {viewType?.FullName}");
 
-        var isCachable = viewType.GetCustomAttribute<CachableViewAttribute>() is not null;
+        var isCachable = viewType?.GetCustomAttribute<CachableViewAttribute>() is not null;
+        logger.LogDebugEx($"isCachable: {isCachable}");
 
         var control = default(Control);
         if (isCachable && cachedViewMap.TryGetValue(viewType, out var view))
@@ -112,6 +120,25 @@ internal class ViewLocator : IDataTemplate
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private Type GetViewType(string viewModelTypeName)
     {
-        return Type.GetType(viewModelTypeName);
+        if (!cacheStringToViewType.TryGetValue(viewModelTypeName, out var type))
+        {
+            if (Type.GetType(viewModelTypeName) is not { } type1)
+            {
+                var type2 = AppDomain.CurrentDomain
+                    .GetAssemblies()
+                    .Select(a => a.GetType(viewModelTypeName))
+                    .FirstOrDefault(t => t != null);
+                type = type2;
+            }
+            else
+            {
+                type = type1;
+            }
+
+            cacheStringToViewType[viewModelTypeName] = type;
+            logger.LogDebugEx($"cache cacheStringToViewType[{viewModelTypeName}] = {type?.FullName}");
+        }
+
+        return type;
     }
 }

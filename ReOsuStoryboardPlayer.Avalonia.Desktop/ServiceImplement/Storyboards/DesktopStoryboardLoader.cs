@@ -259,7 +259,7 @@ public class DesktopStoryboardLoader(ILogger<DesktopStoryboardLoader> logger, IP
             return group != null;
         }
 
-        bool _load_tex(string file_path, out SKBitmap texture)
+        bool _load_tex(string file_path, out SKImage texture)
         {
             texture = null;
 
@@ -267,7 +267,7 @@ public class DesktopStoryboardLoader(ILogger<DesktopStoryboardLoader> logger, IP
             {
                 if (!File.Exists(file_path))
                     return false;
-                texture = SKBitmap.Decode(file_path);
+                texture = SKImage.FromEncodedData(file_path);
             }
             catch (Exception e)
             {
