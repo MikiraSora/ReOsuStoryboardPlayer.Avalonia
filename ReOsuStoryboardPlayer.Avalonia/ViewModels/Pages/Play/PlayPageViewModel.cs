@@ -8,11 +8,13 @@ using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using ReOsuStoryboardPlayer.Avalonia.Models;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using ReOsuStoryboardPlayer.Avalonia.Services.Dialog;
 using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 using ReOsuStoryboardPlayer.Avalonia.Services.Window;
+using ReOsuStoryboardPlayer.Avalonia.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 namespace ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Play;
@@ -22,6 +24,7 @@ public partial class PlayPageViewModel : PageViewModelBase
     private readonly IAudioManager audioManager;
     private readonly IDialogManager dialogManager;
     private readonly ILogger<PlayPageViewModel> logger;
+    private readonly IPersistence persistence;
     private readonly IStoryboardLoader storyboardLoader;
     private readonly IWindowManager windowManager;
 
@@ -33,6 +36,9 @@ public partial class PlayPageViewModel : PageViewModelBase
 
     [ObservableProperty]
     private IStoryboardInstance storyboardInstance;
+
+    [ObservableProperty]
+    private StoryboardPlayerSetting storyboardPlayerSetting;
 
     [ObservableProperty]
     private float storyboardPlayTime;
@@ -49,14 +55,23 @@ public partial class PlayPageViewModel : PageViewModelBase
     {
         this.dialogManager = dialogManager;
         this.storyboardLoader = storyboardLoader;
+        this.persistence = persistence;
         this.logger = logger;
         this.windowManager = windowManager;
         this.audioManager = audioManager;
+
+        Initialize();
+        
     }
 
     public override string Title => "主页";
 
     public TimeSpan CurrentAudioTime => AudioPlayer?.CurrentTime ?? TimeSpan.Zero;
+
+    private async void Initialize()
+    {
+        StoryboardPlayerSetting = await persistence.Load<StoryboardPlayerSetting>();
+    }
 
     [RelayCommand(AllowConcurrentExecutions = false)]
     private async Task LoadStoryboardInstance(CancellationToken token = default)
@@ -67,6 +82,7 @@ public partial class PlayPageViewModel : PageViewModelBase
             if (instance is null || token.IsCancellationRequested)
                 return;
 
+            logger.LogInformationEx($"user loaded storyboard instance: {instance}");
             Stop();
             AudioPlayer = await audioManager.LoadAudio(instance);
             StoryboardInstance = instance;

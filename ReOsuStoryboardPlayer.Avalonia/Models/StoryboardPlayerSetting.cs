@@ -1,9 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Models;
 
-public class StoryboardPlayerSetting : ObservableObject
+public partial class StoryboardPlayerSetting : ObservableObject
 {
+    [ObservableProperty]
+    private WideScreenOption wideScreenOption;
+
     public bool AllowLog
     {
         get => Setting.AllowLog;

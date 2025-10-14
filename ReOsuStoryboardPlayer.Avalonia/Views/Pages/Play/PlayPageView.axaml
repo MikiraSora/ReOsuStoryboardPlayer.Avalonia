@@ -1,4 +1,4 @@
-<UserControl
+<pages:PageViewBase
     x:Class="ReOsuStoryboardPlayer.Avalonia.Views.Pages.Play.PlayPageView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ic="using:FluentIcons.Avalonia"
@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:vm="clr-namespace:ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Play"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:pages="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Views.Pages"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -22,7 +23,8 @@
     </Interaction.Behaviors>
     <Grid IsVisible="{Binding StoryboardInstance,Converter={x:Static ObjectConverters.IsNotNull}}">
         <!-- 播放界面 -->
-        <controls:StoryboardPlayer StoryboardInstance="{Binding StoryboardInstance}"
+        <controls:StoryboardPlayer WideScreen="{Binding StoryboardPlayerSetting.WideScreenOption}"
+                                   StoryboardInstance="{Binding StoryboardInstance}"
                                    AudioPlayer="{Binding AudioPlayer}" />
         <Grid Background="Transparent">
             <Interaction.Behaviors>
@@ -212,4 +214,4 @@
             </Grid>
         </Border>
     </Grid>
-</UserControl>
+</pages:PageViewBase>

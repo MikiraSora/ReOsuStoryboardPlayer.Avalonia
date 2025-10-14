@@ -2,6 +2,7 @@
 using Avalonia;
 using Avalonia.Browser;
 using Avalonia.Media;
+using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia;
@@ -13,6 +14,9 @@ internal sealed class Program
 {
     private static Task Main(string[] args)
     {
+        //Dispatcher.UIThread.UnhandledException += UIThreadOnUnhandledException;
+        //Dispatcher.UIThread.UnhandledExceptionFilter+= UIThreadOnUnhandledExceptionFilter;
+
         return BuildAvaloniaApp()
             .WithInterFont()
             .With(new FontManagerOptions

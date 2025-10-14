@@ -2,7 +2,7 @@ using Avalonia.Controls;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Views.Pages.Home
 {
-    public partial class HomePageView : UserControl
+    public partial class HomePageView : PageViewBase
     {
         public HomePageView()
         {

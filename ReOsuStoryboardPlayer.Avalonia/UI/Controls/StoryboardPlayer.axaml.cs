@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -8,6 +7,7 @@ using Avalonia.Skia;
 using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ReOsuStoryboardPlayer.Avalonia.Models;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 using ReOsuStoryboardPlayer.Core.Base;
@@ -22,7 +22,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.UI.Controls;
 public partial class StoryboardPlayer : UserControl
 {
     public static readonly DirectProperty<StoryboardPlayer, IStoryboardInstance> StoryboardInstanceProperty =
-        AvaloniaProperty.RegisterDirect<StoryboardPlayer, IStoryboardInstance>("StoryboardInstance",
+        AvaloniaProperty.RegisterDirect<StoryboardPlayer, IStoryboardInstance>(nameof(StoryboardInstance),
             o => o.storyboardInstance,
             (o, v) =>
             {
@@ -31,8 +31,13 @@ public partial class StoryboardPlayer : UserControl
             });
 
     public static readonly DirectProperty<StoryboardPlayer, IAudioPlayer> AudioPlayerProperty =
-        AvaloniaProperty.RegisterDirect<StoryboardPlayer, IAudioPlayer>("AudioPlayer", o => o.audioPlayer,
+        AvaloniaProperty.RegisterDirect<StoryboardPlayer, IAudioPlayer>(nameof(AudioPlayer), o => o.audioPlayer,
             (o, v) => { o.audioPlayer = v; });
+
+    public static readonly DirectProperty<StoryboardPlayer, WideScreenOption> WideScreenProperty =
+        AvaloniaProperty.RegisterDirect<StoryboardPlayer, WideScreenOption>(nameof(WideScreen), o => o.wideScreenOption,
+            (o, v) => { o.wideScreenOption = v; });
+
 
     private readonly SKPaint comonPaint;
 
@@ -51,6 +56,7 @@ public partial class StoryboardPlayer : UserControl
     private IStoryboardInstance storyboardInstance;
 
     private StoryboardUpdater storyboardUpdater;
+    private WideScreenOption wideScreenOption = WideScreenOption.Auto;
 
     public StoryboardPlayer()
     {
@@ -80,6 +86,12 @@ public partial class StoryboardPlayer : UserControl
     {
         get => GetValue(StoryboardInstanceProperty);
         set => SetValue(StoryboardInstanceProperty, value);
+    }
+
+    public WideScreenOption WideScreen
+    {
+        get => GetValue(WideScreenProperty);
+        set => SetValue(WideScreenProperty, value);
     }
 
     public IAudioPlayer AudioPlayer
@@ -117,7 +129,9 @@ public partial class StoryboardPlayer : UserControl
 
         UpdateStoryboard();
 
-        var isWidcreenStoryboard = storyboardInstance.Info.IsWidescreenStoryboard;
+        var isWidcreenStoryboard = wideScreenOption == WideScreenOption.Auto
+            ? storyboardInstance.Info.IsWidescreenStoryboard
+            : wideScreenOption is WideScreenOption.ForceWideScreen;
 
         var storyboardWidth = isWidcreenStoryboard ? 854f : 640f;
         var storyboardHeight = 480f;
@@ -175,7 +189,7 @@ public partial class StoryboardPlayer : UserControl
         foreach (var updateStoryboard in storyboardUpdater.UpdatingStoryboardObjects)
             DrawStoryboardObjectImmediatly(canvas, updateStoryboard);
     }
-    
+
 /* FUCK SKIA SHIT API DESIGN
     private void DrawStoryboardObjectsByBatch(SKCanvas canvas)
     {

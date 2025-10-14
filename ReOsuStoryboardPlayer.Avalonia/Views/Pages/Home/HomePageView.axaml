@@ -1,17 +1,19 @@
-<UserControl
+<pages:PageViewBase
     x:Class="ReOsuStoryboardPlayer.Avalonia.Views.Pages.Home.HomePageView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:home="clr-namespace:ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Home"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:pages="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Views.Pages"
+    xmlns:ui="clr-namespace:ReOsuStoryboardPlayer.Avalonia.UI"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Design.DataContext>
         <home:HomePageViewModel />
     </Design.DataContext>
-    <Grid>
+    <Grid Margin="10">
         <!-- Welcome界面 -->
         <StackPanel>
             <TextBlock Text="ReOsuStoryboardPlayer" FontSize="40" TextWrapping="WrapWithOverflow" />
@@ -19,16 +21,52 @@
             <TextBlock Text="Fasdqweniowijrwerwer" TextWrapping="WrapWithOverflow" />
             <TextBlock Text="Fasdqweniowijrwerwer" TextWrapping="WrapWithOverflow" />
             <Button Content="Load Storyboard" Command="{Binding LoadStoryboardInstanceCommand}" />
-            <!--
-                <Button Content="SayHello" Command="{Binding SayHelloCommand}" />
-                <Button Content="LoadAudio" Command="{Binding LoadAudioCommand}" />
-                <Button Content="PlayAudio" Command="{Binding PlayAudioCommand}" />
-                <Button Content="PauseAudio" Command="{Binding PauseAudioCommand}" />
-                <Button Content="VolumeAudio" Command="{Binding VolumeAudioCommand}" />
-                <Button Content="StopAudio" Command="{Binding StopAudioCommand}" />
-                <Button Content="SeekAudio" Command="{Binding SeekAudioCommand}" />
-                <Button Content="PrintAudioCurrentTime" Command="{Binding PrintAudioCurrentTimeCommand}" />
-                -->
+            <Expander Margin="0,10,0,0" IsExpanded="True" ui:PercentRelativePageLayout.WidthPercent="0.75"
+                      Header="Player Settings">
+                <StackPanel>
+                    <WrapPanel ItemSpacing="10">
+                        <CheckBox IsChecked="{Binding StoryboardPlayerSetting.AllowLog}"
+                                  Content="Allow storyboard core log" />
+                        <CheckBox IsChecked="{Binding StoryboardPlayerSetting.DebugMode}"
+                                  Content="Enable debug mode" />
+                        <CheckBox IsChecked="{Binding StoryboardPlayerSetting.FunReverseEasing}"
+                                  Content="Enable funny reverse all objects' easing" />
+                        <CheckBox IsChecked="{Binding StoryboardPlayerSetting.ShowProfileSuggest}"
+                                  Content="Show profile suggest at console log" />
+                        <CheckBox IsChecked="{Binding StoryboardPlayerSetting.EnableLoopCommandUnrolling}"
+                                  Content="Enable unroll loop commands" />
+                        <CheckBox IsChecked="{Binding StoryboardPlayerSetting.EnableSplitMoveScaleCommand}"
+                                  Content="Enable split M/S commands into MX/MY/SX/SY commands" />
+                    </WrapPanel>
+
+                    <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Storyboard control size:" />
+                        <ComboBox Margin="5" ItemsSource="{Binding WideScreenOptions}"
+                                  SelectedItem="{Binding StoryboardPlayerSetting.WideScreenOption}" />
+                    </StackPanel>
+
+                    <StackPanel IsEnabled="{Binding IsSupportMultiThreaded}" Margin="0,5,0,0" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Use" />
+                        <TextBox Margin="5,0" Width="50" Text="{Binding StoryboardPlayerSetting.UpdateThreadCount}" />
+                        <TextBlock VerticalAlignment="Center" Text="multithreads to execute storyboard player actions" />
+                    </StackPanel>
+
+                    <StackPanel IsEnabled="{Binding IsSupportMultiThreaded}" Margin="0,5,0,0" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Will use multithreads if command count is over " />
+                        <TextBox Margin="5,0" Width="50"
+                                 Text="{Binding StoryboardPlayerSetting.ParallelParseCommandLimitCount}" />
+                    </StackPanel>
+
+                    <StackPanel IsEnabled="{Binding IsSupportMultiThreaded}" Margin="0,5,0,0" Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Will use multithreads if object count is over " />
+                        <TextBox Margin="5,0" Width="50"
+                                 Text="{Binding StoryboardPlayerSetting.ParallelUpdateObjectsLimitCount}" />
+                    </StackPanel>
+
+                    <Button Margin="0,10,0,0" Content="Save Settings" Command="{Binding SaveSettingCommand}" />
+                </StackPanel>
+            </Expander>
+
         </StackPanel>
     </Grid>
-</UserControl>
+</pages:PageViewBase>

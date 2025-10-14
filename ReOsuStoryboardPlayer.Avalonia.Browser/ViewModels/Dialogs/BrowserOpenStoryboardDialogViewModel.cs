@@ -183,10 +183,10 @@ public partial class BrowserOpenStoryboardDialogViewModel(
     {
         using var httpClient = new HttpClient();
         var startTime = DateTime.Now;
-        logger.LogInformation($"begin download url: {downloadUrl}");
+        logger.LogInformationEx($"begin download url: {downloadUrl}");
         var bytes = await httpClient.GetByteArrayAsync(downloadUrl);
         var downloadTime = DateTime.Now;
-        logger.LogInformation($"download done, cost time: {(downloadTime - startTime).TotalMilliseconds:F2}ms");
+        logger.LogInformationEx($"download done, cost time: {(downloadTime - startTime).TotalMilliseconds:F2}ms");
         return bytes;
     }
 

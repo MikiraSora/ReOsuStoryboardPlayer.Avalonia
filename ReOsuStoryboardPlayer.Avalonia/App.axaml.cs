@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,8 @@ namespace ReOsuStoryboardPlayer.Avalonia;
 public class App : Application
 {
     public IServiceProvider RootServiceProvider { get; private set; }
+    public Visual VisualRoot { get; private set; }
+    public TopLevel TopLevel => TopLevel.GetTopLevel(VisualRoot);
 
     public override void Initialize()
     {
@@ -26,6 +29,7 @@ public class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         InitServiceProvider();
+        
         //add ViewLocator
         DataTemplates.Add(ActivatorUtilities.CreateInstance<ViewLocator>(RootServiceProvider));
 
@@ -64,15 +68,18 @@ public class App : Application
                 {
                     DataContext = mainViewModel
                 };
+                VisualRoot = desktop.MainWindow;
                 break;
             case ISingleViewApplicationLifetime singleViewPlatform:
                 singleViewPlatform.MainView = new MainView
                 {
                     DataContext = mainViewModel
                 };
+                VisualRoot = singleViewPlatform.MainView;
                 break;
         }
-
+        
+        logger.LogInformationEx($"OnFrameworkInitializationCompleted() done");
         base.OnFrameworkInitializationCompleted();
     }
 

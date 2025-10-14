@@ -1,12 +1,9 @@
-using Avalonia.Controls;
+namespace ReOsuStoryboardPlayer.Avalonia.Views.Pages.Play;
 
-namespace ReOsuStoryboardPlayer.Avalonia.Views.Pages.Play
+public partial class PlayPageView : PageViewBase
 {
-    public partial class PlayPageView : UserControl
+    public PlayPageView()
     {
-        public PlayPageView()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }
