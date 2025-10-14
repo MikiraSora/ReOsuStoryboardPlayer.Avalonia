@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -141,11 +142,11 @@ public partial class StoryboardPlayer : UserControl
 
 
         //DrawDebug(canvas);
-        foreach (var updateStoryboard in storyboardUpdater.UpdatingStoryboardObjects)
-            DrawStoryboardObject(canvas, updateStoryboard);
 
-        comonPaint.Color = SKColors.DarkGoldenrod;
+        DrawStoryboardObjectsImmediatly(canvas);
+
 /*
+        comonPaint.Color = SKColors.DarkGoldenrod;
         canvas.Save();
         canvas.ResetMatrix();
         canvas.Scale(canvasScale);
@@ -169,6 +170,85 @@ public partial class StoryboardPlayer : UserControl
         */
     }
 
+    private void DrawStoryboardObjectsImmediatly(SKCanvas canvas)
+    {
+        foreach (var updateStoryboard in storyboardUpdater.UpdatingStoryboardObjects)
+            DrawStoryboardObjectImmediatly(canvas, updateStoryboard);
+    }
+    
+/* FUCK SKIA SHIT API DESIGN
+    private void DrawStoryboardObjectsByBatch(SKCanvas canvas)
+    {
+        List<SKColor> batchColors = new();
+        List<SKRect> batchSprites = new();
+        List<SKRotationScaleMatrix> batchTramsforms = new();
+        SKImage curImage = null;
+        var curIsAdditive = false;
+        using var print = new SKPaint();
+
+        void flushDraw()
+        {
+            if (batchSprites.Count == 0)
+                return;
+            var blendMode = curIsAdditive ? SKBlendMode.Plus : SKBlendMode.SrcOver;
+
+            canvas.DrawAtlas(curImage, batchSprites.ToArray(), batchTramsforms.ToArray(), batchColors.ToArray(),
+                blendMode, print);
+
+            batchSprites.Clear();
+            batchTramsforms.Clear();
+            batchColors.Clear();
+        }
+
+        void postDraw(SKImage image, bool isAdditive, SKRect spriteRect, SKRotationScaleMatrix matrix, SKColor color)
+        {
+            var needFlush = image != curImage || isAdditive != curIsAdditive;
+            if (needFlush)
+            {
+                flushDraw();
+                curImage = image;
+                curIsAdditive = isAdditive;
+            }
+
+            batchSprites.Add(spriteRect);
+            batchTramsforms.Add(matrix);
+            batchColors.Add(color);
+        }
+
+        foreach (var obj in storyboardUpdater.UpdatingStoryboardObjects)
+        {
+            if (storyboardInstance.Resource.GetSprite(obj) is not ISpriteResource spriteResource)
+                continue;
+            if (!obj.IsVisible) continue;
+
+            var color = new SKColor(obj.Color.X, obj.Color.Y, obj.Color.Z, obj.Color.W);
+
+            var origin = new SKPoint(-obj.OriginOffset.X * (obj.IsHorizonFlip ? -1 : 1),
+                             obj.OriginOffset.Y * (obj.IsVerticalFlip ? -1 : 1)) -
+                         new SKPoint(0.5f, 0.5f);
+
+            var scaleX = obj.Scale.X * (obj.IsHorizonFlip ? -1 : 1);
+            var scaleY = obj.Scale.Y * (obj.IsVerticalFlip ? -1 : 1);
+
+            var translateX = obj.Postion.X;
+            var translateY = obj.Postion.Y;
+
+            var rotate = obj.Rotate;
+
+            skCanvas.Translate(translateX, translateY);
+
+            var rotateScaleMatrix = SKRotationScaleMatrix.Create()
+            skCanvas.RotateRadians(rotate);
+            skCanvas.Scale(scaleX, scaleY);
+
+            var originOffsetX = tex.Width * origin.X;
+            var originOffsetY = tex.Height * origin.Y;
+            skCanvas.DrawImage(tex, originOffsetX, originOffsetY, sprintPaint);
+        }
+
+        flushDraw();
+    }
+*/
 
     private void DrawDebug(SKCanvas skCanvas)
     {
@@ -186,19 +266,19 @@ public partial class StoryboardPlayer : UserControl
             Rotate = 0.17453f
         };
 
-        DrawStoryboardObject(skCanvas, obj, spriteResource.Image);
+        DrawStoryboardObjectImmediatly(skCanvas, obj, spriteResource.Image);
     }
 
-    private void DrawStoryboardObject(SKCanvas skCanvas, StoryboardObject obj)
+    private void DrawStoryboardObjectImmediatly(SKCanvas skCanvas, StoryboardObject obj)
     {
         if (storyboardInstance.Resource.GetSprite(obj) is not ISpriteResource spriteResource)
             return;
         if (!obj.IsVisible) return;
 
-        DrawStoryboardObject(skCanvas, obj, spriteResource.Image);
+        DrawStoryboardObjectImmediatly(skCanvas, obj, spriteResource.Image);
     }
 
-    private void DrawStoryboardObject(SKCanvas skCanvas, StoryboardObject obj, SKImage tex)
+    private void DrawStoryboardObjectImmediatly(SKCanvas skCanvas, StoryboardObject obj, SKImage tex)
     {
         skCanvas.Save();
 
