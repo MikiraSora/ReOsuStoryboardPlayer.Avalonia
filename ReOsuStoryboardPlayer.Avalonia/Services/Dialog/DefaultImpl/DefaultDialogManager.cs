@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Avalonia.Controls;
 using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -29,24 +28,29 @@ public class DefaultDialogManager : IDialogManager
     public Task<T> ShowDialog<T>() where T : DialogViewModelBase
     {
         var viewModel = viewModelFactory.CreateViewModel<T>();
-        return ShowDialog(viewModel);
+        return ShowDialogInternal(viewModel);
+    }
+
+    public async Task ShowDialog(DialogViewModelBase dialogViewModel)
+    {
+        await ShowDialogInternal(dialogViewModel);
     }
 
     public async Task ShowMessageDialog(string content, DialogMessageType messageType = DialogMessageType.Info)
     {
         var vm = new CommonMessageDialogViewModel(messageType, content);
-        await ShowDialog(vm);
+        await ShowDialogInternal(vm);
     }
 
     public async Task<bool> ShowComfirmDialog(string content, string yesButtonContent = "确认",
         string noButtonContent = "取消")
     {
         var vm = new CommonComfirmDialogViewModel(content, yesButtonContent, noButtonContent);
-        await ShowDialog(vm);
+        await ShowDialogInternal(vm);
         return vm.ComfirmResult;
     }
 
-    private Task<T> ShowDialog<T>(T viewModel) where T : DialogViewModelBase
+    private Task<T> ShowDialogInternal<T>(T viewModel) where T : DialogViewModelBase
     {
         return Dispatcher.UIThread.InvokeAsync(async () =>
         {

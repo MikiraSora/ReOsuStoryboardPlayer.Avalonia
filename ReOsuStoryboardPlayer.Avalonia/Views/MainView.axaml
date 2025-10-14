@@ -15,7 +15,7 @@
 
     <views:ReactiveDialogHost OverlayBackground="WhiteSmoke">
         <Grid>
-            <TransitioningContentControl Content="{Binding MainPageContent}" />
+            <TransitioningContentControl Content="{Binding  PageNavigationManager.CurrentPageViewModel}" />
         </Grid>
     </views:ReactiveDialogHost>
 </UserControl>

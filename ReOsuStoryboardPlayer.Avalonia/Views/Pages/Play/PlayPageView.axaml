@@ -1,0 +1,215 @@
+<UserControl
+    x:Class="ReOsuStoryboardPlayer.Avalonia.Views.Pages.Play.PlayPageView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ic="using:FluentIcons.Avalonia"
+    xmlns:controls="clr-namespace:ReOsuStoryboardPlayer.Avalonia.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:vm="clr-namespace:ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Play"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Design.DataContext>
+        <vm:PlayPageViewModel />
+    </Design.DataContext>
+    <UserControl.Styles>
+        <Style Selector="FlyoutPresenter.mySpecialClass">
+            <Setter Property="Padding" Value="10,5" />
+        </Style>
+    </UserControl.Styles>
+    <Interaction.Behaviors>
+        <ExecuteCommandOnKeyDownBehavior Command="{Binding CancelFullScreenCommand}" Key="Escape" />
+    </Interaction.Behaviors>
+    <Grid IsVisible="{Binding StoryboardInstance,Converter={x:Static ObjectConverters.IsNotNull}}">
+        <!-- 播放界面 -->
+        <controls:StoryboardPlayer StoryboardInstance="{Binding StoryboardInstance}"
+                                   AudioPlayer="{Binding AudioPlayer}" />
+        <Grid Background="Transparent">
+            <Interaction.Behaviors>
+                <PointerPressedTrigger>
+                    <InvokeCommandAction Command="{Binding ShowOrHideControlPanelCommand}"
+                                         PassEventArgsToCommand="True" />
+                </PointerPressedTrigger>
+            </Interaction.Behaviors>
+        </Grid>
+        <Border IsVisible="{Binding IsControlPanelVisible}" ClipToBounds="True" CornerRadius="5"
+                VerticalAlignment="Bottom" Margin="50"
+                HorizontalAlignment="Center">
+            <Grid>
+                <controls:CustomBlurBehind>
+                    <controls:CustomBlurBehind.Material>
+                        <ExperimentalAcrylicMaterial TintColor="Azure" TintOpacity="0.5" MaterialOpacity="0.3"
+                                                     PlatformTransparencyCompensationLevel="0" />
+                    </controls:CustomBlurBehind.Material>
+                </controls:CustomBlurBehind>
+                <Grid Margin="20,10" RowDefinitions="Auto,Auto,Auto">
+                    <!--Info-->
+                    <Grid>
+                        <TextBlock FontSize="{StaticResource FontSizeLarge}">
+                            <TextBlock.Text>
+                                <MultiBinding StringFormat="{}{0} - {1}[{2}]">
+                                    <MultiBinding.Bindings>
+                                        <Binding Path="StoryboardInstance.StoryboardInfo.Artist" />
+                                        <Binding Path="StoryboardInstance.StoryboardInfo.Title" />
+                                        <Binding Path="StoryboardInstance.StoryboardInfo.DifficultyName" />
+                                    </MultiBinding.Bindings>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </Grid>
+                    <!--Control Buttons-->
+                    <Grid Grid.Row="1" Grid.IsSharedSizeScope="True">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition SharedSizeGroup="SameWidthGroup" Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition SharedSizeGroup="SameWidthGroup" Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <!--Left-->
+                        <Grid>
+                            <StackPanel Name="leftPanel" HorizontalAlignment="Left" Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <ic:SymbolIcon x:Name="statusIcon"
+                                                   Width="20" Height="20"
+                                                   VerticalAlignment="Center"
+                                                   Foreground="{Binding ElementName=statusText,Path=Foreground}"
+                                                   IconVariant="Filled" />
+                                    <TextBlock x:Name="statusText" VerticalAlignment="Center" />
+
+                                    <Interaction.Behaviors>
+                                        <DataTriggerBehavior Binding="{Binding AudioPlayer.IsPlaying}" Value="True">
+                                            <ChangePropertyAction TargetObject="statusText" PropertyName="Text"
+                                                                  Value="Playing" />
+                                            <ChangePropertyAction TargetObject="statusIcon" PropertyName="Symbol"
+                                                                  Value="Play" />
+                                            <ChangePropertyAction TargetObject="statusText"
+                                                                  PropertyName="Foreground"
+                                                                  Value="LightGreen" />
+                                        </DataTriggerBehavior>
+                                        <DataTriggerBehavior Binding="{Binding AudioPlayer.IsPlaying}"
+                                                             Value="False">
+                                            <ChangePropertyAction TargetObject="statusText" PropertyName="Text"
+                                                                  Value="Paused" />
+                                            <ChangePropertyAction TargetObject="statusText"
+                                                                  PropertyName="Foreground"
+                                                                  Value="Orange" />
+                                            <ChangePropertyAction TargetObject="statusIcon" PropertyName="Symbol"
+                                                                  Value="Pause" />
+                                        </DataTriggerBehavior>
+                                        <DataTriggerBehavior Binding="{Binding AudioPlayer.IsPlaying}"
+                                                             Value="{x:Null}">
+                                            <ChangePropertyAction TargetObject="statusText" PropertyName="Text"
+                                                                  Value="NotLoad" />
+                                            <ChangePropertyAction TargetObject="statusText"
+                                                                  PropertyName="Foreground"
+                                                                  Value="PaleVioletRed" />
+                                            <ChangePropertyAction TargetObject="statusIcon" PropertyName="Symbol"
+                                                                  Value="RecordStop" />
+                                        </DataTriggerBehavior>
+                                    </Interaction.Behaviors>
+                                </StackPanel>
+
+                                <Border Width="1" Height="20" Margin="8,0" />
+
+                                <TextBlock VerticalAlignment="Center"
+                                           FontFamily="Courier New"
+                                           Text="{Binding CurrentAudioTime,Converter={StaticResource TimeSpanToStringValueConverter}}" />
+                                <TextBlock VerticalAlignment="Center" Margin="5,0" Text="/" />
+                                <TextBlock VerticalAlignment="Center"
+                                           FontFamily="Courier New"
+                                           Text="{Binding AudioPlayer.Duration,Converter={StaticResource TimeSpanToStringValueConverter}}" />
+                            </StackPanel>
+                        </Grid>
+                        <!--Center-->
+                        <Grid Grid.Column="1">
+                            <StackPanel
+                                Orientation="Horizontal">
+                                <Button Classes="IconButton" Command="{Binding PlayOrPauseCommand}">
+                                    <ic:SymbolIcon FontSize="40" Symbol="PlayCircle" IconVariant="Filled">
+                                        <Interaction.Behaviors>
+                                            <DataTriggerBehavior Binding="{Binding AudioPlayer.IsPlaying}"
+                                                                 Value="True">
+                                                <ChangePropertyAction PropertyName="Symbol"
+                                                                      Value="PauseCircle" />
+                                            </DataTriggerBehavior>
+                                            <DataTriggerBehavior Binding="{Binding AudioPlayer.IsPlaying}"
+                                                                 Value="False">
+                                                <ChangePropertyAction PropertyName="Symbol"
+                                                                      Value="PlayCircle" />
+                                            </DataTriggerBehavior>
+                                        </Interaction.Behaviors>
+                                    </ic:SymbolIcon>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+
+                        <!--Right-->
+                        <Grid Grid.Column="2">
+                            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                                <Button Command="{Binding VolumeMuteOrNotCommand}" Name="volumeButton"
+                                        Classes="IconButton">
+                                    <ic:SymbolIcon Name="speakerIcon" FontSize="20" Symbol="SpeakerMute"
+                                                   IconVariant="Filled">
+                                        <Interaction.Behaviors>
+                                            <DataTriggerBehavior Binding="{Binding AudioPlayer.Volume}" Value="0">
+                                                <ChangePropertyAction TargetObject="speakerIcon"
+                                                                      PropertyName="Symbol"
+                                                                      Value="SpeakerMute" />
+                                            </DataTriggerBehavior>
+                                            <DataTriggerBehavior Binding="{Binding AudioPlayer.Volume}"
+                                                                 ComparisonCondition="GreaterThan" Value="0">
+                                                <ChangePropertyAction TargetObject="speakerIcon"
+                                                                      PropertyName="Symbol"
+                                                                      Value="Speaker2" />
+                                            </DataTriggerBehavior>
+                                        </Interaction.Behaviors>
+                                    </ic:SymbolIcon>
+                                </Button>
+
+                                <!-- 音量Slider -->
+                                <Slider Minimum="0"
+                                        Maximum="1"
+                                        Width="100"
+                                        VerticalAlignment="Center"
+                                        Margin="2,0,10,0"
+                                        Value="{Binding AudioPlayer.Volume, Mode=TwoWay}"
+                                        TickFrequency="0.01"
+                                        IsSnapToTickEnabled="False" />
+
+                                <Button Classes="IconButton" Command="{Binding LoadStoryboardInstanceCommand}">
+                                    <ic:SymbolIcon FontSize="20" Symbol="FolderOpen"
+                                                   IconVariant="Filled" />
+                                </Button>
+
+                                <Button Classes="IconButton" Command="{Binding ShowOrNotFullScreenCommand}">
+                                    <ic:SymbolIcon FontSize="20" Symbol="FullScreenMaximize"
+                                                   IconVariant="Filled" />
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                    <!--Timeline-->
+                    <ProgressBar Name="timelineProgressBar" ShowProgressText="False"
+                                 CornerRadius="3" Margin="0,10" Grid.Row="2"
+                                 Value="{Binding CurrentAudioTime.TotalMilliseconds}" Minimum="0"
+                                 Maximum="{Binding AudioPlayer.Duration.TotalMilliseconds}">
+                        <Interaction.Behaviors>
+                            <PointerMovedTrigger>
+                                <InvokeCommandAction Command="{Binding TimelineProgressBarMoveCommand}"
+                                                     PassEventArgsToCommand="True" />
+                            </PointerMovedTrigger>
+                            <PointerPressedTrigger>
+                                <InvokeCommandAction Command="{Binding TimelineProgressBarClickCommand}"
+                                                     PassEventArgsToCommand="True" />
+                            </PointerPressedTrigger>
+                        </Interaction.Behaviors>
+                        <ProgressBar.Styles>
+                            <Style Selector="ProgressBar:pointerover">
+                                <Setter Property="Cursor" Value="Hand" />
+                            </Style>
+                        </ProgressBar.Styles>
+                    </ProgressBar>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,47 +1,56 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Platform;
-using Avalonia.Threading;
-using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using ReOsuStoryboardPlayer.Avalonia.Models;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using ReOsuStoryboardPlayer.Avalonia.Services.Dialog;
+using ReOsuStoryboardPlayer.Avalonia.Services.Navigation;
+using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
-using ReOsuStoryboardPlayer.Avalonia.Services.Window;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
+using ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Play;
 
 namespace ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Home;
 
-public partial class HomePageViewModel(
-    IDialogManager dialogManager,
-    IStoryboardLoader storyboardLoader,
-    ILogger<HomePageViewModel> logger,
-    IWindowManager windowManager,
-    IAudioManager audioManager)
-    : PageViewModelBase
+public partial class HomePageViewModel : PageViewModelBase
 {
-    [ObservableProperty]
-    private IAudioPlayer audioPlayer;
+    private readonly IAudioManager audioManager;
+    private readonly IDialogManager dialogManager;
+    private readonly ILogger<HomePageViewModel> logger;
+    private readonly IPageNavigationManager pageNavigationManager;
+    private readonly IPersistence persistence;
+    private readonly IStoryboardLoader storyboardLoader;
 
     [ObservableProperty]
-    private bool isControlPanelVisible = true;
+    private StoryboardPlayerSetting storyboardPlayerSetting;
 
-    [ObservableProperty]
-    private IStoryboardInstance storyboardInstance;
+    public HomePageViewModel(
+        IDialogManager dialogManager,
+        IStoryboardLoader storyboardLoader,
+        IPersistence persistence,
+        IPageNavigationManager pageNavigationManager,
+        IAudioManager audioManager,
+        ILogger<HomePageViewModel> logger)
+    {
+        this.dialogManager = dialogManager;
+        this.storyboardLoader = storyboardLoader;
+        this.persistence = persistence;
+        this.pageNavigationManager = pageNavigationManager;
+        this.audioManager = audioManager;
+        this.logger = logger;
 
-    [ObservableProperty]
-    private float storyboardPlayTime;
-
-    private IDisposable timerDispose;
+        Initaliaze();
+    }
 
     public override string Title => "主页";
 
-    public TimeSpan CurrentAudioTime => AudioPlayer?.CurrentTime ?? TimeSpan.Zero;
+    private async void Initaliaze()
+    {
+        StoryboardPlayerSetting = await persistence.Load<StoryboardPlayerSetting>();
+    }
 
     [RelayCommand(AllowConcurrentExecutions = false)]
     private async Task LoadStoryboardInstance(CancellationToken token = default)
@@ -52,10 +61,13 @@ public partial class HomePageViewModel(
             if (instance is null || token.IsCancellationRequested)
                 return;
 
-            Stop();
-            AudioPlayer = await audioManager.LoadAudio(instance);
-            StoryboardInstance = instance;
-            StoryboardPlayTime = 0;
+            var audio = await audioManager.LoadAudio(instance);
+
+            //switch to play page and never back~
+            var playViewModel = await pageNavigationManager.SetPage<PlayPageViewModel>();
+            playViewModel.StoryboardInstance = instance;
+            playViewModel.StoryboardPlayTime = 0;
+            playViewModel.AudioPlayer = audio;
         }
         catch (Exception e)
         {
@@ -64,6 +76,7 @@ public partial class HomePageViewModel(
             await dialogManager.ShowMessageDialog(msg, DialogMessageType.Error);
         }
     }
+
 /*
     [RelayCommand]
     private async Task SayHello(CancellationToken token = default)
@@ -117,119 +130,4 @@ public partial class HomePageViewModel(
         AudioPlayer?.Stop();
     }
 */
-    [RelayCommand]
-    private void Play()
-    {
-        AudioPlayer.Play();
-        timerDispose?.Dispose();
-        timerDispose = DispatcherTimer.Run(() =>
-            {
-                OnPropertyChanged(nameof(CurrentAudioTime));
-                if (AudioPlayer is null)
-                    return false;
-                return AudioPlayer.IsPlaying && AudioPlayer.IsAvaliable;
-            }, TimeSpan.FromMilliseconds(100),
-            DispatcherPriority.Background);
-    }
-
-    [RelayCommand]
-    private void Pause()
-    {
-        AudioPlayer.Pause();
-
-        timerDispose?.Dispose();
-        timerDispose = default;
-    }
-
-    [RelayCommand]
-    private void Stop()
-    {
-        AudioPlayer?.Stop();
-
-        timerDispose?.Dispose();
-        timerDispose = default;
-    }
-
-    [RelayCommand]
-    private void JumpTo()
-    {
-        timerDispose?.Dispose();
-        timerDispose = default;
-    }
-
-    [RelayCommand]
-    private void CancelFullScreen()
-    {
-        windowManager.IsFullScreen = false;
-    }
-
-    [RelayCommand]
-    private void ShowOrNotFullScreen()
-    {
-        windowManager.IsFullScreen = !windowManager.IsFullScreen;
-    }
-
-    [RelayCommand]
-    private void ShowOrHideControlPanel(PointerEventArgs e)
-    {
-        IsControlPanelVisible = !IsControlPanelVisible;
-        e.Handled = true;
-    }
-
-    [RelayCommand]
-    private void PlayOrPause()
-    {
-        if (AudioPlayer is null)
-            return;
-        if (!AudioPlayer.IsAvaliable)
-            return;
-
-        if (AudioPlayer.IsPlaying)
-            Pause();
-        else
-            Play();
-    }
-
-    [RelayCommand]
-    private void VolumeMuteOrNot()
-    {
-        if (AudioPlayer is null)
-            return;
-        if (!AudioPlayer.IsAvaliable)
-            return;
-
-        if (AudioPlayer.Volume <= 0)
-            AudioPlayer.Volume = 1;
-        else
-            AudioPlayer.Volume = 0;
-    }
-
-    [RelayCommand]
-    private void JumpToTime(double milliseconds)
-    {
-        AudioPlayer?.Seek(TimeSpan.FromMilliseconds(milliseconds), true);
-        OnPropertyChanged(nameof(CurrentAudioTime));
-    }
-
-    [RelayCommand]
-    private void TimelineProgressBarMove(PointerEventArgs e)
-    {
-        e.Handled = true;
-    }
-
-    [RelayCommand]
-    private void TimelineProgressBarClick(PointerEventArgs e)
-    {
-        if ((e.Source as Control)?.FindAncestorOfType<ProgressBar>(true) is not Control control)
-            return;
-        if (AudioPlayer is null)
-            return;
-        var point = e.GetPosition(control);
-        logger.LogInformationEx($"point: {point.X}, {point.Y} width: {control.Bounds.Width} ");
-
-        var jumpToTime = Math.Clamp(point.X / control.Bounds.Width, 0, 1) *
-                         AudioPlayer.Duration.TotalMilliseconds;
-        JumpToTime(jumpToTime);
-        e.Handled = true;
-    }
 }

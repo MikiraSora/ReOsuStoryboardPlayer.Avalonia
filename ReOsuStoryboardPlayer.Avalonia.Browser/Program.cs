@@ -43,6 +43,7 @@ internal sealed class Program
                     collection.AddLogging(o =>
                     {
                         o.AddProvider(new ConsoleLoggerProvider());
+                        o.AddProvider(new EventBoardcastLoggerProvider());
                         o.AddDebug();
                         o.SetMinimumLevel(LogLevel.Debug);
                     });

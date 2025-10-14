@@ -104,7 +104,7 @@ public partial class BrowserAudioPlayer : ObservableObject, IAudioPlayer, IDispo
     public async Task LoadFromAudioFileBytes(byte[] audioData)
     {
         var base64 = Convert.ToBase64String(audioData);
-        logger.LogInformationEx($"base64: {base64}");
+        logger.LogDebugEx($"base64: {base64}");
         await WebAudioInterop.LoadFromBase64(id, base64);
         logger.LogInformationEx("LoadFromBase64() done");
         Duration = TimeSpan.FromSeconds(GetDuration());

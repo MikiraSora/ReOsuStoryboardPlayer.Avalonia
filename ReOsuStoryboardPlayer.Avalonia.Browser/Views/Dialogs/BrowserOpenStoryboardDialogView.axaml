@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:dialogs="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Browser.ViewModels.Dialogs"
+             xmlns:enum="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Browser.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="ReOsuStoryboardPlayer.Avalonia.Browser.Views.Dialogs.BrowserOpenStoryboardDialogView">
     <Design.DataContext>
@@ -12,26 +13,27 @@
     <Border Padding="20,10">
         <StackPanel>
             <StackPanel Margin="0,10,0,0">
-                <RadioButton Command="{Binding SwitchMethodCommand}" CommandParameter="DownloadZipFile"
-                             x:Name="zipUrlRadio" Content="Load .zip/.osz file from url:"
-                             GroupName="SelectMethod" />
+                <RadioButton
+                    IsChecked="{Binding OpenMethod,Converter={StaticResource RadioButtonEnumToBoolConverter},ConverterParameter={x:Static enum:OpenStoryboardMethods.DownloadZipFile}}"
+                    x:Name="zipUrlRadio" Content="Load .zip/.osz file from url:" />
                 <TextBox Watermark="https://example.url/download/L2857.zip" MinWidth="200"
                          Text="{Binding DownloadUrl}"
                          IsEnabled="{Binding ElementName=zipUrlRadio, Path=IsChecked}" />
             </StackPanel>
 
             <StackPanel Margin="0,10,0,0">
-                <RadioButton Command="{Binding SwitchMethodCommand}" CommandParameter="ParseUrl"
-                             x:Name="beatmapUrlRadio" Content="Load from osu beatmap url:" GroupName="SelectMethod" />
+                <RadioButton
+                    IsChecked="{Binding OpenMethod,Converter={StaticResource RadioButtonEnumToBoolConverter},ConverterParameter={x:Static enum:OpenStoryboardMethods.ParseUrl}}"
+                    x:Name="beatmapUrlRadio" Content="Load from osu beatmap url:" />
                 <TextBox Watermark="https://osu.ppy.sh/beatmapsets/559622" MinWidth="200"
                          Text="{Binding ParseUrl}"
                          IsEnabled="{Binding ElementName=beatmapUrlRadio, Path=IsChecked}" />
             </StackPanel>
 
             <StackPanel Margin="0,10,0,0">
-                <RadioButton Command="{Binding SwitchMethodCommand}" CommandParameter="DownloadZipFile"
-                             x:Name="zipFSPathRadio" Content="Load .zip/.osz file from local filesystem:"
-                             GroupName="SelectMethod" />
+                <RadioButton
+                    IsChecked="{Binding OpenMethod,Converter={StaticResource RadioButtonEnumToBoolConverter},ConverterParameter={x:Static enum:OpenStoryboardMethods.OpenLocalZipFile}}"
+                    x:Name="zipFSPathRadio" Content="Load .zip/.osz file from local filesystem:" />
                 <StackPanel IsEnabled="{Binding ElementName=zipFSPathRadio,Path= IsChecked}">
                     <Button Content="Open..." Command="{Binding OpenZipFromLocalFileSystemCommand}" />
                     <TextBlock Text="{Binding ZipLoadInstance.StoryboardInfo.DisplayName}" />
@@ -39,9 +41,9 @@
             </StackPanel>
 
             <StackPanel Margin="0,10,0,0">
-                <RadioButton Command="{Binding SwitchMethodCommand}" CommandParameter="OpenLocalBeatmapFolder"
-                             x:Name="dirFSPathRadio" Content="Load beatmap folder from local filesystem:"
-                             GroupName="SelectMethod" />
+                <RadioButton
+                    IsChecked="{Binding OpenMethod,Converter={StaticResource RadioButtonEnumToBoolConverter},ConverterParameter={x:Static enum:OpenStoryboardMethods.OpenLocalBeatmapFolder}}"
+                    x:Name="dirFSPathRadio" Content="Load beatmap folder from local filesystem:" />
                 <StackPanel IsEnabled="{Binding ElementName=dirFSPathRadio,Path= IsChecked}">
                     <Button Content="Open..." Command="{Binding OpenFolderFromLocalFileSystemCommand}" />
                     <TextBlock Text="{Binding FolderLoadInstance.StoryboardInfo.DisplayName}" />

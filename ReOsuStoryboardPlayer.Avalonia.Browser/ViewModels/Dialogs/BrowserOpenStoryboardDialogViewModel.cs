@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -67,6 +68,10 @@ public partial class BrowserOpenStoryboardDialogViewModel(
             if (cancellationToken.IsCancellationRequested)
                 return;
 
+            using var loadingDialog = new LoadingDialogViewModel();
+            dialogManager.ShowDialog(loadingDialog);
+            await loadingDialog.WaitForAttachedView();
+            
             var instance = await browserStoryboardLoader.OpenLoaderFromZipFileBytes(zipFileBytes);
             if (cancellationToken.IsCancellationRequested)
                 return;
@@ -102,7 +107,11 @@ public partial class BrowserOpenStoryboardDialogViewModel(
             var folder = await LocalFileSystemInterop.PickDirectory();
             if (cancellationToken.IsCancellationRequested)
                 return;
-
+            
+            using var loadingDialog = new LoadingDialogViewModel();
+            dialogManager.ShowDialog(loadingDialog);
+            await loadingDialog.WaitForAttachedView();
+            
             var instance = await browserStoryboardLoader.OpenLoaderFromLocalFileSystem(folder);
             if (cancellationToken.IsCancellationRequested)
                 return;
@@ -183,6 +192,9 @@ public partial class BrowserOpenStoryboardDialogViewModel(
 
     private async Task<bool> LoadFromDownloadingZipUrl(string downloadUrl)
     {
+        using var loadingDialog = new LoadingDialogViewModel();
+        dialogManager.ShowDialog(loadingDialog);
+        
         if (storyboardLoader is not BrowserStoryboardLoader browserStoryboardLoader)
         {
             logger.LogErrorEx($"current loader is not supported: {storyboardLoader?.GetType()?.FullName}");
@@ -206,14 +218,17 @@ public partial class BrowserOpenStoryboardDialogViewModel(
 
     private async Task<bool> TryLoadFromParsingBeatmapUrl(string beatmapUrl)
     {
-        if (storyboardLoader is not BrowserStoryboardLoader browserStoryboardLoader)
-        {
-            logger.LogErrorEx($"current loader is not supported: {storyboardLoader?.GetType()?.FullName}");
-            return false;
-        }
+        using var loadingDialog = new LoadingDialogViewModel();
+        dialogManager.ShowDialog(loadingDialog);
 
         try
         {
+            if (storyboardLoader is not BrowserStoryboardLoader browserStoryboardLoader)
+            {
+                logger.LogErrorEx($"current loader is not supported: {storyboardLoader?.GetType()?.FullName}");
+                return false;
+            }
+
             var match = Regex.Match(beatmapUrl, @"beatmapsets/(\d+)", RegexOptions.IgnoreCase);
             if (!match.Success)
             {
