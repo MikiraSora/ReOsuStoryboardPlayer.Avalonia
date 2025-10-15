@@ -43,14 +43,17 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+        
+    - name: Setup wasm-tool-net8
+      run: dotnet workload install wasm-tools-net8
 
     - name: Restore dependencies
       run: dotnet restore ReOsuStoryboardPlayer.Avalonia.sln
 
-    - name: Build Browser project (Release without AOT)
+    - name: Build Browser project
       run: |
         dotnet publish ReOsuStoryboardPlayer.Avalonia.Browser/ReOsuStoryboardPlayer.Avalonia.Browser.csproj \
-          --configuration Release \
+          --configuration Debug \
           --output ./publish \
           --nologo \
           --verbosity normal
@@ -76,3 +79,5 @@ jobs:
       id: deployment
 
       uses: actions/deploy-pages@v4
+
+
