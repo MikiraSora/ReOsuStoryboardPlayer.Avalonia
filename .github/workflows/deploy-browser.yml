@@ -2,7 +2,7 @@ name: Build and Deploy Browser to GitHub Pages
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master ]
     paths:
       - 'ReOsuStoryboardPlayer.Avalonia.Browser/**'
       - 'ReOsuStoryboardPlayer.Avalonia/**'
@@ -10,7 +10,7 @@ on:
       - 'Dependencies/ReOsuStoryboardPlayer.Avalonia.SourceGenerators/**'
       - '.github/workflows/deploy-browser.yml'
   pull_request:
-    branches: [ master, main ]
+    branches: [ master ]
     paths:
       - 'ReOsuStoryboardPlayer.Avalonia.Browser/**'
       - 'ReOsuStoryboardPlayer.Avalonia/**'
@@ -36,20 +36,13 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
+        fetch-depth: 0
         submodules: recursive
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-
-    - name: Cache NuGet packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
 
     - name: Restore dependencies
       run: dotnet restore ReOsuStoryboardPlayer.Avalonia.sln
@@ -81,4 +74,5 @@ jobs:
     steps:
     - name: Deploy to GitHub Pages
       id: deployment
+
       uses: actions/deploy-pages@v4
