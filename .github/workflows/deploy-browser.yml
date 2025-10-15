@@ -47,10 +47,10 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore ReOsuStoryboardPlayer.Avalonia.sln
 
-    - name: Build Browser project (Release without AOT)
+    - name: Build Browser project
       run: |
         dotnet publish ReOsuStoryboardPlayer.Avalonia.Browser/ReOsuStoryboardPlayer.Avalonia.Browser.csproj \
-          --configuration Release \
+          --configuration Debug \
           --output ./publish \
           --nologo \
           --verbosity normal
@@ -76,3 +76,4 @@ jobs:
       id: deployment
 
       uses: actions/deploy-pages@v4
+
