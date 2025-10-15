@@ -5,6 +5,7 @@
              xmlns:dialogs="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Browser.ViewModels.Dialogs"
              xmlns:enum="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Browser.Models"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:DataType="dialogs:BrowserOpenStoryboardDialogViewModel"
              x:Class="ReOsuStoryboardPlayer.Avalonia.Browser.Views.Dialogs.BrowserOpenStoryboardDialogView">
     <Design.DataContext>
         <dialogs:BrowserOpenStoryboardDialogViewModel />

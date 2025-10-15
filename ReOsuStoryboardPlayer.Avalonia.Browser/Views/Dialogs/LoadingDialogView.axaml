@@ -6,6 +6,7 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              Height="300"
              Width="600"
+             x:DataType="dialogs:LoadingDialogViewModel"
              x:Class="ReOsuStoryboardPlayer.Avalonia.Browser.Views.Dialogs.LoadingDialogView">
     <Design.DataContext>
         <dialogs:LoadingDialogViewModel />
