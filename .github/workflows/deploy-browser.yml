@@ -1,0 +1,84 @@
+name: Build and Deploy Browser to GitHub Pages
+
+on:
+  push:
+    branches: [ master, main ]
+    paths:
+      - 'ReOsuStoryboardPlayer.Avalonia.Browser/**'
+      - 'ReOsuStoryboardPlayer.Avalonia/**'
+      - 'Dependencies/ReOsuStoryboardPlayer/**'
+      - 'Dependencies/ReOsuStoryboardPlayer.Avalonia.SourceGenerators/**'
+      - '.github/workflows/deploy-browser.yml'
+  pull_request:
+    branches: [ master, main ]
+    paths:
+      - 'ReOsuStoryboardPlayer.Avalonia.Browser/**'
+      - 'ReOsuStoryboardPlayer.Avalonia/**'
+      - 'Dependencies/ReOsuStoryboardPlayer/**'
+      - 'Dependencies/ReOsuStoryboardPlayer.Avalonia.SourceGenerators/**'
+      - '.github/workflows/deploy-browser.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: dotnet restore ReOsuStoryboardPlayer.Avalonia.sln
+
+    - name: Build Browser project (Release without AOT)
+      run: |
+        dotnet publish ReOsuStoryboardPlayer.Avalonia.Browser/ReOsuStoryboardPlayer.Avalonia.Browser.csproj \
+          --configuration Release \
+          --output ./publish \
+          --nologo \
+          --verbosity normal
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./publish/wwwroot
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
