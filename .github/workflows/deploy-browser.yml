@@ -43,6 +43,9 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+        
+    - name: Setup wasm-tool-net8
+      run: dotnet workload install wasm-tools-net8
 
     - name: Restore dependencies
       run: dotnet restore ReOsuStoryboardPlayer.Avalonia.sln
@@ -76,4 +79,5 @@ jobs:
       id: deployment
 
       uses: actions/deploy-pages@v4
+
 
