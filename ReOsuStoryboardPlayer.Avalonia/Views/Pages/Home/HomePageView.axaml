@@ -22,6 +22,7 @@
             <TextBlock Text="Fasdqweniowijrwerwer" TextWrapping="WrapWithOverflow" />
             <TextBlock Text="Fasdqweniowijrwerwer" TextWrapping="WrapWithOverflow" />
             <Button Content="Load Storyboard" Command="{Binding LoadStoryboardInstanceCommand}" />
+
             <Expander Margin="0,10,0,0" IsExpanded="True" ui:PercentRelativePageLayout.WidthPercent="0.75"
                       Header="Player Settings">
                 <StackPanel>
@@ -68,6 +69,68 @@
                 </StackPanel>
             </Expander>
 
+            <Expander Margin="0,10,0,0" IsExpanded="True" ui:PercentRelativePageLayout.WidthPercent="0.75"
+                      Header="About">
+                <StackPanel>
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="*,*,*,*,*">
+                        <!--    -->
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            HorizontalAlignment="Right"
+                            Content="CommitHash:" />
+                        <Label
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Content="{Binding ProgramCommitIdShort}"
+                            FontWeight="Bold" />
+                        <!--    -->
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            HorizontalAlignment="Right"
+                            Content="CommitTime:" />
+                        <Label
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Content="{Binding ProgramCommitDate, StringFormat=yyyy/M/dd H:mm:ss.fff}"
+                            FontWeight="Bold" />
+                        <!--    -->
+                        <Label
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            HorizontalAlignment="Right"
+                            Content="BuildTime:" />
+                        <Label
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Content="{Binding ProgramBuildTime}"
+                            FontWeight="Bold" />
+                        <!--    -->
+                        <Label
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            HorizontalAlignment="Right"
+                            Content="BuildConfiguration:" />
+                        <Label
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Content="{Binding ProgramBuildConfiguration}"
+                            FontWeight="Bold" />
+                        <!--    -->
+                        <Label
+                            Grid.Row="4"
+                            Grid.Column="0"
+                            HorizontalAlignment="Right"
+                            Content="BuildVersion:" />
+                        <Label
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Content="{Binding AssemblyVersion}"
+                            FontWeight="Bold" />
+                    </Grid>
+                </StackPanel>
+            </Expander>
         </StackPanel>
     </Grid>
 </pages:PageViewBase>

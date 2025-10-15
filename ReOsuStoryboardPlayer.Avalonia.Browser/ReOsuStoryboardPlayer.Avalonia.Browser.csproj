@@ -12,7 +12,7 @@
         <DefineConstants>TRACE;AVALONIA_BROWSER;</DefineConstants>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
         <DefineConstants>AVALONIA_BROWSER;</DefineConstants>
     </PropertyGroup>
 
