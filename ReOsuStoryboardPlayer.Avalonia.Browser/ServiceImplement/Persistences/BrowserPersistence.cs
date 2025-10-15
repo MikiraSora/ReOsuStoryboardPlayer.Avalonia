@@ -9,7 +9,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Persistences;
 
-[RegisterInjectable(typeof(IPersistence))]
+[Injectio.Attributes.RegisterSingleton<IPersistence>]
 public class BrowserPersistence : IPersistence
 {
     private const string persistenceStoreKey = "__browserPersistence";

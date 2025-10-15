@@ -4,12 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Desktop.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Services.Parameters;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
-using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Core.Base;
 using ReOsuStoryboardPlayer.Core.Parser;
@@ -20,7 +19,7 @@ using SkiaSharp;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Storyboards;
 
-[RegisterInjectable(typeof(IStoryboardLoader), ServiceLifetime.Singleton)]
+[RegisterSingleton<IStoryboardLoader>]
 public class DesktopStoryboardLoader(ILogger<DesktopStoryboardLoader> logger, IParameterManager parameterManager)
     : IStoryboardLoader
 {

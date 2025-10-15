@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Models;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
@@ -16,6 +17,7 @@ using ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Play;
 
 namespace ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Home;
 
+[RegisterTransient<HomePageViewModel>]
 public partial class HomePageViewModel : PageViewModelBase
 {
     private readonly IAudioManager audioManager;
@@ -84,7 +86,7 @@ public partial class HomePageViewModel : PageViewModelBase
             await dialogManager.ShowMessageDialog(msg, DialogMessageType.Error);
         }
     }
-    
+
     [RelayCommand]
     private async Task SaveSetting(CancellationToken token = default)
     {

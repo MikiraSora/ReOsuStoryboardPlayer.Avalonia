@@ -4,7 +4,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Window;
 
-[RegisterInjectable(typeof(IWindowManager))]
+[Injectio.Attributes.RegisterSingleton<IWindowManager>]
 public class BrowserWindowManager : ObservableObject, IWindowManager
 {
     public bool IsFullScreen

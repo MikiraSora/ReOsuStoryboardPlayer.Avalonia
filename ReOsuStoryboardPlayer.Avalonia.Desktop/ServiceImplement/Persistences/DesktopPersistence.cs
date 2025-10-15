@@ -14,7 +14,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Persistences;
 
-[RegisterInjectable(typeof(IPersistence), ServiceLifetime.Singleton)]
+[Injectio.Attributes.RegisterSingleton<IPersistence>]
 public class DesktopPersistence : IPersistence
 {
     private readonly Dictionary<string, object> cacheObj = new();

@@ -6,7 +6,7 @@ using System;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Parameters;
 
-[RegisterInjectable(typeof(IParameterManager), ServiceLifetime.Singleton)]
+[Injectio.Attributes.RegisterSingleton<IParameterManager>]
 public class DesktopParameterManager : IParameterManager
 {
     public DesktopParameterManager()

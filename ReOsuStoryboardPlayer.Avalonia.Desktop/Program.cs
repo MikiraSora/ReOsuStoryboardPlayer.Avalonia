@@ -9,6 +9,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using System;
+using System.Threading.Tasks;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop;
 
@@ -51,7 +52,7 @@ class Program
             .WithInterFont()
             .AppendDependencyInject(collection =>
             {
-                collection.AddInjectsByAttributes(typeof(Program).Assembly);
+                collection.AddReOsuStoryboardPlayerAvaloniaDesktop();
 #if DEBUG
                 if (DesignModeHelper.IsDesignMode)
                     return;

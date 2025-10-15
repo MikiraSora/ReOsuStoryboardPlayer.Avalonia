@@ -36,10 +36,9 @@ internal sealed class Program
 
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
-            .AppendDependencyInject(collection => collection.AddInjectsByAttributes(typeof(Program).Assembly))
             .AppendDependencyInject(collection =>
                 {
-                    collection.AddInjectsByAttributes(typeof(Program).Assembly);
+                    collection.AddReOsuStoryboardPlayerAvaloniaBrowser();
 #if DEBUG
                     if (DesignModeHelper.IsDesignMode)
                         return;

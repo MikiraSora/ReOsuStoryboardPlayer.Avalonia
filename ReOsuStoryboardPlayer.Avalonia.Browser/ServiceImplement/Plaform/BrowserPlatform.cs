@@ -3,7 +3,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Services.Plaform;
 
-[RegisterInjectable(typeof(IPlatform), ServiceLifetime.Singleton)]
+[Injectio.Attributes.RegisterSingleton<IPlatform>]
 public class BrowserPlatform : IPlatform
 {
     public bool SupportMultiThread => false;

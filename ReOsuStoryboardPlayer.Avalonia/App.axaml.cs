@@ -110,8 +110,7 @@ public class App : Application
         //logging
         serviceCollection.AddLogging(o => { o.SetMinimumLevel(LogLevel.Debug); });
 
-        //others.
-        serviceCollection.AddInjectsByAttributes(typeof(App).Assembly);
+        serviceCollection.AddReOsuStoryboardPlayerAvalonia();
 
         //add other DI collection from other assemblies.
         AppBuilderMethodExtensions.AppBuilderStatic.injectConfigFunc?.Invoke(serviceCollection);

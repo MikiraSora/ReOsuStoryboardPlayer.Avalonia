@@ -9,7 +9,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Services.Networks.DefaultImpl;
 
-[RegisterInjectable(typeof(IApplicationHttpFactory), ServiceLifetime.Singleton)]
+[Injectio.Attributes.RegisterSingleton<IApplicationHttpFactory>]
 internal class DefaultApplicationHttpFactory : IApplicationHttpFactory
 {
     private HttpClient client;

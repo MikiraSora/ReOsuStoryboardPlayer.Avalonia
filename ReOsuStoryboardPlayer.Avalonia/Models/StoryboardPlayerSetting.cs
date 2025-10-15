@@ -6,6 +6,9 @@ namespace ReOsuStoryboardPlayer.Avalonia.Models;
 public partial class StoryboardPlayerSetting : ObservableObject
 {
     [ObservableProperty]
+    private int audioSampleRate = 48000;
+    
+    [ObservableProperty]
     private WideScreenOption wideScreenOption;
 
     public bool AllowLog

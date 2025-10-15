@@ -12,7 +12,7 @@ using ReOsuStoryboardPlayer.Avalonia.Views.Dialogs;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Services.Dialog.DefaultImpl;
 
-[RegisterInjectable(typeof(IDialogManager), ServiceLifetime.Singleton)]
+[Injectio.Attributes.RegisterSingleton<IDialogManager>]
 public class DefaultDialogManager : IDialogManager
 {
     private readonly Stack<global::Avalonia.Controls.Window> dialogWindowStack = new();

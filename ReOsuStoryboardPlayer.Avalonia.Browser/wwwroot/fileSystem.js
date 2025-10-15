@@ -75,5 +75,5 @@
         return {readFileAllBytes, disposeFileHandle, userPickDirectory, userPickFile}
     })();
 
-    console.log("localFileSystem.js initialized");
+    console.log("fileSystem.js initialized");
 }

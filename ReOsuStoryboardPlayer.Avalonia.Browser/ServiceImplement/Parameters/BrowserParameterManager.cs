@@ -6,7 +6,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Parameters;
 
-[RegisterInjectable(typeof(IParameterManager), ServiceLifetime.Singleton)]
+[Injectio.Attributes.RegisterSingleton<IParameterManager>]
 public class BrowserParameterManager : IParameterManager
 {
     public BrowserParameterManager()

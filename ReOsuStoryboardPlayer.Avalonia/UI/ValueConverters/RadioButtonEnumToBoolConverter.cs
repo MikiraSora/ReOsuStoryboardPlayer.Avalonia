@@ -7,7 +7,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 namespace ReOsuStoryboardPlayer.Avalonia.UI.ValueConverters;
 
-[RegisterInjectable(typeof(IInjectableValueConverter))]
+[Injectio.Attributes.RegisterScoped<IInjectableValueConverter>]
 public class RadioButtonEnumToBoolConverter(ILogger<RadioButtonEnumToBoolConverter> logger) : IInjectableValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

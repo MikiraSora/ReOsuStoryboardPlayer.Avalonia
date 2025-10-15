@@ -22,7 +22,7 @@ using SkiaSharp;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards;
 
-[RegisterInjectable(typeof(IStoryboardLoader), ServiceLifetime.Singleton)]
+[Injectio.Attributes.RegisterSingleton<IStoryboardLoader>]
 public class BrowserStoryboardLoader(
     ILogger<BrowserStoryboardLoader> logger,
     IDialogManager dialogManager,

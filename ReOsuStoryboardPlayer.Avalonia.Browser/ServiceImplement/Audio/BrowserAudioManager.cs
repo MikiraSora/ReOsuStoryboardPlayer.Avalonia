@@ -1,18 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards;
 using ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSystem;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
-using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Audio;
 
-[RegisterInjectable(typeof(IAudioManager), ServiceLifetime.Singleton)]
+[Injectio.Attributes.RegisterSingleton<IAudioManager>]
 public class BrowserAudioManager(ILogger<BrowserAudioManager> logger, IServiceProvider serviceProvider)
     : IAudioManager
 {

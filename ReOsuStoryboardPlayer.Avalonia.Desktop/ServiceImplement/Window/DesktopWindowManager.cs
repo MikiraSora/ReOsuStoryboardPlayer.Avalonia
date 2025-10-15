@@ -7,7 +7,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Window;
 
-[RegisterInjectable(typeof(IWindowManager))]
+[Injectio.Attributes.RegisterSingleton<IWindowManager>]
 public partial class DesktopWindowManager : ObservableObject, IWindowManager
 {
     [ObservableProperty]

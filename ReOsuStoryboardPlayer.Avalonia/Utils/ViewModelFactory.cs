@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Utils
 {
-    [RegisterInjectable(typeof(ViewModelFactory))]
+    [Injectio.Attributes.RegisterSingleton<ViewModelFactory>]
     public class ViewModelFactory
     {
         private readonly IServiceProvider serviceProvider;

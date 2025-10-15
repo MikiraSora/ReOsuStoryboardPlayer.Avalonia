@@ -7,6 +7,7 @@
     xmlns:vm="clr-namespace:ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Play"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:pages="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Views.Pages"
+    x:DataType="vm:PlayPageViewModel"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">

@@ -12,7 +12,7 @@ using ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Services.Navigation;
 
-[RegisterInjectable(typeof(IPageNavigationManager), ServiceLifetime.Singleton)]
+[Injectio.Attributes.RegisterSingleton<IPageNavigationManager>]
 public partial class DefaultPageNavigationManager : ObservableObject, IPageNavigationManager
 {
     private readonly ILogger<DefaultPageNavigationManager> logger;

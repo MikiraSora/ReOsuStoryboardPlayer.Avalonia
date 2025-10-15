@@ -1,47 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
-  <PropertyGroup>
-    <TargetFramework>net8.0-browser</TargetFramework>
-    <OutputType>Exe</OutputType>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DefineConstants>TRACE;AVALONIA_BROWSER;</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DefineConstants>AVALONIA_BROWSER;</DefineConstants>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0-browser</TargetFramework>
+        <OutputType>Exe</OutputType>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        
+        <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
+    </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+        <DefineConstants>TRACE;AVALONIA_BROWSER;</DefineConstants>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <DefineConstants>AVALONIA_BROWSER;</DefineConstants>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
-    <!--
-    <WasmDebugLevel>1</WasmDebugLevel>
-    <WasmProfilers>browser;</WasmProfilers>
-    <WasmNativeDebugSymbols>true</WasmNativeDebugSymbols>
-    <WasmEmitSymbolMap>true</WasmEmitSymbolMap>
-    <WasmEmitSourceMap>true</WasmEmitSourceMap>
-    <RunAOTCompilation>true</RunAOTCompilation>
-    <WasmNativeDebugSymbols>true</WasmNativeDebugSymbols>
-    <WasmEmitSymbolMap>true</WasmEmitSymbolMap>
-    <WasmEmitSourceMap>true</WasmEmitSourceMap>
-    <WasmEnableSIMD>true</WasmEnableSIMD>
-    <WasmAllowUndefinedSymbols>true</WasmAllowUndefinedSymbols>
-    -->
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Avalonia.Browser" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Avalonia.Browser" Version="$(AvaloniaVersion)"/>
+        <PackageReference Include="Injectio" Version="5.1.0" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ReOsuStoryboardPlayer.Avalonia\ReOsuStoryboardPlayer.Avalonia.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\ReOsuStoryboardPlayer.Avalonia\ReOsuStoryboardPlayer.Avalonia.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Assets\Fonts\NotoSansSC-VariableFont_wght.ttf" />
-    <AvaloniaResource Include="Assets\Fonts\NotoSansSC-VariableFont_wght.ttf" />
-    <None Remove="Assets\test.osz" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Remove="Assets\Fonts\NotoSansSC-VariableFont_wght.ttf"/>
+        <AvaloniaResource Include="Assets\Fonts\NotoSansSC-VariableFont_wght.ttf"/>
+        <None Remove="Assets\test.osz"/>
+    </ItemGroup>
 </Project>
