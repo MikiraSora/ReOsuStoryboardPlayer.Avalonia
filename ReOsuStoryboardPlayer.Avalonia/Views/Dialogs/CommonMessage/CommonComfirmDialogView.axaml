@@ -1,10 +1,11 @@
-﻿<UserControl
+﻿<dialogs:DialogViewBase
     x:Class="ReOsuStoryboardPlayer.Avalonia.Views.Dialogs.CommonMessage.AboutView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:commonMessage="clr-namespace:ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs.CommonMessage"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:dialogs="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Views.Dialogs"
     Width="400"
     x:DataType="commonMessage:CommonComfirmDialogViewModel"
     mc:Ignorable="d">
@@ -28,4 +29,4 @@
                 Content="{Binding NoButtonContent}" />
         </Grid>
     </StackPanel>
-</UserControl>
+</dialogs:DialogViewBase>

@@ -2,13 +2,14 @@
 using Avalonia;
 using Avalonia.Browser;
 using Avalonia.Media;
-using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia;
 using ReOsuStoryboardPlayer.Avalonia.Browser.Utils;
+using ReOsuStoryboardPlayer.Avalonia.Browser.Views;
 using ReOsuStoryboardPlayer.Avalonia.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
+using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 internal sealed class Program
 {
@@ -50,6 +51,8 @@ internal sealed class Program
                         o.AddDebug();
                         o.SetMinimumLevel(LogLevel.Debug);
                     });
+
+                    collection.AddTypeCollectedActivator(ViewTypeCollectedActivator.Default);
                 }
             )
             .LogToTrace();

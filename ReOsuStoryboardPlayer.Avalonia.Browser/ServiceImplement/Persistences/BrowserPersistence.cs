@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ public class BrowserPersistence : IPersistence
         this.logger = logger;
     }
 
-    public Task<T> Load<T>(JsonTypeInfo<T> jsonTypeInfo) where T : new()
+    public Task<T> Load<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(JsonTypeInfo<T> jsonTypeInfo) where T : new()
     {
         return LoadInternal(jsonTypeInfo);
     }
@@ -43,7 +44,7 @@ public class BrowserPersistence : IPersistence
         await SetLocalStorage(persistenceStoreKey, content);
     }
 
-    private async Task<T> LoadInternal<T>(JsonTypeInfo<T> jsonTypeInfo)
+    private async Task<T> LoadInternal<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(JsonTypeInfo<T> jsonTypeInfo)
     {
         var key = GetKey<T>();
 

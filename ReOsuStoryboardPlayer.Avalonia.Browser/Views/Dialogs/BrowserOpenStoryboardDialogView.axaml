@@ -1,12 +1,13 @@
-﻿<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:dialogs="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Browser.ViewModels.Dialogs"
-             xmlns:enum="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Browser.Models"
-             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:DataType="dialogs:BrowserOpenStoryboardDialogViewModel"
-             x:Class="ReOsuStoryboardPlayer.Avalonia.Browser.Views.Dialogs.BrowserOpenStoryboardDialogView">
+﻿<views:ViewBase xmlns="https://github.com/avaloniaui"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+          xmlns:dialogs="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Browser.ViewModels.Dialogs"
+          xmlns:enum="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Browser.Models"
+          xmlns:views="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Views;assembly=ReOsuStoryboardPlayer.Avalonia"
+          mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+          x:DataType="dialogs:BrowserOpenStoryboardDialogViewModel"
+          x:Class="ReOsuStoryboardPlayer.Avalonia.Browser.Views.Dialogs.BrowserOpenStoryboardDialogView">
     <Design.DataContext>
         <dialogs:BrowserOpenStoryboardDialogViewModel />
     </Design.DataContext>
@@ -58,4 +59,4 @@
             </Grid>
         </StackPanel>
     </Border>
-</UserControl>
+</views:ViewBase>

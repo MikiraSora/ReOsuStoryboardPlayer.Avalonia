@@ -1,27 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Microsoft.Extensions.Logging;
+using ReOsuStoryboardPlayer.Avalonia.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels;
-using ReOsuStoryboardPlayer.Avalonia.Views.Attributes;
 
 namespace ReOsuStoryboardPlayer.Avalonia;
 
 internal class ViewLocator : IDataTemplate
 {
-    private readonly Dictionary<Type, Control> cachedViewMap = new();
-    private readonly Dictionary<string, Type> cacheStringToViewType = new();
     private readonly ILogger<ViewLocator> logger;
+    private readonly ViewFactory viewFactory;
 
-    public ViewLocator(ILogger<ViewLocator> logger)
+    public ViewLocator(ILogger<ViewLocator> logger, ViewFactory viewFactory)
     {
         this.logger = logger;
+        this.viewFactory = viewFactory;
     }
 
     public Control Build(object d)
@@ -35,50 +32,28 @@ internal class ViewLocator : IDataTemplate
         logger.LogDebugEx($"viewModel fullName: {viewModel.GetType().FullName}");
         var viewTypeName = GetViewTypeName(viewModel.GetType());
         logger.LogDebugEx($"viewTypeName: {viewTypeName}");
-        var viewType = GetViewType(viewTypeName);
-        logger.LogDebugEx($"viewType: {viewType?.FullName}");
 
-        var isCachable = viewType?.GetCustomAttribute<CachableViewAttribute>() is not null;
-        logger.LogDebugEx($"isCachable: {isCachable}");
-
-        var control = default(Control);
-        if (isCachable && cachedViewMap.TryGetValue(viewType, out var view))
+        //create new view
+        var view = viewFactory.CreateView(viewTypeName);
+        if (view == null)
         {
-            //from cache
-            logger.LogDebugEx($"provide cached view {viewType.Name}");
-            control = view;
-        }
-        else
-        {
-            if (viewType == null)
-            {
-                var msg = $"<viwe type not found:{viewTypeName}; model type:{viewModel.GetType().FullName}>";
+            var msg = $"<resolve type object {viewTypeName} failed; model type:{viewModel.GetType().FullName}>";
 #if DEBUG
-                throw new Exception(msg);
+            throw new Exception(msg);
 #else
 				return new TextBlock { Text = msg };
 #endif
-            }
-
-            //create new
-            control = (Control) (Application.Current as App)?.RootServiceProvider?.Resolve(viewType);
-
-            control.Loaded += (a, aa) => { viewModel.OnViewAfterLoaded(control); };
-            control.Unloaded += (a, aa) =>
-            {
-                viewModel.OnViewBeforeUnload(control);
-                control.DataContext = null;
-
-                if (isCachable)
-                {
-                    cachedViewMap[viewType] = control;
-                    logger.LogDebugEx($"recycle view {viewType.Name} object for ViewLocator");
-                }
-            };
         }
 
-        control.DataContext = viewModel;
-        return control;
+        view.Loaded += (a, aa) => { viewModel.OnViewAfterLoaded(view); };
+        view.Unloaded += (a, aa) =>
+        {
+            viewModel.OnViewBeforeUnload(view);
+            view.DataContext = null;
+        };
+
+        view.DataContext = viewModel;
+        return view;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -95,6 +70,8 @@ internal class ViewLocator : IDataTemplate
 
     private string GetViewTypeName(Type viewModelType)
     {
+        if (viewModelType is null)
+            return null;
         var name = string.Join(".", viewModelType.FullName.Split(".").Select(x =>
         {
             if (x == "ViewModels")
@@ -104,36 +81,5 @@ internal class ViewLocator : IDataTemplate
             return x;
         }));
         return name;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private Type GetViewType(Type viewModelType)
-    {
-        return GetViewType(GetViewTypeName(viewModelType));
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private Type GetViewType(string viewTypeName)
-    {
-        if (!cacheStringToViewType.TryGetValue(viewTypeName, out var type))
-        {
-            if (Type.GetType(viewTypeName) is not { } type1)
-            {
-                var type2 = AppDomain.CurrentDomain
-                    .GetAssemblies()
-                    .Select(a => a.GetType(viewTypeName))
-                    .FirstOrDefault(t => t != null);
-                type = type2;
-            }
-            else
-            {
-                type = type1;
-            }
-
-            cacheStringToViewType[viewTypeName] = type;
-            logger.LogDebugEx($"cache cacheStringToViewType[{viewTypeName}] = {type?.FullName}");
-        }
-
-        return type;
     }
 }

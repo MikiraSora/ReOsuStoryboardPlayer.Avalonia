@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -28,7 +29,8 @@ public partial class DefaultPageNavigationManager : ObservableObject, IPageNavig
         this.viewModelFactory = viewModelFactory;
     }
 
-    public async Task<T> SetPage<T>(bool cleanNavigationStack = false)
+    public async Task<T> SetPage<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(
+        bool cleanNavigationStack = false)
         where T : PageViewModelBase
     {
         logger.LogInformationEx("before CreateViewModel");

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Services.Navigation;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Home;
+using ReOsuStoryboardPlayer.Avalonia.Views;
 
 namespace ReOsuStoryboardPlayer.Avalonia.ViewModels;
 
@@ -55,7 +56,7 @@ public partial class MainViewModel : ViewModelBase
         PageNavigationManager = pageNavigationManager;
 
         ProcessInit();
-
+        
         PageNavigationManager.PropertyChanged += PageNavigationManagerOnPropertyChanged;
     }
 

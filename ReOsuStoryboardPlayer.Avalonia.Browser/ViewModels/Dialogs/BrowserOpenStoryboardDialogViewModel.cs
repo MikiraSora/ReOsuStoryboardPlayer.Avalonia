@@ -237,7 +237,8 @@ public partial class BrowserOpenStoryboardDialogViewModel(
             }
 
             var beatmapSetId = int.Parse(match.Groups[1].Value);
-            var buildDownloadUrl = $"https://txy1.sayobot.cn/beatmaps/download/full/{beatmapSetId}?server=auto";
+            var buildDownloadUrl = $"https://dl.sayobot.cn/beatmaps/download/full/${beatmapSetId}";
+            //var buildDownloadUrl = $"https://txy1.sayobot.cn/beatmaps/download/full/{beatmapSetId}?server=auto";
 
             var zipFileBytes = await DownloadFile(buildDownloadUrl);
             var instance = await browserStoryboardLoader.OpenLoaderFromZipFileBytes(zipFileBytes);

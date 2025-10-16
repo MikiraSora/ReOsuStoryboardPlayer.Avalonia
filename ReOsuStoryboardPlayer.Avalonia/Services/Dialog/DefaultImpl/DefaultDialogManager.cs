@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,7 @@ public class DefaultDialogManager : IDialogManager
         this.logger = logger;
     }
 
-    public Task<T> ShowDialog<T>() where T : DialogViewModelBase
+    public Task<T> ShowDialog<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]T>() where T : DialogViewModelBase
     {
         var viewModel = viewModelFactory.CreateViewModel<T>();
         return ShowDialogInternal(viewModel);

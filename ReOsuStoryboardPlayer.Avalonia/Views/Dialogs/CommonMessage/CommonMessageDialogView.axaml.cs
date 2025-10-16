@@ -4,7 +4,7 @@ using Avalonia.Markup.Xaml;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Views.Dialogs.CommonMessage;
 
-public partial class CommonMessageDialogView : UserControl
+public partial class CommonMessageDialogView : DialogViewBase
 {
     public CommonMessageDialogView()
     {

@@ -1,7 +1,5 @@
-﻿using Avalonia.Controls;
+﻿namespace ReOsuStoryboardPlayer.Avalonia.Views.Pages;
 
-namespace ReOsuStoryboardPlayer.Avalonia.Views.Pages;
-
-public class PageViewBase : UserControl
+public abstract class PageViewBase : ViewBase
 {
 }

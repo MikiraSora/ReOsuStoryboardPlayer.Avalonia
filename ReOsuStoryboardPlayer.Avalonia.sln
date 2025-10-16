@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36414.22 d17.14
+VisualStudioVersion = 17.14.36414.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReOsuStoryboardPlayer.Avalonia", "ReOsuStoryboardPlayer.Avalonia\ReOsuStoryboardPlayer.Avalonia.csproj", "{C13A07A0-B461-903F-F2E0-1F945F3297DD}"
 EndProject
@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependencies", "Dependencie
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReOsuStoryboardPlayer.Core", "Dependencies\ReOsuStoryboardPlayer\ReOsuStoryboardPlayer.Core\ReOsuStoryboardPlayer.Core.csproj", "{139E05B7-11BE-44EA-BB0B-79D6992F28B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReOsuStoryboardPlayer.Avalonia.SourceGenerators", "Dependencies\ReOsuStoryboardPlayer.Avalonia.SourceGenerators\ReOsuStoryboardPlayer.Avalonia.SourceGenerators.csproj", "{77BF7ADE-9C2F-42F3-AE39-2792F75C1B8D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReOsuStoryboardPlayer.Avalonia.SourceGenerator", "Dependencies\ReOsuStoryboardPlayer.Avalonia.SourceGenerator\ReOsuStoryboardPlayer.Avalonia.SourceGenerator.csproj", "{48961094-1BAB-474C-B20F-B0FFC15E8A2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,19 +37,19 @@ Global
 		{139E05B7-11BE-44EA-BB0B-79D6992F28B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{139E05B7-11BE-44EA-BB0B-79D6992F28B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{139E05B7-11BE-44EA-BB0B-79D6992F28B0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{77BF7ADE-9C2F-42F3-AE39-2792F75C1B8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77BF7ADE-9C2F-42F3-AE39-2792F75C1B8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77BF7ADE-9C2F-42F3-AE39-2792F75C1B8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77BF7ADE-9C2F-42F3-AE39-2792F75C1B8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48961094-1BAB-474C-B20F-B0FFC15E8A2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48961094-1BAB-474C-B20F-B0FFC15E8A2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48961094-1BAB-474C-B20F-B0FFC15E8A2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48961094-1BAB-474C-B20F-B0FFC15E8A2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {FD10A6B8-0598-4C70-BE81-74CD270120EA}
-	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{139E05B7-11BE-44EA-BB0B-79D6992F28B0} = {4E1CBDB1-A4EE-4703-A8F0-934835C053FD}
-		{77BF7ADE-9C2F-42F3-AE39-2792F75C1B8D} = {4E1CBDB1-A4EE-4703-A8F0-934835C053FD}
+		{48961094-1BAB-474C-B20F-B0FFC15E8A2B} = {4E1CBDB1-A4EE-4703-A8F0-934835C053FD}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FD10A6B8-0598-4C70-BE81-74CD270120EA}
 	EndGlobalSection
 EndGlobal

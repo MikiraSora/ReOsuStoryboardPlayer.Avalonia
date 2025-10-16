@@ -110,6 +110,7 @@ public class App : Application
 
         //logging
         serviceCollection.AddLogging(o => { o.SetMinimumLevel(LogLevel.Debug); });
+        serviceCollection.AddTypeCollectedActivator(ViewTypeCollectedActivator.Default);
 
         serviceCollection.AddReOsuStoryboardPlayerAvalonia();
 

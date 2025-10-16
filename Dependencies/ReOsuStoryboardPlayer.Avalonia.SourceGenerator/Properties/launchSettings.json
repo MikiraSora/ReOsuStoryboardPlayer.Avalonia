@@ -1,0 +1,9 @@
+﻿{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "DebugRoslynSourceGenerator": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../ReOsuStoryboardPlayer.Avalonia.SourceGenerator.Sample/ReOsuStoryboardPlayer.Avalonia.SourceGenerator.Sample.csproj"
+    }
+  }
+}

@@ -18,11 +18,4 @@ public static class IServiceProviderEx
     {
         return ActivatorUtilities.CreateInstance(serviceProvider, resolveType);
     }
-
-    public static T ResolveAOT<T>(this IServiceProvider serviceProvider) where T : IServiceProvideInjectable, new()
-    {
-        var obj = new T();
-        obj.InitalizeInjected(serviceProvider);
-        return obj;
-    }
 }
