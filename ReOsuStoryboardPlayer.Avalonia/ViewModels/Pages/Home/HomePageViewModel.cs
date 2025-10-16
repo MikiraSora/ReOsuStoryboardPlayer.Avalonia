@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Models;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
@@ -17,7 +16,6 @@ using ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Play;
 
 namespace ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Home;
 
-[RegisterTransient<HomePageViewModel>]
 public partial class HomePageViewModel : PageViewModelBase
 {
     private readonly IAudioManager audioManager;
@@ -30,23 +28,6 @@ public partial class HomePageViewModel : PageViewModelBase
 
     [ObservableProperty]
     private StoryboardPlayerSetting storyboardPlayerSetting;
-    
-    public string ProgramCommitId => ThisAssembly.GitCommitId;
-    public string ProgramCommitIdShort => ProgramCommitId[..7];
-    public string AssemblyVersion => ThisAssembly.AssemblyVersion;
-    public DateTime ProgramCommitDate => ThisAssembly.GitCommitDate + TimeSpan.FromHours(8);
-    public string ProgramBuildConfiguration => ThisAssembly.AssemblyConfiguration;
-
-    public string ProgramBuildTime
-    {
-        get
-        {
-            var type = typeof(HomePageViewModel).Assembly.GetType("DpMapSubscribeTool.BuildTime");
-            var prop = type?.GetField("Value")?.GetValue(null)
-                ?.ToString();
-            return prop;
-        }
-    }
 
     public HomePageViewModel(
         IDialogManager dialogManager,
@@ -68,6 +49,23 @@ public partial class HomePageViewModel : PageViewModelBase
         Initaliaze();
     }
 
+    public string ProgramCommitId => ThisAssembly.GitCommitId;
+    public string ProgramCommitIdShort => ProgramCommitId[..7];
+    public string AssemblyVersion => ThisAssembly.AssemblyVersion;
+    public DateTime ProgramCommitDate => ThisAssembly.GitCommitDate + TimeSpan.FromHours(8);
+    public string ProgramBuildConfiguration => ThisAssembly.AssemblyConfiguration;
+
+    public string ProgramBuildTime
+    {
+        get
+        {
+            var type = typeof(HomePageViewModel).Assembly.GetType("DpMapSubscribeTool.BuildTime");
+            var prop = type?.GetField("Value")?.GetValue(null)
+                ?.ToString();
+            return prop;
+        }
+    }
+
     public WideScreenOption[] WideScreenOptions { get; } = Enum.GetValues<WideScreenOption>();
 
     public bool IsSupportMultiThreaded => platform.SupportMultiThread;
@@ -76,7 +74,8 @@ public partial class HomePageViewModel : PageViewModelBase
 
     private async void Initaliaze()
     {
-        StoryboardPlayerSetting = await persistence.Load<StoryboardPlayerSetting>();
+        StoryboardPlayerSetting =
+            await persistence.Load(StoryboardPlayerSetting.JsonTypeInfo);
     }
 
     [RelayCommand(AllowConcurrentExecutions = false)]
@@ -107,7 +106,7 @@ public partial class HomePageViewModel : PageViewModelBase
     [RelayCommand]
     private async Task SaveSetting(CancellationToken token = default)
     {
-        await persistence.Save(StoryboardPlayerSetting);
+        await persistence.Save(StoryboardPlayerSetting, StoryboardPlayerSetting.JsonTypeInfo);
         await dialogManager.ShowMessageDialog("Save success!");
     }
 }

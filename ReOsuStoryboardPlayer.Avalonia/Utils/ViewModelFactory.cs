@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Utils
 {
@@ -26,7 +27,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Utils
 
         public ViewModelBase CreateViewModel(Type viewModelType)
         {
-            return (ViewModelBase)ActivatorUtilities.CreateInstance(serviceProvider, viewModelType);
+            return (ViewModelBase)serviceProvider.Resolve(viewModelType);
         }
     }
 }

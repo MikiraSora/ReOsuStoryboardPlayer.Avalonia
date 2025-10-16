@@ -1,5 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization.Metadata;
 using CommunityToolkit.Mvvm.ComponentModel;
+using ReOsuStoryboardPlayer.Avalonia.Utils;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Models;
 
@@ -7,9 +8,12 @@ public partial class StoryboardPlayerSetting : ObservableObject
 {
     [ObservableProperty]
     private int audioSampleRate = 48000;
-    
+
     [ObservableProperty]
     private WideScreenOption wideScreenOption;
+
+    public static JsonTypeInfo<StoryboardPlayerSetting> JsonTypeInfo =>
+        JsonSourceGenerationContext.Default.StoryboardPlayerSetting;
 
     public bool AllowLog
     {

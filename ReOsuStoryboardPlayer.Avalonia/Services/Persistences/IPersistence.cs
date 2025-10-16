@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization.Metadata;
+using System.Threading.Tasks;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
 
 public interface IPersistence
 {
-    Task Save<T>(T obj);
-    Task<T> Load<T>() where T : new();
+    Task Save<T>(T obj, JsonTypeInfo<T> jsonTypeInfo);
+    Task<T> Load<T>(JsonTypeInfo<T> jsonTypeInfo) where T : new();
 }

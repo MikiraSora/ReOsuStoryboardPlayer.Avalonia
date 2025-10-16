@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
+using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
+using ReOsuStoryboardPlayer.Avalonia.Browser.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
-using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Persistences;
 
-[Injectio.Attributes.RegisterSingleton<IPersistence>]
+[RegisterSingleton<IPersistence>]
 public class BrowserPersistence : IPersistence
 {
     private const string persistenceStoreKey = "__browserPersistence";
@@ -25,23 +27,23 @@ public class BrowserPersistence : IPersistence
         this.logger = logger;
     }
 
-    public async Task Save<T>(T obj)
+    public Task<T> Load<T>(JsonTypeInfo<T> jsonTypeInfo) where T : new()
+    {
+        return LoadInternal(jsonTypeInfo);
+    }
+
+    public async Task Save<T>(T obj, JsonTypeInfo<T> jsonTypeInfo)
     {
         var key = GetKey<T>();
 
-        settingMap[key] = JsonSerializer.Serialize(obj);
-        var content = JsonSerializer.Serialize(settingMap);
+        settingMap[key] = JsonSerializer.Serialize(obj, jsonTypeInfo);
+        var content = JsonSerializer.Serialize(settingMap, JsonSourceGenerationContext.Default.DictionaryStringString);
 
         // Use localStorage for browser persistence
         await SetLocalStorage(persistenceStoreKey, content);
     }
 
-    public Task<T> Load<T>() where T : new()
-    {
-        return LoadInternal<T>();
-    }
-
-    private async Task<T> LoadInternal<T>()
+    private async Task<T> LoadInternal<T>(JsonTypeInfo<T> jsonTypeInfo)
     {
         var key = GetKey<T>();
 
@@ -59,7 +61,8 @@ public class BrowserPersistence : IPersistence
             else
                 try
                 {
-                    settingMap = JsonSerializer.Deserialize<Dictionary<string, string>>(content);
+                    settingMap = JsonSerializer.Deserialize(content,
+                        JsonSourceGenerationContext.Default.DictionaryStringString);
                 }
                 catch (Exception e)
                 {
@@ -72,10 +75,10 @@ public class BrowserPersistence : IPersistence
             settingMap = new Dictionary<string, string>();
         }
 
-        T cw = default;
+        T cw;
         if (settingMap.TryGetValue(key, out var jsonContent))
         {
-            cw = JsonSerializer.Deserialize<T>(jsonContent);
+            cw = JsonSerializer.Deserialize(jsonContent, jsonTypeInfo);
             logger.LogDebugEx($"create new {typeof(T).Name} object from browser storage, hash = {cw.GetHashCode()}");
         }
         else

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSystem;
 using ReOsuStoryboardPlayer.Core.Base;
 using ReOsuStoryboardPlayer.Core.Optimzer;
+using ReOsuStoryboardPlayer.Core.Optimzer.DefaultOptimzer;
 using ReOsuStoryboardPlayer.Core.Parser.Collection;
 using ReOsuStoryboardPlayer.Core.Parser.Reader;
 using ReOsuStoryboardPlayer.Core.Parser.Stream;
@@ -21,7 +23,7 @@ public static class StoryboardParserHelper
     {
         using (StopwatchRun.Count($"Parse&Optimze Storyboard Objects/Commands from {file_path}"))
         {
-            if (System.IO.Path.GetExtension(file_path).ToLower() == ".osbin")
+            if (Path.GetExtension(file_path).ToLower() == ".osbin")
                 return await GetStoryboardObjectsFromOsbin(fsRoot, file_path);
             return await GetStoryboardObjectsFromOsb(fsRoot, file_path);
         }
@@ -55,8 +57,7 @@ public static class StoryboardParserHelper
         foreach (var obj in list)
             obj.CalculateAndApplyBaseFrameTime();
 
-        if (!optimzer_add)
-            InitOptimzerManager();
+        InitOptimzerManager();
 
         StoryboardOptimzerManager.Optimze( /*PlayerSetting.StoryboardObjectOptimzeLevel*/2857, list);
 
@@ -65,27 +66,38 @@ public static class StoryboardParserHelper
 
     private static void InitOptimzerManager()
     {
-        var base_type = typeof(OptimzerBase);
-
-        var need_load_optimzer = AppDomain.CurrentDomain.GetAssemblies()
-            .Select(x => x.GetTypes())
-            .SelectMany(l => l)
-            .Where(x => x.IsClass && !x.IsAbstract && x.IsSubclassOf(base_type)).Select(x =>
-            {
-                try
+        if (!optimzer_add)
+            return;
+/*
+        try
+        {
+            var base_type = typeof(OptimzerBase);
+            var need_load_optimzer = AppDomain.CurrentDomain.GetAssemblies()
+                .Select(x => x.GetTypes())
+                .SelectMany(l => l)
+                .Where(x => x.IsClass && !x.IsAbstract && x.IsSubclassOf(base_type)).Select(x =>
                 {
-                    return Activator.CreateInstance(x);
-                }
-                catch (Exception e)
-                {
-                    Log.Warn($"Can't load optimzer \"{x.Name}\" :" + e.Message);
-                    return null;
-                }
-            }).OfType<OptimzerBase>();
+                    try
+                    {
+                        return Activator.CreateInstance(x);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Warn($"Can't load optimzer \"{x.Name}\" :" + e.Message);
+                        return null;
+                    }
+                }).OfType<OptimzerBase>();
 
-        foreach (var optimzer in need_load_optimzer)
-            StoryboardOptimzerManager.AddOptimzer(optimzer);
-
+            foreach (var optimzer in need_load_optimzer)
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"InitOptimzerManager() throw exception: {e.Message}");
+        }
+*/
+        StoryboardOptimzerManager.AddOptimzer(new RuntimeOptimzer());
+        StoryboardOptimzerManager.AddOptimzer(new ParserStaticOptimzer());
+        StoryboardOptimzerManager.AddOptimzer(new ConflictCommandRecoverOptimzer());
         optimzer_add = true;
     }
 }

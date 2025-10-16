@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels;
@@ -24,9 +23,6 @@ internal class ViewLocator : IDataTemplate
     {
         this.logger = logger;
     }
-
-    public bool ForceSinglePageNavigation { get; set; } = true;
-    public bool UseSinglePageNavigation { get; } = true;
 
     public Control Build(object d)
     {
@@ -65,8 +61,7 @@ internal class ViewLocator : IDataTemplate
             }
 
             //create new
-            control = (Control) ActivatorUtilities.CreateInstance((Application.Current as App).RootServiceProvider,
-                viewType);
+            control = (Control) (Application.Current as App)?.RootServiceProvider?.Resolve(viewType);
 
             control.Loaded += (a, aa) => { viewModel.OnViewAfterLoaded(control); };
             control.Unloaded += (a, aa) =>
@@ -118,15 +113,15 @@ internal class ViewLocator : IDataTemplate
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private Type GetViewType(string viewModelTypeName)
+    private Type GetViewType(string viewTypeName)
     {
-        if (!cacheStringToViewType.TryGetValue(viewModelTypeName, out var type))
+        if (!cacheStringToViewType.TryGetValue(viewTypeName, out var type))
         {
-            if (Type.GetType(viewModelTypeName) is not { } type1)
+            if (Type.GetType(viewTypeName) is not { } type1)
             {
                 var type2 = AppDomain.CurrentDomain
                     .GetAssemblies()
-                    .Select(a => a.GetType(viewModelTypeName))
+                    .Select(a => a.GetType(viewTypeName))
                     .FirstOrDefault(t => t != null);
                 type = type2;
             }
@@ -135,8 +130,8 @@ internal class ViewLocator : IDataTemplate
                 type = type1;
             }
 
-            cacheStringToViewType[viewModelTypeName] = type;
-            logger.LogDebugEx($"cache cacheStringToViewType[{viewModelTypeName}] = {type?.FullName}");
+            cacheStringToViewType[viewTypeName] = type;
+            logger.LogDebugEx($"cache cacheStringToViewType[{viewTypeName}] = {type?.FullName}");
         }
 
         return type;

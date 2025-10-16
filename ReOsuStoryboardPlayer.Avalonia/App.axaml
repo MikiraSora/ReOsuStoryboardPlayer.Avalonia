@@ -14,9 +14,6 @@
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="UI/Styles/IconButton.axaml" />
-        <StyleInclude Source="avares://DataBox/Themes/DataBoxFluentTheme.axaml" />
-        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
-        <StyleInclude Source="avares://FluentAvalonia.ProgressRing/Styling/Controls/ProgressRing.axaml" />
         <Style Selector="Border.ContentContainer">
             <Setter Property="CornerRadius" Value="5" />
             <Setter Property="Padding" Value="5" />

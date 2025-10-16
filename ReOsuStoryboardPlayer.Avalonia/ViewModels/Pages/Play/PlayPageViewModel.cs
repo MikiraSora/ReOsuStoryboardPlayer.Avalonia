@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -61,7 +62,6 @@ public partial class PlayPageViewModel : PageViewModelBase
         this.audioManager = audioManager;
 
         Initialize();
-        
     }
 
     public override string Title => "主页";
@@ -70,7 +70,8 @@ public partial class PlayPageViewModel : PageViewModelBase
 
     private async void Initialize()
     {
-        StoryboardPlayerSetting = await persistence.Load<StoryboardPlayerSetting>();
+        StoryboardPlayerSetting =
+            await persistence.Load(StoryboardPlayerSetting.JsonTypeInfo);
     }
 
     [RelayCommand(AllowConcurrentExecutions = false)]

@@ -58,14 +58,14 @@ public class PercentRelativePageLayout
         }
     }
 
-    private static void ControlOnAttachedToVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
+    private static void ControlOnAttachedToVisualTree(object sender, VisualTreeAttachmentEventArgs e)
     {
         if (sender is not Control control)
             return;
 
         // 获取父级容器
         if (FindAncestor<PageViewBase>(control) is PageViewBase parent)
-            parent.GetObservable(Control.BoundsProperty).Subscribe(bounds =>
+            parent.GetObservable(Visual.BoundsProperty).Subscribe(bounds =>
             {
                 var widthPercent = GetWidthPercent(control);
                 var heightPercent = GetHeightPercent(control);
@@ -78,9 +78,9 @@ public class PercentRelativePageLayout
             });
     }
 
-    private static T? FindAncestor<T>(Control control) where T : Control
+    private static T FindAncestor<T>(Control control) where T : Control
     {
-        Visual? parent = control;
+        Visual parent = control;
         while (parent != null)
         {
             parent = parent.GetVisualParent();

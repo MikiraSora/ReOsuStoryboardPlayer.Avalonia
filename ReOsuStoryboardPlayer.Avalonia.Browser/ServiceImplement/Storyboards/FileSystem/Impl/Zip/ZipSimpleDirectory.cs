@@ -13,17 +13,17 @@ public class ZipSimpleDirectory : ISimpleDirectory
     private readonly Dictionary<string, ZipSimpleDirectory> _dirs = new();
     private readonly Dictionary<string, ZipSimpleFile> _files = new();
 
-    public ZipSimpleDirectory(ISimpleDirectory? parent, string name)
+    public ZipSimpleDirectory(ISimpleDirectory parent, string name)
     {
         ParentDictionary = parent;
         DirectoryName = name;
     }
 
-    public ISimpleDirectory? ParentDictionary { get; }
+    public ISimpleDirectory ParentDictionary { get; }
 
-    public ISimpleDirectory[] ChildDictionaries => _dirs.Values.ToArray();
+    public ISimpleDirectory[] ChildDictionaries => _dirs.Values.ToArray<ISimpleDirectory>();
 
-    public ISimpleFile[] ChildFiles => _files.Values.ToArray();
+    public ISimpleFile[] ChildFiles => _files.Values.ToArray<ISimpleFile>();
     public string FullPath => Path.Combine(ParentDictionary?.FullPath ?? string.Empty, DirectoryName);
 
     public string DirectoryName { get; }
@@ -40,7 +40,6 @@ public class ZipSimpleDirectory : ISimpleDirectory
 
     public ISimpleFile[] GetFiles(string searchPattern = "*")
     {
-        var recursive = false;
         var regex = WildcardToRegex(searchPattern);
 
         var results = new List<ISimpleFile>();

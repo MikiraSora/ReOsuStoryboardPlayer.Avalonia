@@ -75,6 +75,9 @@ public class CustomBlurBehind : Control
             if (!skia.SkCanvas.TotalMatrix.TryInvert(out var currentInvertedTransform))
                 return;
 
+            if (skia.SkSurface is null)
+                return;
+
             using var backgroundSnapshot = skia.SkSurface.Snapshot();
             using var backdropShader = SKShader.CreateImage(backgroundSnapshot, SKShaderTileMode.Clamp,
                 SKShaderTileMode.Clamp, currentInvertedTransform);
@@ -82,12 +85,10 @@ public class CustomBlurBehind : Control
             if (skia.GrContext == null)
             {
                 using (var filter = SKImageFilter.CreateBlur(3, 3, SKShaderTileMode.Clamp))
-                using (var tmp = new SKPaint
-                       {
-                           Shader = backdropShader,
-                           ImageFilter = filter
-                       })
+                using (var tmp = new SKPaint())
                 {
+                    tmp.Shader = backdropShader;
+                    tmp.ImageFilter = filter;
                     skia.SkCanvas.DrawRect(0, 0, (float) _bounds.Width, (float) _bounds.Height, tmp);
                 }
 
@@ -98,31 +99,25 @@ public class CustomBlurBehind : Control
                 (int) Math.Ceiling(_bounds.Width),
                 (int) Math.Ceiling(_bounds.Height), SKImageInfo.PlatformColorType, SKAlphaType.Premul));
             using (var filter = SKImageFilter.CreateBlur(3, 3, SKShaderTileMode.Clamp))
-            using (var blurPaint = new SKPaint
-                   {
-                       Shader = backdropShader,
-                       ImageFilter = filter
-                   })
+            using (var blurPaint = new SKPaint())
             {
+                blurPaint.Shader = backdropShader;
+                blurPaint.ImageFilter = filter;
                 blurred.Canvas.DrawRect(0, 0, (float) _bounds.Width, (float) _bounds.Height, blurPaint);
             }
 
             using (var blurSnap = blurred.Snapshot())
             using (var blurSnapShader = SKShader.CreateImage(blurSnap))
-            using (var blurSnapPaint = new SKPaint
-                   {
-                       Shader = blurSnapShader,
-                       IsAntialias = true
-                   })
+            using (var blurSnapPaint = new SKPaint())
             {
+                blurSnapPaint.Shader = blurSnapShader;
+                blurSnapPaint.IsAntialias = true;
                 skia.SkCanvas.DrawRect(0, 0, (float) _bounds.Width, (float) _bounds.Height, blurSnapPaint);
             }
 
             //return;
             using var acrylliPaint = new SKPaint();
             acrylliPaint.IsAntialias = true;
-
-            double opacity = 1;
 
             const double noiseOpacity = 0.0225;
 
@@ -154,7 +149,7 @@ public class CustomBlurBehind : Control
 
         public Rect Bounds => _bounds.Inflate(4);
 
-        public bool Equals(ICustomDrawOperation? other)
+        public bool Equals(ICustomDrawOperation other)
         {
             return other is BlurBehindRenderOperation op && op._bounds == _bounds && op._material.Equals(_material);
         }

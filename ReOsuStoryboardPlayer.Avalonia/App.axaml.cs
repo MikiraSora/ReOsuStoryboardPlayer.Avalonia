@@ -29,9 +29,10 @@ public class App : Application
     public override void OnFrameworkInitializationCompleted()
     {
         InitServiceProvider();
-        
+
         //add ViewLocator
-        DataTemplates.Add(ActivatorUtilities.CreateInstance<ViewLocator>(RootServiceProvider));
+        var viewLocator = RootServiceProvider.Resolve<ViewLocator>();
+        DataTemplates.Add(viewLocator);
 
         var logger = RootServiceProvider.GetService<ILogger<App>>();
         var osblogger = RootServiceProvider.GetService<ILoggerFactory>().CreateLogger("OsuStoryboardPlayerCoreLog");
@@ -40,10 +41,10 @@ public class App : Application
             var logLevl = level switch
             {
                 Log.LogLevel.Debug => LogLevel.Debug,
-                Log.LogLevel.None => LogLevel.Information,
                 Log.LogLevel.Error => LogLevel.Error,
                 Log.LogLevel.User => LogLevel.Information,
-                Log.LogLevel.Warn => LogLevel.Warning
+                Log.LogLevel.Warn => LogLevel.Warning,
+                /*Log.LogLevel.None or */_ => LogLevel.Information
             };
             osblogger.Log(logLevl, $"{caller}(): {message}");
         };
@@ -59,7 +60,7 @@ public class App : Application
             Resources[key] = converter;
         }
 
-        var mainViewModel = ActivatorUtilities.CreateInstance<MainViewModel>(RootServiceProvider);
+        var mainViewModel = RootServiceProvider.Resolve<MainViewModel>();
 
         switch (ApplicationLifetime)
         {
@@ -78,8 +79,8 @@ public class App : Application
                 VisualRoot = singleViewPlatform.MainView;
                 break;
         }
-        
-        logger.LogInformationEx($"OnFrameworkInitializationCompleted() done");
+
+        logger.LogInformationEx("OnFrameworkInitializationCompleted() done");
         base.OnFrameworkInitializationCompleted();
     }
 

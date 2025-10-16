@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Browser.Utils;
@@ -23,7 +24,7 @@ public partial class LocalFileSystemInterop
     public static async Task<JSDirectory> PickDirectory()
     {
         var jsonContent = await PickDirectoryInternal();
-        return JsonSerializer.Deserialize<JSDirectory>(jsonContent);
+        return JsonSerializer.Deserialize(jsonContent, JsonSourceGenerationContext.Default.JSDirectory);
     }
 
     [JSImport("globalThis.LocalFileSystemInterop.readFileAllBytes")]

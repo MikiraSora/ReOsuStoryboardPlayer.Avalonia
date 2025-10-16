@@ -11,17 +11,17 @@ public class JsfsSimpleDirectory : ISimpleDirectory
     private readonly Dictionary<string, JsfsSimpleDirectory> _dirs = new();
     private readonly Dictionary<string, JsfsSimpleFile> _files = new();
 
-    public JsfsSimpleDirectory(ISimpleDirectory? parent, string name)
+    public JsfsSimpleDirectory(ISimpleDirectory parent, string name)
     {
         ParentDictionary = parent;
         DirectoryName = name;
     }
 
-    public ISimpleDirectory? ParentDictionary { get; }
+    public ISimpleDirectory ParentDictionary { get; }
 
-    public ISimpleDirectory[] ChildDictionaries => _dirs.Values.ToArray();
+    public ISimpleDirectory[] ChildDictionaries => _dirs.Values.ToArray<ISimpleDirectory>();
 
-    public ISimpleFile[] ChildFiles => _files.Values.ToArray();
+    public ISimpleFile[] ChildFiles => _files.Values.ToArray<ISimpleFile>();
     public string FullPath => Path.Combine(ParentDictionary?.FullPath ?? string.Empty, DirectoryName);
 
     public string DirectoryName { get; }
@@ -38,7 +38,6 @@ public class JsfsSimpleDirectory : ISimpleDirectory
 
     public ISimpleFile[] GetFiles(string searchPattern = "*")
     {
-        var recursive = false;
         var regex = WildcardToRegex(searchPattern);
 
         var results = new List<ISimpleFile>();

@@ -3,6 +3,7 @@
         <TargetFramework>net8.0-browser</TargetFramework>
         <OutputType>Exe</OutputType>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <PublishAot>false</PublishAot>
         
         <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
     </PropertyGroup>
@@ -12,7 +13,7 @@
         <DefineConstants>TRACE;AVALONIA_BROWSER;</DefineConstants>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <DefineConstants>AVALONIA_BROWSER;</DefineConstants>
     </PropertyGroup>
 

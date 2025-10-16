@@ -1,28 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Extensions.DependencyInjection;
+using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Utils;
-using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Services.Navigation;
 
-[Injectio.Attributes.RegisterSingleton<IPageNavigationManager>]
+[RegisterSingleton<IPageNavigationManager>]
 public partial class DefaultPageNavigationManager : ObservableObject, IPageNavigationManager
 {
     private readonly ILogger<DefaultPageNavigationManager> logger;
-    private readonly ViewModelFactory viewModelFactory;
     private readonly Stack<PageViewModelBase> pageViewModelStack = new();
+    private readonly ViewModelFactory viewModelFactory;
 
     [ObservableProperty]
     private PageViewModelBase currentPageViewModel;
 
-    public DefaultPageNavigationManager(ILogger<DefaultPageNavigationManager> logger,ViewModelFactory viewModelFactory)
+    public DefaultPageNavigationManager(ILogger<DefaultPageNavigationManager> logger, ViewModelFactory viewModelFactory)
     {
         this.logger = logger;
         this.viewModelFactory = viewModelFactory;
@@ -31,7 +31,9 @@ public partial class DefaultPageNavigationManager : ObservableObject, IPageNavig
     public async Task<T> SetPage<T>(bool cleanNavigationStack = false)
         where T : PageViewModelBase
     {
+        logger.LogInformationEx("before CreateViewModel");
         var page = viewModelFactory.CreateViewModel<T>();
+        logger.LogInformationEx("after CreateViewModel");
         await SetPage(page, cleanNavigationStack);
         return page;
     }
@@ -106,5 +108,12 @@ public partial class DefaultPageNavigationManager : ObservableObject, IPageNavig
         logger.LogInformationEx(
             $"current page {CurrentPageViewModel.Title}({CurrentPageViewModel.GetType().FullName})");
         return Task.FromResult(true);
+    }
+
+    protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+
+        logger.LogInformationEx($"OnPropertyChanged {e.PropertyName}, CurrentPageViewModel={CurrentPageViewModel}");
     }
 }

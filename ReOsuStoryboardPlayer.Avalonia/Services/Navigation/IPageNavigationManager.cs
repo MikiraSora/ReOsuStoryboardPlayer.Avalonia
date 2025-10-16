@@ -1,9 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using System.Threading.Tasks;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Services.Navigation;
 
-public interface IPageNavigationManager
+public interface IPageNavigationManager : INotifyPropertyChanged
 {
     PageViewModelBase CurrentPageViewModel { get; }
 

@@ -69,7 +69,7 @@ public partial class BrowserOpenStoryboardDialogViewModel(
                 return;
 
             using var loadingDialog = new LoadingDialogViewModel();
-            dialogManager.ShowDialog(loadingDialog);
+            dialogManager.ShowDialog(loadingDialog).NoWait();
             await loadingDialog.WaitForAttachedView();
             
             var instance = await browserStoryboardLoader.OpenLoaderFromZipFileBytes(zipFileBytes);
@@ -109,7 +109,7 @@ public partial class BrowserOpenStoryboardDialogViewModel(
                 return;
             
             using var loadingDialog = new LoadingDialogViewModel();
-            dialogManager.ShowDialog(loadingDialog);
+            dialogManager.ShowDialog(loadingDialog).NoWait();
             await loadingDialog.WaitForAttachedView();
             
             var instance = await browserStoryboardLoader.OpenLoaderFromLocalFileSystem(folder);
@@ -179,21 +179,21 @@ public partial class BrowserOpenStoryboardDialogViewModel(
         CloseDialog();
     }
 
-    private async Task<byte[]> DownloadFile(string downloadUrl)
+    private async Task<byte[]> DownloadFile(string dlUrl)
     {
         using var httpClient = new HttpClient();
         var startTime = DateTime.Now;
-        logger.LogInformationEx($"begin download url: {downloadUrl}");
-        var bytes = await httpClient.GetByteArrayAsync(downloadUrl);
+        logger.LogInformationEx($"begin download url: {dlUrl}");
+        var bytes = await httpClient.GetByteArrayAsync(dlUrl);
         var downloadTime = DateTime.Now;
         logger.LogInformationEx($"download done, cost time: {(downloadTime - startTime).TotalMilliseconds:F2}ms");
         return bytes;
     }
 
-    private async Task<bool> LoadFromDownloadingZipUrl(string downloadUrl)
+    private async Task<bool> LoadFromDownloadingZipUrl(string dlUrl)
     {
         using var loadingDialog = new LoadingDialogViewModel();
-        dialogManager.ShowDialog(loadingDialog);
+        dialogManager.ShowDialog(loadingDialog).NoWait();
         
         if (storyboardLoader is not BrowserStoryboardLoader browserStoryboardLoader)
         {
@@ -203,7 +203,7 @@ public partial class BrowserOpenStoryboardDialogViewModel(
 
         try
         {
-            var zipFileBytes = await DownloadFile(downloadUrl);
+            var zipFileBytes = await DownloadFile(dlUrl);
             var instance = await browserStoryboardLoader.OpenLoaderFromZipFileBytes(zipFileBytes);
 
             DownloadInstance = instance;
@@ -211,7 +211,7 @@ public partial class BrowserOpenStoryboardDialogViewModel(
         }
         catch (Exception e)
         {
-            logger.LogErrorEx(e, $"can't load storyboard from .zip/.osz download:{downloadUrl} {e.Message}");
+            logger.LogErrorEx(e, $"can't load storyboard from .zip/.osz download:{dlUrl} {e.Message}");
             return false;
         }
     }
@@ -219,7 +219,7 @@ public partial class BrowserOpenStoryboardDialogViewModel(
     private async Task<bool> TryLoadFromParsingBeatmapUrl(string beatmapUrl)
     {
         using var loadingDialog = new LoadingDialogViewModel();
-        dialogManager.ShowDialog(loadingDialog);
+        dialogManager.ShowDialog(loadingDialog).NoWait();
 
         try
         {
