@@ -53,7 +53,7 @@ jobs:
     - name: Build Browser project
       run: |
         dotnet publish ReOsuStoryboardPlayer.Avalonia.Browser/ReOsuStoryboardPlayer.Avalonia.Browser.csproj \
-          --configuration Debug \
+          --configuration Release \
           --output ./publish \
           --nologo \
           --verbosity normal
@@ -79,5 +79,6 @@ jobs:
       id: deployment
 
       uses: actions/deploy-pages@v4
+
 
 
