@@ -12,7 +12,9 @@ Program can build/run on Windows/Browser/Android(WIP)
 * Audio Implementation: [NAudio (Windows)](https://github.com/naudio/NAudio)
 
 ### Todos:
-* Optimize code
+* Fix/Support FireFox
+* Support multithread in browser
+* Fix/Optimize render
 * Integrate content
 * Add Storyboard debugger who want debug his storyboard?
 * Support Android
