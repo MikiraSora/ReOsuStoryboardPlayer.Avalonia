@@ -16,11 +16,11 @@ public static class TypeCollectedActivatorHelper<T>
     public static bool TryCreateInstance(IServiceProvider serviceProvider, string fullClassName, out T instance)
     {
         if (cacheClassToActivatorMap.TryGetValue(fullClassName, out var cacheActivator))
-            return cacheActivator.TryCreateInstance(fullClassName, out instance);
+            return cacheActivator.TryCreateInstance(serviceProvider, fullClassName, out instance);
 
         var activitors = serviceProvider.GetServices<ITypeCollectedActivator<T>>();
         foreach (var activitor in activitors)
-            if (activitor.TryCreateInstance(fullClassName, out instance))
+            if (activitor.TryCreateInstance(serviceProvider, fullClassName, out instance))
             {
                 cacheClassToActivatorMap[fullClassName] = activitor;
                 return true;

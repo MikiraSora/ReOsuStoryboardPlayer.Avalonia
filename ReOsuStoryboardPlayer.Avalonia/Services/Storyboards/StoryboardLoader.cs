@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Platform;
+using Avalonia.Skia;
 using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Services.Parameters;
@@ -276,7 +278,8 @@ public class StoryboardLoader
                 if (!SimpleIO.ExistFile(fsRoot, file_path))
                     return null;
                 using var fs = await SimpleIO.OpenRead(fsRoot, file_path);
-                return SKImage.FromEncodedData(fs);
+                var img = SKImage.FromEncodedData(fs);
+                return img;
             }
             catch (Exception e)
             {

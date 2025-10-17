@@ -157,23 +157,23 @@ public class TypeCollectedActivatorGenerator : IIncrementalGenerator
 
         // 生成类型收集字典
         sb.AppendLine(
-            $"    private static readonly IDictionary<string, Func<{activatorInfo.TargetBaseType}>> _typeFactories = (new Dictionary<string, Func<{activatorInfo.TargetBaseType}>>()");
+            $"    private static readonly IDictionary<string, Func<IServiceProvider,{activatorInfo.TargetBaseType}>> _typeFactories = (new Dictionary<string, Func<IServiceProvider,{activatorInfo.TargetBaseType}>>()");
         sb.AppendLine("    {");
 
         // 为每个派生类型生成工厂方法
         foreach (var derivedType in derivedTypes)
-            sb.AppendLine($"        {{ \"{derivedType!.FullClassName}\", () => new {derivedType.FullClassName}() }},");
+            sb.AppendLine($"        {{ \"{derivedType!.FullClassName}\", p => Microsoft.Extensions.DependencyInjection.ActivatorUtilities.CreateInstance<{derivedType.FullClassName}>(p) }},");
 
         sb.AppendLine("    }).ToFrozenDictionary();");
         sb.AppendLine();
 
         // 生成TryCreateInstance方法
-        sb.AppendLine($"    public bool TryCreateInstance(string fullName, out {activatorInfo.TargetBaseType} obj)");
+        sb.AppendLine($"    public bool TryCreateInstance(IServiceProvider serviceProvider, string fullName, out {activatorInfo.TargetBaseType} obj)");
         sb.AppendLine("    {");
         sb.AppendLine("        obj = null;");
         sb.AppendLine("        if (_typeFactories.TryGetValue(fullName, out var factory))");
         sb.AppendLine("        {");
-        sb.AppendLine("            var instance = factory();");
+        sb.AppendLine("            var instance = factory(serviceProvider);");
         sb.AppendLine($"            if (instance is {activatorInfo.TargetBaseType} typedInstance)");
         sb.AppendLine("            {");
         sb.AppendLine("                obj = typedInstance;");

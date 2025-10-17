@@ -39,6 +39,7 @@
                 VerticalAlignment="Bottom" Margin="50"
                 HorizontalAlignment="Center">
             <Grid>
+                <!--
                 <controls:CustomBlurBehind>
                     <controls:CustomBlurBehind.Material>
                         <ExperimentalAcrylicMaterial
@@ -46,6 +47,7 @@
                                                      PlatformTransparencyCompensationLevel="0" />
                     </controls:CustomBlurBehind.Material>
                 </controls:CustomBlurBehind>
+                -->
                 <Grid Margin="20,10" RowDefinitions="Auto,Auto,Auto">
                     <!--Info-->
                     <Grid>

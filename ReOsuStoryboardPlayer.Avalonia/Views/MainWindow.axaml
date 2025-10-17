@@ -8,5 +8,4 @@
         x:Class="ReOsuStoryboardPlayer.Avalonia.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
         Title="ReOsuStoryboardPlayer.Avalonia">
-        <views:MainView />
 </Window>

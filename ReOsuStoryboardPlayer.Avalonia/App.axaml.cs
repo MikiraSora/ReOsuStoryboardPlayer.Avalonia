@@ -62,22 +62,21 @@ public class App : Application
         }
 
         var mainViewModel = RootServiceProvider.Resolve<MainViewModel>();
+        var mainView = RootServiceProvider.Resolve<MainView>();
 
         switch (ApplicationLifetime)
         {
             case IClassicDesktopStyleApplicationLifetime desktop:
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = mainViewModel
+                    DataContext = mainViewModel,
+                    Content = mainView
                 };
                 VisualRoot = desktop.MainWindow;
                 break;
             case ISingleViewApplicationLifetime singleViewPlatform:
-                singleViewPlatform.MainView = new MainView
-                {
-                    DataContext = mainViewModel
-                };
-                VisualRoot = singleViewPlatform.MainView;
+                VisualRoot = singleViewPlatform.MainView = mainView;
+                singleViewPlatform.MainView.DataContext = mainViewModel;
                 break;
         }
 

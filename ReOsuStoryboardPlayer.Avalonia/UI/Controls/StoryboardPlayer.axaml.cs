@@ -75,8 +75,8 @@ public partial class StoryboardPlayer : UserControl
 
         sprintPaint = new SKPaint
         {
-            IsAntialias = true,
-            FilterQuality = SKFilterQuality.High
+            IsAntialias = false,
+            FilterQuality = SKFilterQuality.Low,
         };
 
         InitializeComponent();

@@ -11,7 +11,7 @@ public class DesktopParameterManager : IParameterManager
 {
     public DesktopParameterManager()
     {
-        Parameters = CommandParser.Parse(Environment.GetCommandLineArgs(), out _);
+        Parameters = CommandParser.Parse(Environment.GetCommandLineArgs(), out _) ?? new DesktopParameters();
     }
 
     public IParameters Parameters { get; }
