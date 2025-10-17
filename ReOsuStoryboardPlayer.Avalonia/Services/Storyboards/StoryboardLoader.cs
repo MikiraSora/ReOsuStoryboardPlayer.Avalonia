@@ -9,6 +9,7 @@ using Avalonia.Skia;
 using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Services.Parameters;
+using ReOsuStoryboardPlayer.Avalonia.Services.Render;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
 using ReOsuStoryboardPlayer.Core.Base;
@@ -24,11 +25,14 @@ public class StoryboardLoader
 {
     private readonly ILogger<StoryboardLoader> logger;
     private readonly IParameterManager parameterManager;
+    private readonly IRenderManager renderManager;
 
-    public StoryboardLoader(ILogger<StoryboardLoader> logger, IParameterManager parameterManager)
+    public StoryboardLoader(ILogger<StoryboardLoader> logger, IParameterManager parameterManager,
+        IRenderManager renderManager)
     {
         this.logger = logger;
         this.parameterManager = parameterManager;
+        this.renderManager = renderManager;
     }
 
     public async Task<StoryboardInstance> LoadStoryboard(ISimpleDirectory fsRoot)
@@ -120,6 +124,44 @@ public class StoryboardLoader
         logger.LogInformationEx($"loaded {objectList.Count} storybaord objects totally.");
 
         var resource = await BuildStoryboardResource(fsRoot, objectList, string.Empty);
+
+        logger.LogInformationEx("rebuild skImage as gpu texture resources at render context...");
+        renderManager.InvokeInRender(drawingContext =>
+        {
+            var apiLeaseFeature = drawingContext.TryGetFeature<ISkiaSharpApiLeaseFeature>();
+            if (apiLeaseFeature == null)
+            {
+                logger.LogWarningEx("rebuild resource failed: TryGetFeature<ISkiaSharpApiLeaseFeature>() is null.");
+                return;
+            }
+
+            using var apiLease = apiLeaseFeature.Lease();
+            var grContext = apiLease.SkSurface?.Context as GRContext;
+            if (grContext == null)
+            {
+                logger.LogWarningEx("rebuild resource failed: grContext is null.");
+                return;
+            }
+
+            foreach (var resourceKey in objectList.Select(x => x.ImageFilePath).Distinct())
+            {
+                var sprite = resource.GetSprite(resourceKey);
+                if (sprite == null)
+                {
+                    logger.LogWarningEx($"rebuild resource failed: sprite is null, key: {resourceKey}");
+                    continue;
+                }
+                var img = sprite.Image;
+                if (img.IsTextureBacked)
+                    continue;
+                var textureImg = img.ToTextureImage(grContext);
+                sprite.Image = textureImg;
+                logger.LogInformationEx($"rebuild image as texture: {resourceKey}");
+                img.Dispose();
+            }
+            logger.LogInformationEx($"rebuild skimage resources done");
+        });
+
         logger.LogInformationEx("BuildStoryboardResource() successfully");
 
         return new StoryboardInstance(fsRoot, storyboardInfo, info, objectList, resource);
