@@ -21,8 +21,8 @@ namespace ReOsuStoryboardPlayer.Avalonia.UI.Controls;
 
 public partial class StoryboardPlayer : UserControl
 {
-    public static readonly DirectProperty<StoryboardPlayer, IStoryboardInstance> StoryboardInstanceProperty =
-        AvaloniaProperty.RegisterDirect<StoryboardPlayer, IStoryboardInstance>(nameof(StoryboardInstance),
+    public static readonly DirectProperty<StoryboardPlayer, StoryboardInstance> StoryboardInstanceProperty =
+        AvaloniaProperty.RegisterDirect<StoryboardPlayer, StoryboardInstance>(nameof(StoryboardInstance),
             o => o.storyboardInstance,
             (o, v) =>
             {
@@ -53,7 +53,7 @@ public partial class StoryboardPlayer : UserControl
 
     private volatile bool isRendering;
 
-    private IStoryboardInstance storyboardInstance;
+    private StoryboardInstance storyboardInstance;
 
     private StoryboardUpdater storyboardUpdater;
     private WideScreenOption wideScreenOption = WideScreenOption.Auto;
@@ -82,7 +82,7 @@ public partial class StoryboardPlayer : UserControl
         InitializeComponent();
     }
 
-    public IStoryboardInstance StoryboardInstance
+    public StoryboardInstance StoryboardInstance
     {
         get => GetValue(StoryboardInstanceProperty);
         set => SetValue(StoryboardInstanceProperty, value);
@@ -266,7 +266,7 @@ public partial class StoryboardPlayer : UserControl
 
     private void DrawDebug(SKCanvas skCanvas)
     {
-        if (storyboardInstance.Resource.GetSprite(@"sb\diary\page1.png") is not ISpriteResource spriteResource)
+        if (storyboardInstance.Resource.GetSprite(@"sb\diary\page1.png") is not SpriteResource spriteResource)
             return;
         var obj = new StoryboardObject
         {
@@ -285,7 +285,7 @@ public partial class StoryboardPlayer : UserControl
 
     private void DrawStoryboardObjectImmediatly(SKCanvas skCanvas, StoryboardObject obj)
     {
-        if (storyboardInstance.Resource.GetSprite(obj) is not ISpriteResource spriteResource)
+        if (storyboardInstance.Resource.GetSprite(obj.ImageFilePath) is not SpriteResource spriteResource)
             return;
         if (!obj.IsVisible) return;
 

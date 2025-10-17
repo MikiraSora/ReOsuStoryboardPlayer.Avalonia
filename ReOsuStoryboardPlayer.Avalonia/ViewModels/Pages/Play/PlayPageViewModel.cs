@@ -26,7 +26,7 @@ public partial class PlayPageViewModel : PageViewModelBase
     private readonly IDialogManager dialogManager;
     private readonly ILogger<PlayPageViewModel> logger;
     private readonly IPersistence persistence;
-    private readonly IStoryboardLoader storyboardLoader;
+    private readonly IStoryboardLoadDialog iStoryboardLoadDialog;
     private readonly IWindowManager windowManager;
 
     [ObservableProperty]
@@ -36,7 +36,7 @@ public partial class PlayPageViewModel : PageViewModelBase
     private bool isControlPanelVisible = true;
 
     [ObservableProperty]
-    private IStoryboardInstance storyboardInstance;
+    private StoryboardInstance storyboardInstance;
 
     [ObservableProperty]
     private StoryboardPlayerSetting storyboardPlayerSetting;
@@ -48,14 +48,14 @@ public partial class PlayPageViewModel : PageViewModelBase
 
     public PlayPageViewModel(
         IDialogManager dialogManager,
-        IStoryboardLoader storyboardLoader,
+        IStoryboardLoadDialog iStoryboardLoadDialog,
         IPersistence persistence,
         ILogger<PlayPageViewModel> logger,
         IWindowManager windowManager,
         IAudioManager audioManager)
     {
         this.dialogManager = dialogManager;
-        this.storyboardLoader = storyboardLoader;
+        this.iStoryboardLoadDialog = iStoryboardLoadDialog;
         this.persistence = persistence;
         this.logger = logger;
         this.windowManager = windowManager;
@@ -79,7 +79,7 @@ public partial class PlayPageViewModel : PageViewModelBase
     {
         try
         {
-            var instance = await storyboardLoader.OpenLoaderDialog();
+            var instance = await iStoryboardLoadDialog.OpenLoaderDialog();
             if (instance is null || token.IsCancellationRequested)
                 return;
 

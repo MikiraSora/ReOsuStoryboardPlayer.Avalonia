@@ -24,14 +24,14 @@ public partial class HomePageViewModel : PageViewModelBase
     private readonly IPageNavigationManager pageNavigationManager;
     private readonly IPersistence persistence;
     private readonly IPlatform platform;
-    private readonly IStoryboardLoader storyboardLoader;
+    private readonly IStoryboardLoadDialog iStoryboardLoadDialog;
 
     [ObservableProperty]
     private StoryboardPlayerSetting storyboardPlayerSetting;
 
     public HomePageViewModel(
         IDialogManager dialogManager,
-        IStoryboardLoader storyboardLoader,
+        IStoryboardLoadDialog iStoryboardLoadDialog,
         IPersistence persistence,
         IPageNavigationManager pageNavigationManager,
         IAudioManager audioManager,
@@ -39,7 +39,7 @@ public partial class HomePageViewModel : PageViewModelBase
         ILogger<HomePageViewModel> logger)
     {
         this.dialogManager = dialogManager;
-        this.storyboardLoader = storyboardLoader;
+        this.iStoryboardLoadDialog = iStoryboardLoadDialog;
         this.persistence = persistence;
         this.pageNavigationManager = pageNavigationManager;
         this.audioManager = audioManager;
@@ -83,7 +83,7 @@ public partial class HomePageViewModel : PageViewModelBase
     {
         try
         {
-            var instance = await storyboardLoader.OpenLoaderDialog();
+            var instance = await iStoryboardLoadDialog.OpenLoaderDialog();
             if (instance is null || token.IsCancellationRequested)
                 return;
 

@@ -3,8 +3,4 @@ using SkiaSharp;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 
-public interface ISpriteResource
-{
-    string Name { get; }
-    SKImage Image { get; }
-}
+public record SpriteResource(string Name, SKImage Image);

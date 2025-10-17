@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSystem;
 using ReOsuStoryboardPlayer.Avalonia.Services.Parameters;
 using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
 using ReOsuStoryboardPlayer.Core.Parser;
@@ -12,7 +11,7 @@ using ReOsuStoryboardPlayer.Core.Parser.Reader;
 using ReOsuStoryboardPlayer.Core.Parser.Stream;
 using ReOsuStoryboardPlayer.Core.Utils;
 
-namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards;
+namespace ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 
 public class BeatmapFolderInfoEx : BeatmapFolderInfo
 {
@@ -33,7 +32,7 @@ public class BeatmapFolderInfoEx : BeatmapFolderInfo
         if (args != null && args.TryGetArg("diff", out var diff_name))
             explicitly_osu_diff_name = diff_name;
 
-        var info = ParseForBrowser(fsRoot, folder_path);
+        var info = Parse(fsRoot, folder_path);
 
         info.osu_file_path = folder_path;
 
@@ -103,7 +102,7 @@ public class BeatmapFolderInfoEx : BeatmapFolderInfo
         return info;
     }
 
-    private static BeatmapFolderInfoEx ParseForBrowser(ISimpleDirectory fsRoot, string folder_path)
+    private static BeatmapFolderInfoEx Parse(ISimpleDirectory fsRoot, string folder_path)
     {
         if (!SimpleIO.ExistDirectory(fsRoot, folder_path))
             throw new Exception($"\"{folder_path}\" not a folder!");

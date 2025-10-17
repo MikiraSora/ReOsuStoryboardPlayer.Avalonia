@@ -17,18 +17,18 @@ using ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs;
 namespace ReOsuStoryboardPlayer.Avalonia.Browser.ViewModels.Dialogs;
 
 public partial class BrowserOpenStoryboardDialogViewModel(
-    IStoryboardLoader storyboardLoader,
+    IStoryboardLoadDialog iStoryboardLoadDialog,
     ILogger<BrowserOpenStoryboardDialogViewModel> logger,
     IDialogManager dialogManager) : DialogViewModelBase
 {
     [ObservableProperty]
-    private IStoryboardInstance downloadInstance;
+    private StoryboardInstance downloadInstance;
 
     [ObservableProperty]
     private string downloadUrl;
 
     [ObservableProperty]
-    private IStoryboardInstance folderLoadInstance;
+    private StoryboardInstance folderLoadInstance;
 
     [ObservableProperty]
     private bool loadFromUrl;
@@ -37,16 +37,16 @@ public partial class BrowserOpenStoryboardDialogViewModel(
     private OpenStoryboardMethods openMethod;
 
     [ObservableProperty]
-    private IStoryboardInstance parseInstance;
+    private StoryboardInstance parseInstance;
 
     [ObservableProperty]
     private string parseUrl;
 
     [ObservableProperty]
-    private IStoryboardInstance selectedStoryboardInstance;
+    private StoryboardInstance selectedStoryboardInstance;
 
     [ObservableProperty]
-    private IStoryboardInstance zipLoadInstance;
+    private StoryboardInstance zipLoadInstance;
 
     public override string DialogIdentifier => nameof(BrowserOpenStoryboardDialogViewModel);
 
@@ -55,9 +55,9 @@ public partial class BrowserOpenStoryboardDialogViewModel(
     [RelayCommand]
     private async Task OpenZipFromLocalFileSystem(CancellationToken cancellationToken)
     {
-        if (storyboardLoader is not BrowserStoryboardLoader browserStoryboardLoader)
+        if (iStoryboardLoadDialog is not BrowserStoryboardLoadDialog browserStoryboardLoader)
         {
-            logger.LogErrorEx($"current loader is not supported: {storyboardLoader?.GetType()?.FullName}");
+            logger.LogErrorEx($"current loader is not supported: {iStoryboardLoadDialog?.GetType()?.FullName}");
             return;
         }
 
@@ -95,9 +95,9 @@ public partial class BrowserOpenStoryboardDialogViewModel(
     [RelayCommand]
     private async Task OpenFolderFromLocalFileSystem(CancellationToken cancellationToken)
     {
-        if (storyboardLoader is not BrowserStoryboardLoader browserStoryboardLoader)
+        if (iStoryboardLoadDialog is not BrowserStoryboardLoadDialog browserStoryboardLoader)
         {
-            logger.LogErrorEx($"current loader is not supported: {storyboardLoader?.GetType()?.FullName}");
+            logger.LogErrorEx($"current loader is not supported: {iStoryboardLoadDialog?.GetType()?.FullName}");
             return;
         }
 
@@ -194,9 +194,9 @@ public partial class BrowserOpenStoryboardDialogViewModel(
         using var loadingDialog = new LoadingDialogViewModel();
         dialogManager.ShowDialog(loadingDialog).NoWait();
 
-        if (storyboardLoader is not BrowserStoryboardLoader browserStoryboardLoader)
+        if (iStoryboardLoadDialog is not BrowserStoryboardLoadDialog browserStoryboardLoader)
         {
-            logger.LogErrorEx($"current loader is not supported: {storyboardLoader?.GetType()?.FullName}");
+            logger.LogErrorEx($"current loader is not supported: {iStoryboardLoadDialog?.GetType()?.FullName}");
             return false;
         }
 
@@ -222,9 +222,9 @@ public partial class BrowserOpenStoryboardDialogViewModel(
 
         try
         {
-            if (storyboardLoader is not BrowserStoryboardLoader browserStoryboardLoader)
+            if (iStoryboardLoadDialog is not BrowserStoryboardLoadDialog browserStoryboardLoader)
             {
-                logger.LogErrorEx($"current loader is not supported: {storyboardLoader?.GetType()?.FullName}");
+                logger.LogErrorEx($"current loader is not supported: {iStoryboardLoadDialog?.GetType()?.FullName}");
                 return false;
             }
 

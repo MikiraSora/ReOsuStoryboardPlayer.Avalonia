@@ -2,7 +2,7 @@
 
 namespace ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 
-public interface IStoryboardLoader
+public interface IStoryboardLoadDialog
 {
-    ValueTask<IStoryboardInstance> OpenLoaderDialog();
+    ValueTask<StoryboardInstance> OpenLoaderDialog();
 }

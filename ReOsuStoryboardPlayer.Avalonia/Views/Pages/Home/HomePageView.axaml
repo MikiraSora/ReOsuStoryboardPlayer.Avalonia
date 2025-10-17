@@ -20,7 +20,7 @@
             <TextBlock Text="ReOsuStoryboardPlayer" FontSize="40" TextWrapping="WrapWithOverflow" />
             <TextBlock Text="Fasdqweniowijrwerwer" TextWrapping="WrapWithOverflow" />
 
-            <Button Content="Load Storyboard" Classes="accent"
+            <Button Margin="0,10" Content="Load Storyboard" Classes="accent"
                     Command="{Binding LoadStoryboardInstanceCommand}" />
 
             <Expander Margin="0,10,0,0" IsExpanded="True" ui:PercentRelativePageLayout.WidthPercent="0.75"

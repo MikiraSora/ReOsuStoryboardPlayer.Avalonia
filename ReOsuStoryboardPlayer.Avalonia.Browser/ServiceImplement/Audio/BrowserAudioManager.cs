@@ -15,16 +15,6 @@ namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Audio;
 public class BrowserAudioManager(ILogger<BrowserAudioManager> logger, IServiceProvider serviceProvider)
     : IAudioManager
 {
-    public async Task<IAudioPlayer> LoadAudio(IStoryboardInstance storyboardInstance)
-    {
-        if (storyboardInstance is not BrowserStoryboardInstance instance)
-            return default;
-
-        var audioPath = instance.InfoEx.audio_file_path;
-        using var fs = await SimpleIO.OpenRead(instance.StoryboardFileSystemRootDirectory, audioPath);
-        return await LoadAudio(fs);
-    }
-
     public async Task<IAudioPlayer> LoadAudio(Stream stream)
     {
         using var ms = new MemoryStream();

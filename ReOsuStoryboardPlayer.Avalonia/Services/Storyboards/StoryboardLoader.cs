@@ -4,78 +4,32 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
-using ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSystem;
-using ReOsuStoryboardPlayer.Avalonia.Browser.Utils;
-using ReOsuStoryboardPlayer.Avalonia.Browser.ViewModels.Dialogs;
-using ReOsuStoryboardPlayer.Avalonia.Services.Dialog;
 using ReOsuStoryboardPlayer.Avalonia.Services.Parameters;
-using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
-using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
-using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem.Impl.Zip;
 using ReOsuStoryboardPlayer.Core.Base;
 using ReOsuStoryboardPlayer.Core.Parser;
 using ReOsuStoryboardPlayer.Core.Parser.Reader;
 using ReOsuStoryboardPlayer.Core.Parser.Stream;
 using SkiaSharp;
 
-namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards;
+namespace ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 
-[Injectio.Attributes.RegisterSingleton<IStoryboardLoader>]
-public class BrowserStoryboardLoader(
-    ILogger<BrowserStoryboardLoader> logger,
-    IDialogManager dialogManager,
-    IParameterManager parameterManager)
-    : IStoryboardLoader
+[RegisterSingleton<StoryboardLoader>]
+public class StoryboardLoader
 {
-    private readonly IParameterManager parameterManager = parameterManager;
+    private readonly ILogger<StoryboardLoader> logger;
+    private readonly IParameterManager parameterManager;
 
-    public async ValueTask<IStoryboardInstance> OpenLoaderDialog()
+    public StoryboardLoader(ILogger<StoryboardLoader> logger, IParameterManager parameterManager)
     {
-        var openDialog = await dialogManager.ShowDialog<BrowserOpenStoryboardDialogViewModel>();
-        return openDialog.SelectedStoryboardInstance;
+        this.logger = logger;
+        this.parameterManager = parameterManager;
     }
 
-    public async ValueTask<IStoryboardInstance> OpenLoaderFromZipFileBytes(byte[] zipFileBytes)
-    {
-        var fsRoot = ZipFileSystemBuilder.LoadFromZipFileBytes(zipFileBytes);
-        return await LoadStoryboardInstance(fsRoot);
-    }
-
-    public async ValueTask<IStoryboardInstance> OpenLoaderFromLocalFileSystem(
-        LocalFileSystemInterop.JSDirectory jsDirRoot)
-    {
-        var fsRoot = BrowserFileSystemBuilder.LoadFromLocalFileSystem(jsDirRoot);
-        return await LoadStoryboardInstance(fsRoot);
-    }
-
-    private void dumpDirectory(StringBuilder sb, ISimpleDirectory fsRoot, int tabCount = 0)
-    {
-        if (fsRoot == null)
-            return;
-
-        var indent = new string(' ', tabCount * 4);
-        sb.AppendLine($"{indent}[DIR] {fsRoot.DirectoryName}");
-        sb.AppendLine();
-
-        // 打印所有文件
-        if (fsRoot.ChildFiles?.Length > 0)
-        {
-            foreach (var file in fsRoot.ChildFiles)
-                sb.AppendLine($"{indent}  - {file.FileName} ({file.FileLength} bytes)");
-            sb.AppendLine();
-        }
-
-        // 递归打印子目录
-        if (fsRoot.ChildDictionaries != null)
-            foreach (var subDir in fsRoot.ChildDictionaries)
-                dumpDirectory(sb, subDir, tabCount + 1);
-    }
-
-    private async ValueTask<IStoryboardInstance> LoadStoryboardInstance(ISimpleDirectory fsRoot)
+    public async Task<StoryboardInstance> LoadStoryboard(ISimpleDirectory fsRoot)
     {
         logger.LogInformationEx($"fsRoot loaded: {fsRoot}");
 
@@ -83,47 +37,43 @@ public class BrowserStoryboardLoader(
         dumpDirectory(sb, fsRoot);
         logger.LogDebugEx(sb.ToString());
 
-        var instance = BrowserStoryboardInstance.CreateInstance();
-        instance.StoryboardFileSystemRootDirectory = fsRoot;
-        logger.LogInformationEx($"instance loaded: {instance}.");
-
-        instance.InfoEx = await BeatmapFolderInfoEx.Parse(fsRoot, string.Empty, parameterManager.Parameters);
-        if (instance.Info == null)
+        var info = await BeatmapFolderInfoEx.Parse(fsRoot, string.Empty, parameterManager.Parameters);
+        if (info == null)
         {
             logger?.LogErrorEx("can't create BeatmapFolderInfo");
             return default;
         }
 
-        logger.LogInformationEx($"instance.Info.osb_file_path: {instance.Info.osb_file_path}");
-        logger.LogInformationEx($"instance.Info.folder_path: {instance.Info.folder_path}");
-        logger.LogInformationEx($"instance.Info.IsWidescreenStoryboard: {instance.Info.IsWidescreenStoryboard}");
-        foreach (var pair in instance.Info.DifficultFiles)
-            logger.LogInformationEx($"instance.Info.DifficultFiles[{pair.Key}]: {pair.Value}");
-        logger.LogInformationEx($"instance.InfoEx.audio_file_path: {instance.InfoEx.audio_file_path}");
-        logger.LogInformationEx($"instance.InfoEx.osu_file_path: {instance.InfoEx.osu_file_path}");
+        logger.LogInformationEx($"info.osb_file_path: {info.osb_file_path}");
+        logger.LogInformationEx($"info.folder_path: {info.folder_path}");
+        logger.LogInformationEx($"info.IsWidescreenStoryboard: {info.IsWidescreenStoryboard}");
+        foreach (var pair in info.DifficultFiles)
+            logger.LogInformationEx($"info.DifficultFiles[{pair.Key}]: {pair.Value}");
+        logger.LogInformationEx($"infoEx.audio_file_path: {info.audio_file_path}");
+        logger.LogInformationEx($"infoEx.osu_file_path: {info.osu_file_path}");
 
-        instance.StoryboardInfo = await ParseStoryboardInfo(fsRoot, instance.InfoEx);
-        logger.LogInformationEx($"instance.StoryboardInfo.Title: {instance.StoryboardInfo.Title}");
-        logger.LogInformationEx($"instance.StoryboardInfo.Artist: {instance.StoryboardInfo.Artist}");
-        logger.LogInformationEx($"instance.StoryboardInfo.Creator: {instance.StoryboardInfo.Creator}");
-        logger.LogInformationEx($"instance.StoryboardInfo.Source: {instance.StoryboardInfo.Source}");
-        logger.LogInformationEx($"instance.StoryboardInfo.DifficultyName: {instance.StoryboardInfo.DifficultyName}");
-        logger.LogInformationEx($"instance.StoryboardInfo.BeatmapId: {instance.StoryboardInfo.BeatmapId}");
-        logger.LogInformationEx($"instance.StoryboardInfo.BeatmapSetId: {instance.StoryboardInfo.BeatmapSetId}");
+        var storyboardInfo = await ParseStoryboardInfo(fsRoot, info);
+        logger.LogInformationEx($"storyboardInfo.Title: {storyboardInfo.Title}");
+        logger.LogInformationEx($"storyboardInfo.Artist: {storyboardInfo.Artist}");
+        logger.LogInformationEx($"storyboardInfo.Creator: {storyboardInfo.Creator}");
+        logger.LogInformationEx($"storyboardInfo.Source: {storyboardInfo.Source}");
+        logger.LogInformationEx($"storyboardInfo.DifficultyName: {storyboardInfo.DifficultyName}");
+        logger.LogInformationEx($"storyboardInfo.BeatmapId: {storyboardInfo.BeatmapId}");
+        logger.LogInformationEx($"storyboardInfo.BeatmapSetId: {storyboardInfo.BeatmapSetId}");
 
-        List<StoryboardObject> temp_objs_list = new(), parse_osb_Storyboard_objs = new();
+        List<StoryboardObject> temp_objs_list, parse_osb_Storyboard_objs = new();
 
         //get objs from osu file
-        var parse_osu_Storyboard_objs = string.IsNullOrWhiteSpace(instance.InfoEx.osu_file_path)
+        var parse_osu_Storyboard_objs = string.IsNullOrWhiteSpace(info.osu_file_path)
             ? new List<StoryboardObject>()
-            : await StoryboardParserHelper.GetStoryboardObjects(fsRoot, instance.InfoEx.osu_file_path);
+            : await StoryboardParserHelper.GetStoryboardObjects(fsRoot, info.osu_file_path);
         AdjustZ(parse_osu_Storyboard_objs);
 
-        if (!string.IsNullOrWhiteSpace(instance.InfoEx.osb_file_path) &&
-            SimpleIO.ExistFile(fsRoot, instance.InfoEx.osb_file_path))
+        if (!string.IsNullOrWhiteSpace(info.osb_file_path) &&
+            SimpleIO.ExistFile(fsRoot, info.osb_file_path))
         {
             parse_osb_Storyboard_objs =
-                await StoryboardParserHelper.GetStoryboardObjects(fsRoot, instance.InfoEx.osb_file_path);
+                await StoryboardParserHelper.GetStoryboardObjects(fsRoot, info.osb_file_path);
             AdjustZ(parse_osb_Storyboard_objs);
         }
 
@@ -164,13 +114,36 @@ public class BrowserStoryboardLoader(
             }
         }
 
-        instance.ObjectList = temp_objs_list;
-        logger.LogInformationEx($"loaded {instance.ObjectList.Count} storybaord objects totally.");
+        var objectList = temp_objs_list;
+        logger.LogInformationEx($"loaded {objectList.Count} storybaord objects totally.");
 
-        instance.Resource = await BuildStoryboardResource(fsRoot, instance.ObjectList, string.Empty);
+        var resource = await BuildStoryboardResource(fsRoot, objectList, string.Empty);
         logger.LogInformationEx("BuildStoryboardResource() successfully");
 
-        return instance;
+        return new StoryboardInstance(fsRoot, storyboardInfo, info, objectList, resource);
+    }
+
+    private void dumpDirectory(StringBuilder sb, ISimpleDirectory fsRoot, int tabCount = 0)
+    {
+        if (fsRoot == null)
+            return;
+
+        var indent = new string(' ', tabCount * 4);
+        sb.AppendLine($"{indent}[DIR] {fsRoot.DirectoryName}");
+        sb.AppendLine();
+
+        // 打印所有文件
+        if (fsRoot.ChildFiles?.Length > 0)
+        {
+            foreach (var file in fsRoot.ChildFiles)
+                sb.AppendLine($"{indent}  - {file.FileName} ({file.FileLength} bytes)");
+            sb.AppendLine();
+        }
+
+        // 递归打印子目录
+        if (fsRoot.ChildDictionaries != null)
+            foreach (var subDir in fsRoot.ChildDictionaries)
+                dumpDirectory(sb, subDir, tabCount + 1);
     }
 
     private async Task<StoryboardInfo> ParseStoryboardInfo(ISimpleDirectory fsRoot, BeatmapFolderInfoEx instanceInfoEx)
@@ -221,12 +194,12 @@ public class BrowserStoryboardLoader(
         return storyboardInfo;
     }
 
-    private async ValueTask<IStoryboardResource> BuildStoryboardResource(ISimpleDirectory fsRoot,
+    private async ValueTask<StoryboardResource> BuildStoryboardResource(ISimpleDirectory fsRoot,
         IEnumerable<StoryboardObject> storyboardObjectList, string folder_path)
     {
-        Dictionary<string, BrowserSpriteResource> CacheDrawSpriteInstanceMap = new();
+        Dictionary<string, SpriteResource> CacheDrawSpriteInstanceMap = new();
 
-        var resource = new BrowserStoryboardResource();
+        var resource = new StoryboardResource();
 
         foreach (var obj in storyboardObjectList)
             switch (obj)
@@ -242,18 +215,11 @@ public class BrowserStoryboardLoader(
                     break;
 
                 case StoryboardAnimation animation:
-                    List<BrowserSpriteResource> list = new();
-
                     for (var index = 0; index < animation.FrameCount; index++)
                     {
                         var path = animation.FrameBaseImagePath + index + animation.FrameFileExtension;
-                        if (await _get(path) is not BrowserSpriteResource group2)
-                        {
+                        if (await _get(path) is not SpriteResource)
                             logger.LogWarningEx($"not found image:{path}");
-                            continue;
-                        }
-
-                        list.Add(group2);
                     }
 
                     break;
@@ -269,7 +235,7 @@ public class BrowserStoryboardLoader(
 
         return resource;
 
-        async Task<BrowserSpriteResource> _get(string image_name)
+        async Task<SpriteResource> _get(string image_name)
         {
             var fix_image = image_name;
             //for Flex
@@ -289,14 +255,14 @@ public class BrowserStoryboardLoader(
 
                 tex = await _load_tex(file_path);
                 if (tex == null)
-                    if (!image_name.EndsWith("-0") && await _get(image_name + "-0") is BrowserSpriteResource group2)
+                    if (!image_name.EndsWith("-0") && await _get(image_name + "-0") is SpriteResource group2)
                         return group2;
             }
 
             if (tex != null)
             {
                 group = CacheDrawSpriteInstanceMap[image_name] =
-                    new BrowserSpriteResource(fix_image, tex);
+                    new SpriteResource(fix_image, tex);
                 logger.LogDebugEx($"Created Storyboard sprite instance from image file :{fix_image}");
             }
 

@@ -41,7 +41,7 @@
             <Grid>
                 <controls:CustomBlurBehind>
                     <controls:CustomBlurBehind.Material>
-                        <ExperimentalAcrylicMaterial TintColor="{StaticResource ThemeBackgroundColor}"
+                        <ExperimentalAcrylicMaterial
                                                      TintOpacity="0.5" MaterialOpacity="0.3"
                                                      PlatformTransparencyCompensationLevel="0" />
                     </controls:CustomBlurBehind.Material>

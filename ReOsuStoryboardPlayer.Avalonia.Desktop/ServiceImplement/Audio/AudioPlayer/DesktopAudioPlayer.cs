@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
+using NAudio.Vorbis;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Utils;
@@ -66,7 +67,7 @@ public partial class DesktopAudioPlayer : ObservableObject, IAudioPlayer
         //more accurate
         baseOffset = audioFileReader.CurrentTime;
         pauseTime = pause ? seekTime : pauseTime;
-        
+
         if (!pause)
             Play();
         else
@@ -116,6 +117,34 @@ public partial class DesktopAudioPlayer : ObservableObject, IAudioPlayer
         Pause();
     }
 
+    private Task<(ISampleProvider SampleProvider, TimeSpan duration)> TryLoadNormal(Stream stream)
+    {
+        try
+        {
+            var rawStream = new StreamMediaFoundationReader(stream);
+            return Task.FromResult((rawStream.ToSampleProvider(), rawStream.TotalTime));
+        }
+        catch (Exception e)
+        {
+            logger.LogErrorEx(e, $"Load audio file failed : {e.Message}");
+            return Task.FromResult<(ISampleProvider SampleProvider, TimeSpan duration)>(default);
+        }
+    }
+
+    private Task<(ISampleProvider SampleProvider, TimeSpan duration)> TryLoadOgg(Stream stream)
+    {
+        try
+        {
+            var rawStream = new VorbisWaveReader(stream);
+            return Task.FromResult((rawStream.ToSampleProvider(), rawStream.TotalTime));
+        }
+        catch (Exception e)
+        {
+            logger.LogErrorEx(e, $"Load audio file failed : {e.Message}");
+            return Task.FromResult<(ISampleProvider SampleProvider, TimeSpan duration)>(default);
+        }
+    }
+
     public async Task Load(Stream stream, int targetSampleRate)
     {
         //release resource before loading new one.
@@ -123,9 +152,18 @@ public partial class DesktopAudioPlayer : ObservableObject, IAudioPlayer
 
         try
         {
-            var rawStream = new StreamMediaFoundationReader(stream);
+            ISampleProvider sampleProvider;
+            TimeSpan totalTime;
+
+            (sampleProvider, totalTime) = await TryLoadNormal(stream);
+            if (sampleProvider is null)
+                (sampleProvider, totalTime) = await TryLoadOgg(stream);
+
+            if (sampleProvider is null)
+                throw new Exception("audio file stream is unknown/notSupport format ");
+
             var processedProvider =
-                await AudioCompatibilizer.CheckCompatible(rawStream.ToSampleProvider(), targetSampleRate);
+                await AudioCompatibilizer.CheckCompatible(sampleProvider, targetSampleRate);
 
             audioFileReader = new BufferWaveStream(processedProvider.ToWaveProvider().ToArray(),
                 processedProvider.WaveFormat);
@@ -137,7 +175,7 @@ public partial class DesktopAudioPlayer : ObservableObject, IAudioPlayer
             finishProvider.StartListen();
             finishProvider.OnReturnEmptySamples += Provider_OnReturnEmptySamples;
 
-            Duration = rawStream.TotalTime;
+            Duration = totalTime;
             IsAvaliable = true;
         }
         catch (Exception e)

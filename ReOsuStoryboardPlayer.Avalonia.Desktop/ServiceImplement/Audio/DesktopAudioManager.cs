@@ -60,16 +60,6 @@ public class DesktopAudioManager : ObservableObject, IAudioManager
         return player;
     }
 
-    public Task<IAudioPlayer> LoadAudio(IStoryboardInstance storyboardInstance)
-    {
-        if ((storyboardInstance as DesktopStoryboardInstance)?.Info is not BeatmapFolderInfoEx info)
-            return Task.FromResult<IAudioPlayer>(null);
-
-        var audioPath = info.audio_file_path;
-        var fs = File.OpenRead(audioPath);
-        return LoadAudio(fs);
-    }
-
     private async void Initalize()
     {
         var playerSetting = await persistence.Load<StoryboardPlayerSetting>(default);
