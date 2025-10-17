@@ -9,7 +9,7 @@ Program can build/run on Windows/Browser(Chromium)/Android(WIP)
 * UI Framework: [Avalonia](https://github.com/AvaloniaUI/Avalonia)
 * Rendering Implementation: [SkiaSharp](https://github.com/mono/SkiaSharp)
 * Storyboard Implementation: [ReOsuStoryboardPlayer.Core](https://github.com/MikiraSora/ReOsuStoryboardPlayer/tree/master/ReOsuStoryboardPlayer.Core)
-* Audio Implementation: [NAudio (Windows)](https://github.com/naudio/NAudio)
+* Audio Implementation: [NAudio (Windows)](https://github.com/naudio/NAudio) / [WebAudio](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Audio_API)
 
 ### Todos:
 * Fix/Support FireFox
