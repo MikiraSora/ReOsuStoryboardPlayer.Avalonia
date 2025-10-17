@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
@@ -71,7 +70,7 @@ public partial class BrowserOpenStoryboardDialogViewModel(
             using var loadingDialog = new LoadingDialogViewModel();
             dialogManager.ShowDialog(loadingDialog).NoWait();
             await loadingDialog.WaitForAttachedView();
-            
+
             var instance = await browserStoryboardLoader.OpenLoaderFromZipFileBytes(zipFileBytes);
             if (cancellationToken.IsCancellationRequested)
                 return;
@@ -107,11 +106,11 @@ public partial class BrowserOpenStoryboardDialogViewModel(
             var folder = await LocalFileSystemInterop.PickDirectory();
             if (cancellationToken.IsCancellationRequested)
                 return;
-            
+
             using var loadingDialog = new LoadingDialogViewModel();
             dialogManager.ShowDialog(loadingDialog).NoWait();
             await loadingDialog.WaitForAttachedView();
-            
+
             var instance = await browserStoryboardLoader.OpenLoaderFromLocalFileSystem(folder);
             if (cancellationToken.IsCancellationRequested)
                 return;
@@ -194,7 +193,7 @@ public partial class BrowserOpenStoryboardDialogViewModel(
     {
         using var loadingDialog = new LoadingDialogViewModel();
         dialogManager.ShowDialog(loadingDialog).NoWait();
-        
+
         if (storyboardLoader is not BrowserStoryboardLoader browserStoryboardLoader)
         {
             logger.LogErrorEx($"current loader is not supported: {storyboardLoader?.GetType()?.FullName}");
@@ -237,10 +236,19 @@ public partial class BrowserOpenStoryboardDialogViewModel(
             }
 
             var beatmapSetId = int.Parse(match.Groups[1].Value);
-            var buildDownloadUrl = $"https://dl.sayobot.cn/beatmaps/download/full/${beatmapSetId}";
-            //var buildDownloadUrl = $"https://txy1.sayobot.cn/beatmaps/download/full/{beatmapSetId}?server=auto";
+            var zipFileBytes = default(byte[]);
+            try
+            {
+                var buildDownloadUrl = $"https://dl.sayobot.cn/beatmaps/download/full/${beatmapSetId}";
+                zipFileBytes = await DownloadFile(buildDownloadUrl);
+            }
+            catch (Exception e)
+            {
+                logger.LogErrorEx(e,
+                    $"osu.sayobot.cn can't download beatmap directly, please try other ways:{beatmapUrl} {e.Message}");
+                return false;
+            }
 
-            var zipFileBytes = await DownloadFile(buildDownloadUrl);
             var instance = await browserStoryboardLoader.OpenLoaderFromZipFileBytes(zipFileBytes);
 
             ParseInstance = instance;

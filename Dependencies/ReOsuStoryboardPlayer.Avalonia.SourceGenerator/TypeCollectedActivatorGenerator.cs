@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -76,6 +77,7 @@ public class TypeCollectedActivatorGenerator : IIncrementalGenerator
         var className = classDeclaration.Identifier.ValueText;
         var namespaceDeclaration = classDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
         var ns = namespaceDeclaration?.Name?.ToString() ?? string.Empty;
+        
 
         // 获取特性参数
         var attributeData = context.Attributes[0];
@@ -106,8 +108,6 @@ public class TypeCollectedActivatorGenerator : IIncrementalGenerator
         var typeSymbol = semanticModel.GetDeclaredSymbol(classDeclaration) as ITypeSymbol;
         if (typeSymbol == null)
             return null;
-
-        //Debugger.Launch();
 
         var namespaceDeclaration = classDeclaration.FirstAncestorOrSelf<BaseNamespaceDeclarationSyntax>();
         var ns = namespaceDeclaration?.Name?.ToString() ?? string.Empty;

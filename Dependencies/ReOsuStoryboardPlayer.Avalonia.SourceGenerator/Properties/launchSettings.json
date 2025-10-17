@@ -3,7 +3,7 @@
   "profiles": {
     "DebugRoslynSourceGenerator": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "../ReOsuStoryboardPlayer.Avalonia.SourceGenerator.Sample/ReOsuStoryboardPlayer.Avalonia.SourceGenerator.Sample.csproj"
+      "targetProject": "../../ReOsuStoryboardPlayer.Avalonia/ReOsuStoryboardPlayer.Avalonia.csproj"
     }
   }
 }
