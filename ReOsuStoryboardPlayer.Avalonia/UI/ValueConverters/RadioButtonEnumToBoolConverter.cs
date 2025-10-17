@@ -12,13 +12,13 @@ public class RadioButtonEnumToBoolConverter(ILogger<RadioButtonEnumToBoolConvert
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        logger.LogDebugEx($"value: {value}, targetType: {targetType.Name}, parameter: {parameter}, culture: {culture}");
+        //logger.LogDebugEx($"value: {value}, targetType: {targetType.Name}, parameter: {parameter}, culture: {culture}");
         return value?.Equals(parameter);
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        logger.LogDebugEx($"value: {value}, targetType: {targetType.Name}, parameter: {parameter}, culture: {culture}");
+        //logger.LogDebugEx($"value: {value}, targetType: {targetType.Name}, parameter: {parameter}, culture: {culture}");
         return value?.Equals(true) == true ? parameter : BindingOperations.DoNothing;
     }
 }

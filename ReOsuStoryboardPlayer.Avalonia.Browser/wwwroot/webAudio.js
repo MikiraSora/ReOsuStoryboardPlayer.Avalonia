@@ -27,15 +27,21 @@
             const player = players.get(id);
             if (!player) return;
 
+            console.log("loadFromBase64() 11111");
             const binary = atob(base64);
+            console.log("loadFromBase64() 2222");
             const arrayBuffer = new ArrayBuffer(binary.length);
+            console.log("loadFromBase64() 33333");
             const view = new Uint8Array(arrayBuffer);
             for (let i = 0; i < binary.length; i++) {
                 view[i] = binary.charCodeAt(i);
             }
+            console.log("loadFromBase64() 44444");
 
             player.buffer = await player.context.decodeAudioData(arrayBuffer.slice(0));
+            console.log("loadFromBase64() 55555");
             player.duration = player.buffer.duration;
+            console.log("loadFromBase64() 56555");
         }
 
         function _createSource(player) {
@@ -170,5 +176,4 @@
     })();
 
     console.log("webAudio.js initialized");
-    console.log(globalThis.WebAudioInterop);
 }

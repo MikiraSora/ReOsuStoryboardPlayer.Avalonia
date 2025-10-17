@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
@@ -96,7 +95,7 @@ public partial class BrowserAudioPlayer : ObservableObject, IAudioPlayer, IDispo
     {
         if (message.BrowserAudioPlayerId != id)
             return;
-        
+
         Stop();
         logger.LogInformationEx($"called by id:{id}");
     }
@@ -104,13 +103,13 @@ public partial class BrowserAudioPlayer : ObservableObject, IAudioPlayer, IDispo
     public async Task LoadFromAudioFileBytes(byte[] audioData)
     {
         var base64 = Convert.ToBase64String(audioData);
-        logger.LogDebugEx($"base64: {base64}");
+        logger.LogDebugEx($"audioData size: {audioData.Length}");
         await WebAudioInterop.LoadFromBase64(id, base64);
         logger.LogInformationEx("LoadFromBase64() done");
         Duration = TimeSpan.FromSeconds(GetDuration());
         logger.LogInformationEx($"Duration: {Duration}");
         logger.LogInformationEx($"called by id:{id}");
-        
+
         IsAvaliable = true;
     }
 

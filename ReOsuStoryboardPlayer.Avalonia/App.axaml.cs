@@ -7,6 +7,7 @@ using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.UI.ValueConverters;
+using ReOsuStoryboardPlayer.Avalonia.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels;
@@ -109,7 +110,11 @@ public class App : Application
         */
 
         //logging
-        serviceCollection.AddLogging(o => { o.SetMinimumLevel(LogLevel.Debug); });
+        serviceCollection.AddLogging(o =>
+        {
+            o.SetMinimumLevel(LogLevel.Debug);
+            o.AddProvider(new EventBoardcastLoggerProvider());
+        });
         serviceCollection.AddTypeCollectedActivator(ViewTypeCollectedActivator.Default);
 
         serviceCollection.AddReOsuStoryboardPlayerAvalonia();

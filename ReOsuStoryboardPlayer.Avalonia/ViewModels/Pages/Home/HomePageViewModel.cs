@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -8,10 +9,13 @@ using ReOsuStoryboardPlayer.Avalonia.Models;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using ReOsuStoryboardPlayer.Avalonia.Services.Dialog;
 using ReOsuStoryboardPlayer.Avalonia.Services.Navigation;
+using ReOsuStoryboardPlayer.Avalonia.Services.Parameters;
 using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
 using ReOsuStoryboardPlayer.Avalonia.Services.Plaform;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
+using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem.Impl.Zip;
+using ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs.OpenStoryboard;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Play;
 
 namespace ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Home;
@@ -22,27 +26,33 @@ public partial class HomePageViewModel : PageViewModelBase
     private readonly IDialogManager dialogManager;
     private readonly ILogger<HomePageViewModel> logger;
     private readonly IPageNavigationManager pageNavigationManager;
+    private readonly IParameterManager parameterManager;
     private readonly IPersistence persistence;
     private readonly IPlatform platform;
-    private readonly IStoryboardLoadDialog iStoryboardLoadDialog;
+    private readonly IStoryboardLoadDialog storyboardLoadDialog;
+    private readonly StoryboardLoader storyboardLoader;
 
     [ObservableProperty]
     private StoryboardPlayerSetting storyboardPlayerSetting;
 
     public HomePageViewModel(
         IDialogManager dialogManager,
-        IStoryboardLoadDialog iStoryboardLoadDialog,
+        IStoryboardLoadDialog storyboardLoadDialog,
+        StoryboardLoader storyboardLoader,
         IPersistence persistence,
         IPageNavigationManager pageNavigationManager,
         IAudioManager audioManager,
+        IParameterManager parameterManager,
         IPlatform platform,
         ILogger<HomePageViewModel> logger)
     {
         this.dialogManager = dialogManager;
-        this.iStoryboardLoadDialog = iStoryboardLoadDialog;
+        this.storyboardLoadDialog = storyboardLoadDialog;
+        this.storyboardLoader = storyboardLoader;
         this.persistence = persistence;
         this.pageNavigationManager = pageNavigationManager;
         this.audioManager = audioManager;
+        this.parameterManager = parameterManager;
         this.platform = platform;
         this.logger = logger;
 
@@ -74,8 +84,43 @@ public partial class HomePageViewModel : PageViewModelBase
 
     private async void Initaliaze()
     {
-        StoryboardPlayerSetting =
-            await persistence.Load(StoryboardPlayerSetting.JsonTypeInfo);
+        StoryboardPlayerSetting = await persistence.Load(StoryboardPlayerSetting.JsonTypeInfo);
+
+        if (parameterManager.Parameters.TryGetArg("loadBeatmapSetId", out var loadBeatmapSetId))
+            if (!int.TryParse(loadBeatmapSetId, out var beatmapSetId))
+                await dialogManager.ShowMessageDialog(
+                    $"can't download/load storyboard because param 'loadBeatmapSetId' is invaild:{loadBeatmapSetId}",
+                    DialogMessageType.Error);
+            else
+                await LoadStoryboardFromBeatmapSet(beatmapSetId);
+    }
+
+    private async Task LoadStoryboardFromBeatmapSet(int beatmapSetId)
+    {
+        try
+        {
+            using var loadingDialog = new LoadingDialogViewModel();
+            dialogManager.ShowDialog(loadingDialog).NoWait();
+            await loadingDialog.WaitForAttachedView();
+
+            var downloadUrl = $"https://dl.sayobot.cn/beatmaps/download/full/{beatmapSetId}";
+            logger.LogInformationEx($"downloadUrl: {downloadUrl}");
+
+            using var httpClient = new HttpClient();
+            var zipBytes = await httpClient.GetByteArrayAsync(downloadUrl);
+            logger.LogInformationEx($"download zip file successfully, size: {zipBytes.Length}");
+
+            var dir = await ZipFileSystemBuilder.LoadFromZipFileBytes(zipBytes);
+            var instance = await storyboardLoader.LoadStoryboard(dir);
+
+            await LoadStoryboardInstance(instance);
+        }
+        catch (Exception e)
+        {
+            var msg = e.Message;
+            logger.LogErrorEx(e, $"load storyboard throw exception: {e.Message}");
+            await dialogManager.ShowMessageDialog(msg, DialogMessageType.Error);
+        }
     }
 
     [RelayCommand(AllowConcurrentExecutions = false)]
@@ -83,24 +128,31 @@ public partial class HomePageViewModel : PageViewModelBase
     {
         try
         {
-            var instance = await iStoryboardLoadDialog.OpenLoaderDialog();
+            var instance = await storyboardLoadDialog.OpenLoaderDialog();
             if (instance is null || token.IsCancellationRequested)
                 return;
 
-            var audio = await audioManager.LoadAudio(instance);
-
-            //switch to play page and never back~
-            var playViewModel = await pageNavigationManager.SetPage<PlayPageViewModel>();
-            playViewModel.StoryboardInstance = instance;
-            playViewModel.StoryboardPlayTime = 0;
-            playViewModel.AudioPlayer = audio;
+            await LoadStoryboardInstance(instance);
         }
         catch (Exception e)
         {
             var msg = e.Message;
-            logger.LogErrorEx(e, $"open storyboard dialog exception: {e.Message}");
+            logger.LogErrorEx(e, $"open storyboard dialog throw exception: {e.Message}");
             await dialogManager.ShowMessageDialog(msg, DialogMessageType.Error);
         }
+    }
+
+    private async Task LoadStoryboardInstance(StoryboardInstance instance, CancellationToken token = default)
+    {
+        var audio = await audioManager.LoadAudio(instance);
+        logger.LogInformationEx($"load storyboard instance successfully, audio: {audio}");
+
+        //switch to play page and never back~
+        var playViewModel = await pageNavigationManager.SetPage<PlayPageViewModel>();
+        playViewModel.StoryboardInstance = instance;
+        playViewModel.StoryboardPlayTime = 0;
+        playViewModel.AudioPlayer = audio;
+        logger.LogInformationEx($"setup PlayPageViewModel done: {instance}");
     }
 
     [RelayCommand]
