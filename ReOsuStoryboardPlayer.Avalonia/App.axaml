@@ -12,7 +12,8 @@
     </Application.Resources>
 
     <Application.Styles>
-        <FluentTheme />
+        <FluentTheme/>
+
         <StyleInclude Source="UI/Styles/IconButton.axaml" />
         <Style Selector="Border.ContentContainer">
             <Setter Property="CornerRadius" Value="5" />

@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSystem;
+namespace ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
 
-public static class BrowserSimpleIO
+public static class SimpleIO
 {
     public static bool ExistDirectory(ISimpleDirectory root, string path)
     {

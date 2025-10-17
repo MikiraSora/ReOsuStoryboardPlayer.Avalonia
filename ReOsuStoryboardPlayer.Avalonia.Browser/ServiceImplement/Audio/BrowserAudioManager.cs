@@ -7,6 +7,7 @@ using ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSy
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
+using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Audio;
 
@@ -20,7 +21,7 @@ public class BrowserAudioManager(ILogger<BrowserAudioManager> logger, IServicePr
             return default;
 
         var audioPath = instance.InfoEx.audio_file_path;
-        using var fs = await BrowserSimpleIO.OpenRead(instance.StoryboardFileSystemRootDirectory, audioPath);
+        using var fs = await SimpleIO.OpenRead(instance.StoryboardFileSystemRootDirectory, audioPath);
         return await LoadAudio(fs);
     }
 

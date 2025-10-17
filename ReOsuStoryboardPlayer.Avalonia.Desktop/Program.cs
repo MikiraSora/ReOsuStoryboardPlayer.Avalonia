@@ -15,7 +15,6 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop;
 
 class Program
 {
-    public static INotificationManager NotificationManager;
     private static bool exceptionHandling;
 
     // Initialization code. Don't use any Avalonia, third-party APIs or any

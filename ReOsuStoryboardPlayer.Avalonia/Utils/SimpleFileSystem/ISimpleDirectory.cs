@@ -1,4 +1,4 @@
-﻿namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSystem;
+﻿namespace ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
 
 public interface ISimpleDirectory
 {

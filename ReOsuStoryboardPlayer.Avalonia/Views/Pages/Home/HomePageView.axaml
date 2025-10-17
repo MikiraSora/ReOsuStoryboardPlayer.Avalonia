@@ -19,9 +19,9 @@
         <StackPanel>
             <TextBlock Text="ReOsuStoryboardPlayer" FontSize="40" TextWrapping="WrapWithOverflow" />
             <TextBlock Text="Fasdqweniowijrwerwer" TextWrapping="WrapWithOverflow" />
-            <TextBlock Text="Fasdqweniowijrwerwer" TextWrapping="WrapWithOverflow" />
-            <TextBlock Text="Fasdqweniowijrwerwer" TextWrapping="WrapWithOverflow" />
-            <Button Content="Load Storyboard" Command="{Binding LoadStoryboardInstanceCommand}" />
+
+            <Button Content="Load Storyboard" Classes="accent"
+                    Command="{Binding LoadStoryboardInstanceCommand}" />
 
             <Expander Margin="0,10,0,0" IsExpanded="True" ui:PercentRelativePageLayout.WidthPercent="0.75"
                       Header="Player Settings">

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
@@ -18,7 +19,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio;
 
-[Injectio.Attributes.RegisterSingleton<IAudioManager>]
+[RegisterSingleton<IAudioManager>]
 public class DesktopAudioManager : ObservableObject, IAudioManager
 {
     private readonly ILogger<DesktopAudioPlayer> audioLogger;
@@ -54,7 +55,7 @@ public class DesktopAudioManager : ObservableObject, IAudioManager
         var player = new DesktopAudioPlayer(masterMixer, audioLogger);
         ownAudioPlayerRefs.Add(new WeakReference<DesktopAudioPlayer>(player));
 
-        var playerSetting = await persistence.Load<StoryboardPlayerSetting>();
+        var playerSetting = await persistence.Load<StoryboardPlayerSetting>(default);
         await player.Load(stream, playerSetting.AudioSampleRate);
         return player;
     }
@@ -71,7 +72,7 @@ public class DesktopAudioManager : ObservableObject, IAudioManager
 
     private async void Initalize()
     {
-        var playerSetting = await persistence.Load<StoryboardPlayerSetting>();
+        var playerSetting = await persistence.Load<StoryboardPlayerSetting>(default);
         var audioOutputType = AudioOutputType.Wasapi;
 
         try
@@ -79,7 +80,7 @@ public class DesktopAudioManager : ObservableObject, IAudioManager
             audioOutputDevice = audioOutputType switch
             {
                 AudioOutputType.Asio => new AsioOut {AutoStop = false},
-                AudioOutputType.Wasapi => new WasapiOut(AudioClientShareMode.Shared, 0)
+                _ => new WasapiOut(AudioClientShareMode.Shared, 0)
                 //AudioOutputType.WaveOut or _ => new WaveOut() { DesiredLatency = 100 },
             };
         }

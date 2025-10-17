@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSystem;
+using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
 using ReOsuStoryboardPlayer.Core.Base;
 using ReOsuStoryboardPlayer.Core.Optimzer;
 using ReOsuStoryboardPlayer.Core.Optimzer.DefaultOptimzer;
@@ -32,7 +31,7 @@ public static class StoryboardParserHelper
     private static async Task<List<StoryboardObject>> GetStoryboardObjectsFromOsbin(ISimpleDirectory fsRoot,
         string path)
     {
-        using (var stream = await BrowserSimpleIO.OpenRead(fsRoot, path))
+        using (var stream = await SimpleIO.OpenRead(fsRoot, path))
         {
             return StoryboardBinaryFormatter.Deserialize(stream).ToList();
         }
@@ -40,7 +39,7 @@ public static class StoryboardParserHelper
 
     private static async Task<List<StoryboardObject>> GetStoryboardObjectsFromOsb(ISimpleDirectory fsRoot, string path)
     {
-        using var stream = await BrowserSimpleIO.OpenRead(fsRoot, path);
+        using var stream = await SimpleIO.OpenRead(fsRoot, path);
         var reader = new OsuFileReader(stream);
 
         var collection = new VariableCollection(new VariableReader(reader).EnumValues());

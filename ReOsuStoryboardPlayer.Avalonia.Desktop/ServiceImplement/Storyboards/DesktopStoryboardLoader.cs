@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Avalonia.Platform.Storage;
 using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Desktop.Utils;
@@ -27,14 +28,14 @@ public class DesktopStoryboardLoader(ILogger<DesktopStoryboardLoader> logger, IP
 
     public async ValueTask<IStoryboardInstance> OpenLoaderDialog()
     {
-        var selectDirPath = BrowseFolder("Select a storyboard/beatmap folder");
-        if (!Directory.Exists(selectDirPath))
+        var toplevel = (App.Current as App).TopLevel;
+        var folder = (await toplevel.StorageProvider?.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            logger?.LogErrorEx($"folder is empty/notfound: {selectDirPath}");
-            return null;
-        }
+            AllowMultiple = false,
+            Title = "Select Beatmap Folder"
+        })).FirstOrDefault();
 
-        return await LoadStoryboardInstanceFromDisk(selectDirPath);
+        return await LoadStoryboardInstanceFromDisk(default);
     }
 
     [DllImport("user32.dll")]

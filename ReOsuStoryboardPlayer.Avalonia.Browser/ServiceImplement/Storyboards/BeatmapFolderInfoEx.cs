@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSystem;
 using ReOsuStoryboardPlayer.Avalonia.Services.Parameters;
+using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
 using ReOsuStoryboardPlayer.Core.Parser;
 using ReOsuStoryboardPlayer.Core.Parser.Reader;
 using ReOsuStoryboardPlayer.Core.Parser.Stream;
@@ -52,7 +53,7 @@ public class BeatmapFolderInfoEx : BeatmapFolderInfo
             //优先选std铺面的.一些图其他模式谱面会有阻挡 53925 fripSide - Hesitation Snow
             foreach (var x in info.DifficultFiles)
             {
-                var lines = await BrowserSimpleIO.ReadAllLines(fsRoot, x.Value);
+                var lines = await SimpleIO.ReadAllLines(fsRoot, x.Value);
 
                 foreach (var line in lines)
                     if (line.StartsWith("Mode"))
@@ -68,13 +69,13 @@ public class BeatmapFolderInfoEx : BeatmapFolderInfo
                         }
             }
 
-            if (!BrowserSimpleIO.ExistFile(fsRoot, info.osu_file_path))
+            if (!SimpleIO.ExistFile(fsRoot, info.osu_file_path))
                 info.osu_file_path = info.DifficultFiles.FirstOrDefault().Value;
         }
 
-        if (!string.IsNullOrWhiteSpace(info.osu_file_path) && BrowserSimpleIO.ExistFile(fsRoot, info.osu_file_path))
+        if (!string.IsNullOrWhiteSpace(info.osu_file_path) && SimpleIO.ExistFile(fsRoot, info.osu_file_path))
         {
-            using var fs = await BrowserSimpleIO.OpenRead(fsRoot, info.osu_file_path);
+            using var fs = await SimpleIO.OpenRead(fsRoot, info.osu_file_path);
             info.reader = new OsuFileReader(fs);
             var section = new SectionReader(Section.General, info.reader);
 
@@ -87,16 +88,16 @@ public class BeatmapFolderInfoEx : BeatmapFolderInfo
                 info.IsWidescreenStoryboard = wideMatch.ToInt() == 1;
         }
 
-        if (string.IsNullOrWhiteSpace(info.osu_file_path) || !BrowserSimpleIO.ExistFile(fsRoot, info.osu_file_path))
-            info.audio_file_path = BrowserSimpleIO.GetFiles(fsRoot, info.folder_path, "*.mp3")
+        if (string.IsNullOrWhiteSpace(info.osu_file_path) || !SimpleIO.ExistFile(fsRoot, info.osu_file_path))
+            info.audio_file_path = SimpleIO.GetFiles(fsRoot, info.folder_path, "*.mp3")
                 .OrderByDescending(x => x.FileLength)
                 .FirstOrDefault()
                 ?.FullPath;
 
-        if (string.IsNullOrWhiteSpace(info.osu_file_path) || !BrowserSimpleIO.ExistFile(fsRoot, info.osu_file_path))
+        if (string.IsNullOrWhiteSpace(info.osu_file_path) || !SimpleIO.ExistFile(fsRoot, info.osu_file_path))
             Log.Warn("No .osu load");
 
-        if (string.IsNullOrWhiteSpace(info.audio_file_path) || !BrowserSimpleIO.ExistFile(fsRoot, info.audio_file_path))
+        if (string.IsNullOrWhiteSpace(info.audio_file_path) || !SimpleIO.ExistFile(fsRoot, info.audio_file_path))
             throw new Exception("Audio file not found.");
 
         return info;
@@ -104,7 +105,7 @@ public class BeatmapFolderInfoEx : BeatmapFolderInfo
 
     private static BeatmapFolderInfoEx ParseForBrowser(ISimpleDirectory fsRoot, string folder_path)
     {
-        if (!BrowserSimpleIO.ExistDirectory(fsRoot, folder_path))
+        if (!SimpleIO.ExistDirectory(fsRoot, folder_path))
             throw new Exception($"\"{folder_path}\" not a folder!");
 
         var info = new BeatmapFolderInfoEx();
@@ -130,12 +131,12 @@ public class BeatmapFolderInfoEx : BeatmapFolderInfo
 
         bool _check(string file_path)
         {
-            return !string.IsNullOrWhiteSpace(file_path) && BrowserSimpleIO.ExistFile(fsRoot, file_path);
+            return !string.IsNullOrWhiteSpace(file_path) && SimpleIO.ExistFile(fsRoot, file_path);
         }
 
         IEnumerable<string> TryGetAnyFiles(string extend_name)
         {
-            return BrowserSimpleIO.GetFilePaths(fsRoot, folder_path, "*" + extend_name);
+            return SimpleIO.GetFilePaths(fsRoot, folder_path, "*" + extend_name);
         }
     }
 }

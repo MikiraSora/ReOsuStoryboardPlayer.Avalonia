@@ -1,17 +1,11 @@
 ﻿using ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSystem.Impl.JSFileSystem;
-using ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSystem.Impl.Zip;
 using ReOsuStoryboardPlayer.Avalonia.Browser.Utils;
+using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSystem;
 
 public static class BrowserFileSystemBuilder
 {
-    public static ISimpleDirectory LoadFromZipFileBytes(byte[] zipFileBytes)
-    {
-        var root = ZipSimpleDirectory.LoadFromZipFileBytes(zipFileBytes);
-        return root;
-    }
-
     public static ISimpleDirectory LoadFromLocalFileSystem(LocalFileSystemInterop.JSDirectory jsDirRoot)
     {
         JsfsSimpleDirectory buildDir(ISimpleDirectory parent, LocalFileSystemInterop.JSDirectory jsDir)

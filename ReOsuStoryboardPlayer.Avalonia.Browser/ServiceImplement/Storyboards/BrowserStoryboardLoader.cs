@@ -14,6 +14,8 @@ using ReOsuStoryboardPlayer.Avalonia.Services.Parameters;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
+using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
+using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem.Impl.Zip;
 using ReOsuStoryboardPlayer.Core.Base;
 using ReOsuStoryboardPlayer.Core.Parser;
 using ReOsuStoryboardPlayer.Core.Parser.Reader;
@@ -39,7 +41,7 @@ public class BrowserStoryboardLoader(
 
     public async ValueTask<IStoryboardInstance> OpenLoaderFromZipFileBytes(byte[] zipFileBytes)
     {
-        var fsRoot = BrowserFileSystemBuilder.LoadFromZipFileBytes(zipFileBytes);
+        var fsRoot = ZipFileSystemBuilder.LoadFromZipFileBytes(zipFileBytes);
         return await LoadStoryboardInstance(fsRoot);
     }
 
@@ -118,7 +120,7 @@ public class BrowserStoryboardLoader(
         AdjustZ(parse_osu_Storyboard_objs);
 
         if (!string.IsNullOrWhiteSpace(instance.InfoEx.osb_file_path) &&
-            BrowserSimpleIO.ExistFile(fsRoot, instance.InfoEx.osb_file_path))
+            SimpleIO.ExistFile(fsRoot, instance.InfoEx.osb_file_path))
         {
             parse_osb_Storyboard_objs =
                 await StoryboardParserHelper.GetStoryboardObjects(fsRoot, instance.InfoEx.osb_file_path);
@@ -191,10 +193,10 @@ public class BrowserStoryboardLoader(
         storyboardInfo.BeatmapSetId = -1;
 
         var osuFilePath = instanceInfoEx.osu_file_path;
-        if (BrowserSimpleIO.ExistFile(fsRoot, osuFilePath))
+        if (SimpleIO.ExistFile(fsRoot, osuFilePath))
             try
             {
-                using var fs = await BrowserSimpleIO.OpenRead(fsRoot, osuFilePath);
+                using var fs = await SimpleIO.OpenRead(fsRoot, osuFilePath);
                 var osuReader = new OsuFileReader(fs);
                 var sectionReader = new SectionReader(Section.Metadata, osuReader);
 
@@ -305,9 +307,9 @@ public class BrowserStoryboardLoader(
         {
             try
             {
-                if (!BrowserSimpleIO.ExistFile(fsRoot, file_path))
+                if (!SimpleIO.ExistFile(fsRoot, file_path))
                     return null;
-                using var fs = await BrowserSimpleIO.OpenRead(fsRoot, file_path);
+                using var fs = await SimpleIO.OpenRead(fsRoot, file_path);
                 return SKImage.FromEncodedData(fs);
             }
             catch (Exception e)

@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
+using Injectio.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Services.Dialog;
 using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
 using ReOsuStoryboardPlayer.Avalonia.Utils;
-using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Persistences;
 
-[Injectio.Attributes.RegisterSingleton<IPersistence>]
+[RegisterSingleton<IPersistence>]
 public class DesktopPersistence : IPersistence
 {
     private readonly Dictionary<string, object> cacheObj = new();
@@ -42,7 +43,7 @@ public class DesktopPersistence : IPersistence
             "setting.json");
     }
 
-    public async Task Save<T>(T obj)
+    public async Task Save<T>(T obj, JsonTypeInfo<T> typeInfo)
     {
 #if DEBUG
         if (DesignModeHelper.IsDesignMode)
@@ -56,14 +57,14 @@ public class DesktopPersistence : IPersistence
                 var key = GetKey<T>();
 
                 settingMap[key] = JsonSerializer.Serialize(obj, serializerOptions);
-                var content = JsonSerializer.Serialize(settingMap, serializerOptions);
+                var content = JsonSerializer.Serialize(settingMap);
 
                 File.WriteAllText(savePath, content);
             }
         });
     }
 
-    public Task<T> Load<T>() where T : new()
+    public Task<T> Load<T>(JsonTypeInfo<T> typeInfo) where T : new()
     {
         return Task.Run(() =>
         {

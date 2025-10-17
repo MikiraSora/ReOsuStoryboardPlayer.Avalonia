@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using ReOsuStoryboardPlayer.Avalonia.Browser.Utils;
+using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards.FileSystem.Impl.JSFileSystem;
 
