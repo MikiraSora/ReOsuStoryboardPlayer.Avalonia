@@ -1,4 +1,4 @@
-﻿namespace ReOsuStoryboardPlayer.Avalonia.Browser.Models;
+﻿namespace ReOsuStoryboardPlayer.Avalonia.Models;
 
 public enum OpenStoryboardMethods
 {

@@ -1,24 +1,27 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using ReOsuStoryboardPlayer.Avalonia.Browser.Models;
-using ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Storyboards;
-using ReOsuStoryboardPlayer.Avalonia.Browser.Utils;
+using ReOsuStoryboardPlayer.Avalonia.Models;
 using ReOsuStoryboardPlayer.Avalonia.Services.Dialog;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
-using ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs;
+using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem.Impl.AvaloniaStorageProvider;
+using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem.Impl.Zip;
 
-namespace ReOsuStoryboardPlayer.Avalonia.Browser.ViewModels.Dialogs;
+namespace ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs.OpenStoryboard;
 
-public partial class BrowserOpenStoryboardDialogViewModel(
-    IStoryboardLoadDialog iStoryboardLoadDialog,
-    ILogger<BrowserOpenStoryboardDialogViewModel> logger,
+public partial class OpenStoryboardDialogViewModel(
+    ILogger<OpenStoryboardDialogViewModel> logger,
+    StoryboardLoader storyboardLoader,
     IDialogManager dialogManager) : DialogViewModelBase
 {
     [ObservableProperty]
@@ -48,30 +51,58 @@ public partial class BrowserOpenStoryboardDialogViewModel(
     [ObservableProperty]
     private StoryboardInstance zipLoadInstance;
 
-    public override string DialogIdentifier => nameof(BrowserOpenStoryboardDialogViewModel);
+    public override string DialogIdentifier => nameof(OpenStoryboardDialogViewModel);
 
     public override string Title => "Open storyboard from...";
 
     [RelayCommand]
     private async Task OpenZipFromLocalFileSystem(CancellationToken cancellationToken)
     {
-        if (iStoryboardLoadDialog is not BrowserStoryboardLoadDialog browserStoryboardLoader)
+        var topLevel = (Application.Current as App)?.TopLevel;
+        if (topLevel is null)
         {
-            logger.LogErrorEx($"current loader is not supported: {iStoryboardLoadDialog?.GetType()?.FullName}");
+            logger.LogErrorEx("TopLevel is null");
+            await dialogManager.ShowMessageDialog("Can't open file dialog because program internal error",
+                DialogMessageType.Error);
             return;
         }
 
+        var storageProvider = topLevel.StorageProvider;
+
         try
         {
-            var zipFileBytes = await LocalFileSystemInterop.PickFile();
-            if (cancellationToken.IsCancellationRequested)
-                return;
+            using var file = (await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                Title = "Select .zip/.osz file",
+                AllowMultiple = false,
+                FileTypeFilter =
+                [
+                    new FilePickerFileType("zip file") {Patterns = ["*.zip"]},
+                    new FilePickerFileType("beatmap file") {Patterns = ["*.osz"]}
+                ]
+            })).FirstOrDefault();
 
             using var loadingDialog = new LoadingDialogViewModel();
             dialogManager.ShowDialog(loadingDialog).NoWait();
             await loadingDialog.WaitForAttachedView();
 
-            var instance = await browserStoryboardLoader.OpenLoaderFromZipFileBytes(zipFileBytes);
+            if (file is null)
+            {
+                logger.LogErrorEx("OpenFilePickerAsync() return null");
+                return;
+            }
+
+            using var fs = await file.OpenReadAsync();
+            using var ms = new MemoryStream();
+            await fs.CopyToAsync(ms);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            var dir = await ZipFileSystemBuilder.LoadFromZipFileBytes(ms.ToArray());
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            var instance = await storyboardLoader.LoadStoryboard(dir);
             if (cancellationToken.IsCancellationRequested)
                 return;
 
@@ -95,15 +126,24 @@ public partial class BrowserOpenStoryboardDialogViewModel(
     [RelayCommand]
     private async Task OpenFolderFromLocalFileSystem(CancellationToken cancellationToken)
     {
-        if (iStoryboardLoadDialog is not BrowserStoryboardLoadDialog browserStoryboardLoader)
+        var topLevel = (Application.Current as App)?.TopLevel;
+        if (topLevel is null)
         {
-            logger.LogErrorEx($"current loader is not supported: {iStoryboardLoadDialog?.GetType()?.FullName}");
+            logger.LogErrorEx("TopLevel is null");
+            await dialogManager.ShowMessageDialog("Can't open file dialog because program internal error",
+                DialogMessageType.Error);
             return;
         }
 
+        var storageProvider = topLevel.StorageProvider;
+
         try
         {
-            var folder = await LocalFileSystemInterop.PickDirectory();
+            var folder = (await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                AllowMultiple = false,
+                Title = "Select beatmap folder"
+            })).FirstOrDefault();
             if (cancellationToken.IsCancellationRequested)
                 return;
 
@@ -111,7 +151,11 @@ public partial class BrowserOpenStoryboardDialogViewModel(
             dialogManager.ShowDialog(loadingDialog).NoWait();
             await loadingDialog.WaitForAttachedView();
 
-            var instance = await browserStoryboardLoader.OpenLoaderFromLocalFileSystem(folder);
+            var dir = await AvaloniaStorageProviderFileSystemBuilder.LoadFromAvaloniaStorageFolder(folder);
+            if (cancellationToken.IsCancellationRequested)
+                return;
+
+            var instance = await storyboardLoader.LoadStoryboard(dir);
             if (cancellationToken.IsCancellationRequested)
                 return;
 
@@ -194,16 +238,11 @@ public partial class BrowserOpenStoryboardDialogViewModel(
         using var loadingDialog = new LoadingDialogViewModel();
         dialogManager.ShowDialog(loadingDialog).NoWait();
 
-        if (iStoryboardLoadDialog is not BrowserStoryboardLoadDialog browserStoryboardLoader)
-        {
-            logger.LogErrorEx($"current loader is not supported: {iStoryboardLoadDialog?.GetType()?.FullName}");
-            return false;
-        }
-
         try
         {
             var zipFileBytes = await DownloadFile(dlUrl);
-            var instance = await browserStoryboardLoader.OpenLoaderFromZipFileBytes(zipFileBytes);
+            var dir = await ZipFileSystemBuilder.LoadFromZipFileBytes(zipFileBytes);
+            var instance = await storyboardLoader.LoadStoryboard(dir);
 
             DownloadInstance = instance;
             return true;
@@ -222,12 +261,6 @@ public partial class BrowserOpenStoryboardDialogViewModel(
 
         try
         {
-            if (iStoryboardLoadDialog is not BrowserStoryboardLoadDialog browserStoryboardLoader)
-            {
-                logger.LogErrorEx($"current loader is not supported: {iStoryboardLoadDialog?.GetType()?.FullName}");
-                return false;
-            }
-
             var match = Regex.Match(beatmapUrl, @"beatmapsets/(\d+)", RegexOptions.IgnoreCase);
             if (!match.Success)
             {
@@ -236,7 +269,7 @@ public partial class BrowserOpenStoryboardDialogViewModel(
             }
 
             var beatmapSetId = int.Parse(match.Groups[1].Value);
-            var zipFileBytes = default(byte[]);
+            byte[] zipFileBytes;
             try
             {
                 var buildDownloadUrl = $"https://dl.sayobot.cn/beatmaps/download/full/${beatmapSetId}";
@@ -245,11 +278,14 @@ public partial class BrowserOpenStoryboardDialogViewModel(
             catch (Exception e)
             {
                 logger.LogErrorEx(e,
-                    $"osu.sayobot.cn can't download beatmap directly, please try other ways:{beatmapUrl} {e.Message}");
+                    $"sayobot can't download beatmap directly, please try other ways:{beatmapUrl} {e.Message}");
+                await dialogManager.ShowMessageDialog("sayobot can't download beatmap directly, please try other ways",
+                    DialogMessageType.Error);
                 return false;
             }
 
-            var instance = await browserStoryboardLoader.OpenLoaderFromZipFileBytes(zipFileBytes);
+            var dir = await ZipFileSystemBuilder.LoadFromZipFileBytes(zipFileBytes);
+            var instance = await storyboardLoader.LoadStoryboard(dir);
 
             ParseInstance = instance;
             return true;

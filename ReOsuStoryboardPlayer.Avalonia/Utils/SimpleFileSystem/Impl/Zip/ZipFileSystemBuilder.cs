@@ -1,10 +1,12 @@
-﻿namespace ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem.Impl.Zip;
+﻿using System.Threading.Tasks;
+
+namespace ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem.Impl.Zip;
 
 public class ZipFileSystemBuilder
 {
-    public static ISimpleDirectory LoadFromZipFileBytes(byte[] zipFileBytes)
+    public static async Task<ISimpleDirectory> LoadFromZipFileBytes(byte[] zipFileBytes)
     {
-        var root = ZipSimpleDirectory.LoadFromZipFileBytes(zipFileBytes);
+        var root = await ZipSimpleDirectory.LoadFromZipFileBytes(zipFileBytes);
         return root;
     }
 }

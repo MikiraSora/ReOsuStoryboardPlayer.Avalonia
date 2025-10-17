@@ -2,13 +2,13 @@
           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-          xmlns:dialogs="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Browser.ViewModels.Dialogs"
+          xmlns:dialogs="clr-namespace:ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs.OpenStoryboard"
           xmlns:views="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Views;assembly=ReOsuStoryboardPlayer.Avalonia"
           mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
           Height="300"
           Width="600"
           x:DataType="dialogs:LoadingDialogViewModel"
-          x:Class="ReOsuStoryboardPlayer.Avalonia.Browser.Views.Dialogs.LoadingDialogView">
+          x:Class="ReOsuStoryboardPlayer.Avalonia.Views.Dialogs.OpenStoryboard.LoadingDialogView">
     <Design.DataContext>
         <dialogs:LoadingDialogViewModel />
     </Design.DataContext>

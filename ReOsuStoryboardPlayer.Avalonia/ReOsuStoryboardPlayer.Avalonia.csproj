@@ -59,6 +59,14 @@
             <DependentUpon>HomePageView.axaml</DependentUpon>
             <SubType>Code</SubType>
         </Compile>
+        <Compile Update="Views\Dialogs\OpenStoryboard\BrowserOpenStoryboardDialogView.axaml.cs">
+          <DependentUpon>BrowserOpenStoryboardDialogView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
+        <Compile Update="Views\Dialogs\OpenStoryboard\LoadingDialogView.axaml.cs">
+          <DependentUpon>LoadingDialogView.axaml</DependentUpon>
+          <SubType>Code</SubType>
+        </Compile>
     </ItemGroup>
 
     <ItemGroup>

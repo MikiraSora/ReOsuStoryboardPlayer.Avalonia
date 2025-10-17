@@ -6,7 +6,7 @@ using System.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 
-namespace ReOsuStoryboardPlayer.Avalonia.Browser.Utils;
+namespace ReOsuStoryboardPlayer.Avalonia.Utils;
 
 public class EventBoardcastLoggerProvider : ILoggerProvider
 {

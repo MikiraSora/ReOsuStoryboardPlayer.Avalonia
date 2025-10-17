@@ -10,7 +10,6 @@ using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl;
 using ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPlayer;
-using ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Storyboards;
 using ReOsuStoryboardPlayer.Avalonia.Models;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;

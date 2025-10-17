@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem.Impl.Zip;
 
@@ -91,7 +92,7 @@ public class ZipSimpleDirectory : ISimpleDirectory
     /// <summary>
     ///     从 zip 字节加载虚拟文件系统
     /// </summary>
-    public static ISimpleDirectory LoadFromZipFileBytes(byte[] bytes)
+    public static async Task<ISimpleDirectory> LoadFromZipFileBytes(byte[] bytes)
     {
         var root = new ZipSimpleDirectory(null, "");
 
@@ -121,7 +122,7 @@ public class ZipSimpleDirectory : ISimpleDirectory
             {
                 using var es = entry.Open();
                 using var msEntry = new MemoryStream();
-                es.CopyTo(msEntry);
+                await es.CopyToAsync(msEntry);
                 var data = msEntry.ToArray();
 
                 var fileName = pathParts[^1];

@@ -6,10 +6,9 @@ using Avalonia.Controls;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.Messaging;
-using ReOsuStoryboardPlayer.Avalonia.Browser.Utils;
-using ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs;
+using ReOsuStoryboardPlayer.Avalonia.Utils;
 
-namespace ReOsuStoryboardPlayer.Avalonia.Browser.ViewModels.Dialogs;
+namespace ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs.OpenStoryboard;
 
 public class LoadingDialogViewModel : DialogViewModelBase, IDisposable
 {

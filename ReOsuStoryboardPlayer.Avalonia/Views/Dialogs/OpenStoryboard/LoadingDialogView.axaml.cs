@@ -3,7 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using ReOsuStoryboardPlayer.Avalonia.Views;
 
-namespace ReOsuStoryboardPlayer.Avalonia.Browser.Views.Dialogs;
+namespace ReOsuStoryboardPlayer.Avalonia.Views.Dialogs.OpenStoryboard;
 
 public partial class LoadingDialogView : ViewBase
 {

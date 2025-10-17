@@ -2,14 +2,14 @@
           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-          xmlns:dialogs="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Browser.ViewModels.Dialogs"
-          xmlns:enum="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Browser.Models"
+          xmlns:dialogs="clr-namespace:ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs.OpenStoryboard"
+          xmlns:enum="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Models"
           xmlns:views="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Views;assembly=ReOsuStoryboardPlayer.Avalonia"
           mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-          x:DataType="dialogs:BrowserOpenStoryboardDialogViewModel"
-          x:Class="ReOsuStoryboardPlayer.Avalonia.Browser.Views.Dialogs.BrowserOpenStoryboardDialogView">
+          x:DataType="dialogs:OpenStoryboardDialogViewModel"
+          x:Class="ReOsuStoryboardPlayer.Avalonia.Views.Dialogs.OpenStoryboard.OpenStoryboardDialogView">
     <Design.DataContext>
-        <dialogs:BrowserOpenStoryboardDialogViewModel />
+        <dialogs:OpenStoryboardDialogViewModel />
     </Design.DataContext>
 
     <Border Padding="20,10">
