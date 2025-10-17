@@ -16,7 +16,7 @@ Program can build/run on Windows/Browser(Chromium)/Android(WIP)
 - [x] Fix/Support FireFox
 - [ ] Support multithread in browser
 - [ ] Fix/Optimize render
-- [ ] Integrate content
+- [x] Integrate content
 - [ ] Add Storyboard debugger who want debug his storyboard?
 - [ ] Support Android
 
