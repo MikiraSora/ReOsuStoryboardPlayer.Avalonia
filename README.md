@@ -19,10 +19,11 @@ Program can build/run on Windows/Browser(Chromium)/Android(WIP)
 
 - [x] Fix/Support FireFox
 - [ ] Support multithread in browser
-- [ ] Fix/Optimize render
+- [x] Fix/Optimize render
 - [x] Integrate content
 - [ ] Add Storyboard debugger who want debug his storyboard?
 - [ ] Support Android
+- [ ] Fix memory leak in heavy/cool storybaord
 
 ### Screenshot
 <img width="1915" height="1001" alt="image" src="https://github.com/user-attachments/assets/59d5471d-2586-4f1f-8441-49cab3e95ec1" />
