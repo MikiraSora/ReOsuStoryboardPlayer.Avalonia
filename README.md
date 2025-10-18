@@ -2,7 +2,7 @@
 ---------------
 ### Introduction
 This repository is developed based on another repository [ReOsuStoryboardPlayer.Core](https://github.com/MikiraSora/ReOsuStoryboardPlayer/tree/master/ReOsuStoryboardPlayer.Core), primarily for learning Avalonia development and NativeAOT.
-Program can build/run on Windows/Browser(Chromium)/Android(WIP)
+Program can build/run on Windows/Browser/Android(WIP)
 
 ### Play
 [Browser Online](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/)</br>
@@ -18,7 +18,7 @@ Program can build/run on Windows/Browser(Chromium)/Android(WIP)
 ### Todos:
 
 - [x] Fix/Support FireFox
-- [ ] Support multithread in browser (migrate to .Net9/.Net10)
+- [ ] ~~Support multithread in browser (migrate to .Net9/.Net10)~~
 - [x] Fix/Optimize render
 - [x] Integrate content
 - [ ] Add Storyboard debugger who want debug his storyboard?
