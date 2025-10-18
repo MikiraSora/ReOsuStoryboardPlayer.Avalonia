@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
@@ -30,28 +30,29 @@
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)"/>
         <PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="11.1.5"/>
-        <PackageReference Include="Avalonia.Skia" Version="11.3.0"/>
+        <PackageReference Include="Avalonia.Skia" Version="11.3.7" />
         <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)"/>
         <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)"/>
-        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.0"/>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
         <PackageReference Include="AvaloniaDialogs" Version="3.7.0"/>
 
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
         <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)"/>
         <PackageReference Include="DialogHost.Avalonia" Version="0.9.3"/>
         <PackageReference Include="DynamicData" Version="9.4.1"/>
-        <PackageReference Include="FluentIcons.Avalonia" Version="1.1.249"/>
-        <PackageReference Include="FluentIcons.Common" Version="1.1.249"/>
+        <PackageReference Include="FluentIcons.Avalonia" Version="1.1.312" />
+        <PackageReference Include="FluentIcons.Common" Version="1.1.312" />
         <PackageReference Include="Injectio" Version="5.1.0"/>
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10"/>
-        <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0"/>
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0"/>
-        <PackageReference Include="Nerdbank.GitVersioning" Version="3.6.139">
+        <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.10" />
+        <PackageReference Include="Nerdbank.GitVersioning" Version="3.8.118">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Serilog.Sinks.File" Version="6.0.0"/>
-        <PackageReference Include="Xaml.Behaviors" Version="11.3.0"/>
+        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+        <PackageReference Include="Xaml.Behaviors" Version="11.3.6.5" />
     </ItemGroup>
 
     <ItemGroup>
