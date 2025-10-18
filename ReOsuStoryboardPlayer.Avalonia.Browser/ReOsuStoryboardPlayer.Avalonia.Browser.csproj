@@ -12,7 +12,17 @@
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <DefineConstants>AVALONIA_BROWSER;</DefineConstants>
+        <RunAOTCompilation>true</RunAOTCompilation>
     </PropertyGroup>
+
+    <!--
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <WasmEnableThreads>true</WasmEnableThreads>
+    </PropertyGroup>
+    <ItemGroup Condition=" '$(Configuration)' == 'Release' ">
+        <PackageReference Include="Microsoft.NET.WebAssembly.Threading" Version="8.0.0" IncludeAssets="compile" PrivateAssets="none" />
+    </ItemGroup>
+    -->
 
     <ItemGroup>
         <PackageReference Include="Avalonia.Browser" Version="$(AvaloniaVersion)"/>
@@ -32,6 +42,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Models\" />
+        <Folder Include="Models\"/>
     </ItemGroup>
 </Project>
