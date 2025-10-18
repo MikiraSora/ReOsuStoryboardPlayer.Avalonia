@@ -18,7 +18,7 @@ Program can build/run on Windows/Browser/Android(WIP)
 ### Todos:
 
 - [x] Fix/Support FireFox
-- [ ] Support multithread in browser (migrate to .Net9/.Net10)
+- [ ] ~~Support multithread in browser (migrate to .Net9/.Net10)~~
 - [x] Fix/Optimize render
 - [x] Integrate content
 - [ ] Add Storyboard debugger who want debug his storyboard?
