@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -24,9 +23,9 @@ public partial class PlayPageViewModel : PageViewModelBase
 {
     private readonly IAudioManager audioManager;
     private readonly IDialogManager dialogManager;
+    private readonly IStoryboardLoadDialog iStoryboardLoadDialog;
     private readonly ILogger<PlayPageViewModel> logger;
     private readonly IPersistence persistence;
-    private readonly IStoryboardLoadDialog iStoryboardLoadDialog;
     private readonly IWindowManager windowManager;
 
     [ObservableProperty]
@@ -185,9 +184,11 @@ public partial class PlayPageViewModel : PageViewModelBase
     }
 
     [RelayCommand]
-    private void JumpToTime(double milliseconds)
+    private void JumpToTime(string millisecondsStr)
     {
-        AudioPlayer?.Seek(TimeSpan.FromMilliseconds(milliseconds), true);
+        if (!int.TryParse(millisecondsStr, out var time))
+            return;
+        AudioPlayer?.Seek(TimeSpan.FromMilliseconds(time), true);
         OnPropertyChanged(nameof(CurrentAudioTime));
     }
 
@@ -209,7 +210,8 @@ public partial class PlayPageViewModel : PageViewModelBase
 
         var jumpToTime = Math.Clamp(point.X / control.Bounds.Width, 0, 1) *
                          AudioPlayer.Duration.TotalMilliseconds;
-        JumpToTime(jumpToTime);
+        AudioPlayer?.Seek(TimeSpan.FromMilliseconds(jumpToTime), true);
+        OnPropertyChanged(nameof(CurrentAudioTime));
         e.Handled = true;
     }
 }

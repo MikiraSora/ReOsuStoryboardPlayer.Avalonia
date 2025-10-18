@@ -42,8 +42,8 @@
                 <controls:CustomBlurBehind>
                     <controls:CustomBlurBehind.Material>
                         <ExperimentalAcrylicMaterial
-                                                     TintOpacity="0.5" MaterialOpacity="0.3"
-                                                     PlatformTransparencyCompensationLevel="0" />
+                            TintOpacity="0.5" MaterialOpacity="0.3"
+                            PlatformTransparencyCompensationLevel="0" />
                     </controls:CustomBlurBehind.Material>
                 </controls:CustomBlurBehind>
                 <Grid Margin="20,10" RowDefinitions="Auto,Auto,Auto">
@@ -121,6 +121,25 @@
                                 <TextBlock VerticalAlignment="Center"
                                            FontFamily="Courier New"
                                            Text="{Binding AudioPlayer.Duration,Converter={StaticResource TimeSpanToStringValueConverter}}" />
+
+                                <Button Classes="IconButton">
+                                    <ic:SymbolIcon FontSize="20" Symbol="ShiftsActivity"
+                                                   IconVariant="Filled" />
+                                    <Button.Flyout>
+                                        <Flyout Placement="Top" ShowMode="Standard">
+                                            <StackPanel>
+                                                <TextBlock Margin="0,0,0,5" Text="Jump to audio time"/>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBox Margin="0,0,10,0" Name="jumpToInput" Width="100"
+                                                             UseFloatingWatermark="False"
+                                                             Watermark="ms" />
+                                                    <Button Content="Go" Command="{Binding JumpToTimeCommand}"
+                                                            CommandParameter="{Binding #jumpToInput.Text}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </Flyout>
+                                    </Button.Flyout>
+                                </Button>
                             </StackPanel>
                         </Grid>
                         <!--Center-->

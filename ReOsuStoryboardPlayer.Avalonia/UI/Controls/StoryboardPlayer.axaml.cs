@@ -76,7 +76,7 @@ public partial class StoryboardPlayer : UserControl
         sprintPaint = new SKPaint
         {
             IsAntialias = false,
-            FilterQuality = SKFilterQuality.Low,
+            FilterQuality = SKFilterQuality.Low
         };
 
         InitializeComponent();
@@ -266,18 +266,18 @@ public partial class StoryboardPlayer : UserControl
 
     private void DrawDebug(SKCanvas skCanvas)
     {
-        if (storyboardInstance.Resource.GetSprite(@"sb\diary\page1.png") is not SpriteResource spriteResource)
+        if (storyboardInstance.Resource.GetSprite(@"s\tex.jpg") is not SpriteResource spriteResource)
             return;
         var obj = new StoryboardObject
         {
-            OriginOffset = AnchorConvert.Convert(Anchor.Centre),
-            IsHorizonFlip = true,
+            OriginOffset = AnchorConvert.Convert(Anchor.TopCentre),
+            IsHorizonFlip = false,
             IsVerticalFlip = false,
             IsAdditive = false,
-            Postion = new Vector(320, 240),
-            Scale = new Vector(0.3f, 0.4f),
+            Postion = new Vector(320, 0),
+            Scale = new Vector(0.625f, -0.625f),
             Color = new ByteVec4(255, 255, 255, 255),
-            Rotate = 0.17453f
+            Rotate = 0f
         };
 
         DrawStoryboardObjectImmediatly(skCanvas, obj, spriteResource.Image);
@@ -301,8 +301,8 @@ public partial class StoryboardPlayer : UserControl
             new SKColor(obj.Color.X, obj.Color.Y, obj.Color.Z, obj.Color.W),
             SKBlendMode.Modulate);
 
-        var origin = new SKPoint(-obj.OriginOffset.X * (obj.IsHorizonFlip ? -1 : 1),
-                         obj.OriginOffset.Y * (obj.IsVerticalFlip ? -1 : 1)) -
+        var origin = new SKPoint(-obj.OriginOffset.X * (obj.IsHorizonFlip ? -1 : 1) * (obj.Scale.X < 0 ? -1 : 1),
+                         obj.OriginOffset.Y * (obj.IsVerticalFlip ? -1 : 1) * (obj.Scale.Y < 0 ? -1 : 1)) -
                      new SKPoint(0.5f, 0.5f);
 
         var scaleX = obj.Scale.X * (obj.IsHorizonFlip ? -1 : 1);

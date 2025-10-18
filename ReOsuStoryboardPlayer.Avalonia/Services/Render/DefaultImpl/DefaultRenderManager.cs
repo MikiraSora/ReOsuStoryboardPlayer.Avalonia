@@ -18,7 +18,6 @@ public class DefaultRenderManager(ILogger<DefaultRenderManager> logger) : IRende
     public void InvokeInRender(IRenderManager.RenderAction renderAction)
     {
         pendingActions.Enqueue(renderAction);
-        logger.LogDebugEx($"add action: {renderAction.GetHashCode()}");
 
         if (!requestedInvalidateVisual)
         {
@@ -29,12 +28,9 @@ public class DefaultRenderManager(ILogger<DefaultRenderManager> logger) : IRende
 
     public void ProcessPendingInvokeRenderAction(ImmediateDrawingContext context)
     {
-        logger.LogDebugEx($"Begin process {pendingActions.Count} pending render actions");
         while (pendingActions.TryDequeue(out var action))
         {
-            logger.LogDebugEx($"Executing action: {action.GetHashCode()}");
             action(context);
-            logger.LogDebugEx("done");
         }
 
         requestedInvalidateVisual = false;

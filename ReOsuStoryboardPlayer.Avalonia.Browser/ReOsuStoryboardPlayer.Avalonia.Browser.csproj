@@ -17,19 +17,14 @@
         <TrimMode>full</TrimMode>
     </PropertyGroup>
 
-    <!--
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <WasmEnableThreads>true</WasmEnableThreads>
     </PropertyGroup>
-    <ItemGroup Condition=" '$(Configuration)' == 'Release' ">
-        <PackageReference Include="Microsoft.NET.WebAssembly.Threading" Version="8.0.0" IncludeAssets="compile" PrivateAssets="none" />
-    </ItemGroup>
-    -->
 
     <ItemGroup>
         <PackageReference Include="Avalonia.Browser" Version="$(AvaloniaVersion)"/>
         <PackageReference Include="Injectio" Version="5.1.0"/>
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.10" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.10"/>
     </ItemGroup>
 
     <ItemGroup>

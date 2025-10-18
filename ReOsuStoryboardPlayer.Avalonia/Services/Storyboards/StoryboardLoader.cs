@@ -151,6 +151,7 @@ public class StoryboardLoader
                     logger.LogWarningEx($"rebuild resource failed: sprite is null, key: {resourceKey}");
                     continue;
                 }
+
                 var img = sprite.Image;
                 if (img.IsTextureBacked)
                     continue;
@@ -159,7 +160,8 @@ public class StoryboardLoader
                 logger.LogInformationEx($"rebuild image as texture: {resourceKey}");
                 img.Dispose();
             }
-            logger.LogInformationEx($"rebuild skimage resources done");
+
+            logger.LogInformationEx("rebuild skimage resources done");
         });
 
         logger.LogInformationEx("BuildStoryboardResource() successfully");
