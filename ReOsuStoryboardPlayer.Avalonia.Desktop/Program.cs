@@ -1,6 +1,6 @@
-﻿using Avalonia;
+﻿using System;
+using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Controls.Notifications;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Desktop.Utils;
@@ -8,12 +8,10 @@ using ReOsuStoryboardPlayer.Avalonia.Desktop.Utils.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
-using System;
-using System.Threading.Tasks;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop;
 
-class Program
+internal class Program
 {
     private static bool exceptionHandling;
 
@@ -35,7 +33,7 @@ class Program
         };
 #endif
         BuildAvaloniaApp()
-        .StartWithClassicDesktopLifetime(args, lifetime => lifetime.Exit += OnExit);
+            .StartWithClassicDesktopLifetime(args, lifetime => lifetime.Exit += OnExit);
     }
 
     private static void OnExit(object sender, ControlledApplicationLifetimeExitEventArgs e)
@@ -50,20 +48,20 @@ class Program
             .UsePlatformDetect()
             .WithInterFont()
             .AppendDependencyInject(collection =>
-            {
-                collection.AddReOsuStoryboardPlayerAvaloniaDesktop();
-#if DEBUG
-                if (DesignModeHelper.IsDesignMode)
-                    return;
-#endif
-                collection.AddLogging(o =>
                 {
-                    o.SetMinimumLevel(LogLevel.Debug);
-                    o.AddProvider(new FileLoggerProvider());
-                    o.AddDebug();
-                    o.AddConsole();
-                });
-            }
+                    collection.AddReOsuStoryboardPlayerAvaloniaDesktop();
+#if DEBUG
+                    if (DesignModeHelper.IsDesignMode)
+                        return;
+#endif
+                    collection.AddLogging(o =>
+                    {
+                        o.SetMinimumLevel(LogLevel.Debug);
+                        o.AddProvider(new FileLoggerProvider());
+                        o.AddDebug();
+                        o.AddConsole();
+                    });
+                }
             )
             .LogToTrace();
 

@@ -18,8 +18,12 @@
             globalThis.open(url);
         }
 
+        function getDPI(url) {
+            return window.devicePixelRatio || 1;
+        }
+
         return {
-            exitFullScreen, requestFullScreen, isFullScreen, openURL
+            exitFullScreen, requestFullScreen, isFullScreen, openURL, getDPI
         };
     })();
 

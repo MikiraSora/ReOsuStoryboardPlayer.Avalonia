@@ -219,7 +219,7 @@ public partial class StoryboardPlayer : UserControl
 
         string[] lines =
         [
-            $"Bounds: {storyboardDrawOperation.Bounds} Dpi: /{this.GetVisualRoot()?.RenderScaling ?? 1:F2}x ClientSize:{this.GetVisualRoot()?.ClientSize}",
+            $"Bounds: {storyboardDrawOperation.Bounds} Dpi: {this.GetVisualRoot()?.RenderScaling ?? 1:F2}x ClientSize:{this.GetVisualRoot()?.ClientSize}",
             $"FPS/Update/Render: {(float.IsInfinity(fps) ? "--" : fps.ToString("F2"))}/{storyboardRenderCostTime:F2}ms/{storyboardUpdateCostTime:F2}ms",
             $"Rendering Objs: {storyboardUpdater.UpdatingStoryboardObjects.Count}",
             $"Executing Cmds: {storyboardUpdater.UpdatingStoryboardObjects.Sum(x => x.ExecutedCommands.Count)}"
