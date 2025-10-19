@@ -1,11 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Rendering.SceneGraph;
 using Avalonia.Skia;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Models;
@@ -55,12 +58,15 @@ public partial class StoryboardPlayer : UserControl
 
     private readonly ILogger<StoryboardPlayer> logger;
 
+    private readonly SKPaint sprintPaint;
+
+    private readonly Stopwatch stopwatch = new();
+
     private readonly StoryboardDrawOperation storyboardDrawOperation;
 
     private IAudioPlayer audioPlayer;
 
     private volatile bool isRendering;
-    private SKPaint sprintPaint;
 
     private StoryboardInstance storyboardInstance;
     private StoryboardPlayerSetting storyboardPlayerSetting = new();
@@ -129,7 +135,6 @@ public partial class StoryboardPlayer : UserControl
     private void UpdateStoryboard()
     {
         var curTime = (float) (audioPlayer?.CurrentTime.TotalMilliseconds ?? 0);
-        //logger.LogDebugEx($"curTime: {curTime}");
         storyboardUpdater?.Update(curTime);
     }
 
@@ -137,7 +142,8 @@ public partial class StoryboardPlayer : UserControl
     {
         base.Render(context);
 
-        storyboardDrawOperation.Bounds = new Rect(0, 0, Bounds.Width, Bounds.Height);
+        var scale = this.GetVisualRoot()?.RenderScaling ?? 1;
+        storyboardDrawOperation.Bounds = new Rect(0, 0, Bounds.Width, Bounds.Height) * scale;
         context?.Custom(storyboardDrawOperation);
 
         Dispatcher.UIThread.InvokeAsync(InvalidateVisual, DispatcherPriority.Background);
@@ -148,7 +154,15 @@ public partial class StoryboardPlayer : UserControl
         if (storyboardUpdater is null || storyboardInstance is null)
             return;
 
+#if DEBUG
+        stopwatch.Restart();
+#endif
         UpdateStoryboard();
+
+#if DEBUG
+        var storyboardUpdateCostTime = stopwatch.ElapsedMilliseconds;
+        stopwatch.Restart();
+#endif
 
         var settingWideScreenOption = storyboardPlayerSetting?.WideScreenOption ?? WideScreenOption.Auto;
         var isWidcreenStoryboard = settingWideScreenOption == WideScreenOption.Auto
@@ -158,8 +172,8 @@ public partial class StoryboardPlayer : UserControl
         var storyboardWidth = isWidcreenStoryboard ? 854f : 640f;
         var storyboardHeight = 480f;
 
-        var screenWidth = (float) Bounds.Width;
-        var screenHeight = (float) Bounds.Height;
+        var screenWidth = (float) storyboardDrawOperation.Bounds.Width;
+        var screenHeight = (float) storyboardDrawOperation.Bounds.Height;
 
         //垂直居中且按宽度等比例缩放
         var canvasScale = Math.Min(screenWidth / storyboardWidth, screenHeight / storyboardHeight);
@@ -199,11 +213,19 @@ public partial class StoryboardPlayer : UserControl
 */
         canvas.Restore();
 
-        /*
-        comonPaint.Color = SKColors.Black;
-        canvas.DrawRect(new SKRect(0, 0, viewOffsetX, screenHeight), comonPaint);
-        canvas.DrawRect(new SKRect(screenWidth - viewOffsetX, 0, screenWidth, screenHeight), comonPaint);
-        */
+#if DEBUG
+        var storyboardRenderCostTime = stopwatch.ElapsedMilliseconds;
+        var fps = 1000.0f / (storyboardRenderCostTime + storyboardUpdateCostTime);
+
+        string[] lines =
+        [
+            $"Bounds: {storyboardDrawOperation.Bounds} Dpi: /{this.GetVisualRoot()?.RenderScaling ?? 1:F2}x ClientSize:{this.GetVisualRoot()?.ClientSize}",
+            $"FPS/Update/Render: {(float.IsInfinity(fps) ? "--" : fps.ToString("F2"))}/{storyboardRenderCostTime:F2}ms/{storyboardUpdateCostTime:F2}ms",
+            $"Rendering Objs: {storyboardUpdater.UpdatingStoryboardObjects.Count}",
+            $"Executing Cmds: {storyboardUpdater.UpdatingStoryboardObjects.Sum(x => x.ExecutedCommands.Count)}"
+        ];
+        DrawTextOverlay(canvas, lines);
+#endif
     }
 
     private void DrawStoryboardObjectsImmediatly(SKCanvas canvas)
@@ -390,4 +412,72 @@ public partial class StoryboardPlayer : UserControl
         public Rect Bounds { get; set; }
         public event Action<ImmediateDrawingContext> OnRender;
     }
+
+#if DEBUG
+    private readonly SKPaint textPaint = new()
+    {
+        IsAntialias = true,
+        Typeface = SKTypeface.FromFamilyName("Consolas", SKFontStyleWeight.Normal, SKFontStyleWidth.Normal,
+                       SKFontStyleSlant.Upright)
+                   ?? SKTypeface.FromFamilyName("Courier New")
+                   ?? SKTypeface.Default,
+        TextSize = 14,
+        Color = SKColors.White,
+        IsStroke = false
+    };
+
+    private readonly SKPaint bgPaint = new() {IsAntialias = true, Color = new SKColor(0, 0, 0, 160), IsStroke = false};
+
+    public void DrawTextOverlay(
+        SKCanvas canvas,
+        params string[] lines)
+    {
+        if (canvas == null) throw new ArgumentNullException(nameof(canvas));
+
+        // Font metrics 用来计算行高
+        var fm = textPaint.FontMetrics; // ascent is negative
+        // 行高：ascent(-) + descent(+) + leading
+        var lineHeight = MathF.Ceiling(MathF.Abs(fm.Ascent) + MathF.Abs(fm.Descent) + MathF.Abs(fm.Leading));
+
+        // 计算最大宽度
+        var maxWidth = 0f;
+        foreach (var line in lines)
+        {
+            if (string.IsNullOrEmpty(line)) continue;
+            var w = textPaint.MeasureText(line);
+            if (w > maxWidth) maxWidth = w;
+        }
+
+        // 如果所有行都空（例如只是换行），用量度空格以确保最小可见宽度
+        if (maxWidth == 0f)
+            maxWidth = textPaint.MeasureText(" ");
+
+        // 背景矩形（左上角）
+        var x = 0f;
+        var y = 0f;
+        var padding = 6f;
+        var cornerRadius = 6f;
+        var bgLeft = x;
+        var bgTop = y;
+        var bgWidth = maxWidth + padding * 2f;
+        var bgHeight = lineHeight * lines.Length + padding * 2f;
+
+        // 绘制背景圆角矩形
+        var rect = new SKRect(bgLeft, bgTop, bgLeft + bgWidth, bgTop + bgHeight);
+        canvas.DrawRoundRect(rect, cornerRadius, cornerRadius, bgPaint);
+
+        // 绘制每一行文字（基线计算）
+        // 首行基线位置： padding + (|ascent|)  (因为 ascent 是负数，baseline 从 top + padding + |ascent|)
+        var baselineStart = bgTop + padding + MathF.Abs(fm.Ascent);
+        var curBaseline = baselineStart;
+
+        foreach (var line in lines)
+        {
+            // 注意：MeasureText 对于空字符串返回 0，我们仍然需要绘制空白占位（可忽略）
+            if (!string.IsNullOrEmpty(line))
+                canvas.DrawText(line, bgLeft + padding, curBaseline, textPaint);
+            curBaseline += lineHeight;
+        }
+    }
+#endif
 }
