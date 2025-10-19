@@ -17,10 +17,12 @@
         <TrimMode>full</TrimMode>
     </PropertyGroup>
 
+    <!--
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <WasmEnableThreads>true</WasmEnableThreads>
     </PropertyGroup>
-
+    -->
+    
     <ItemGroup>
         <PackageReference Include="Avalonia.Browser" Version="$(AvaloniaVersion)"/>
         <PackageReference Include="Injectio" Version="5.1.0"/>
