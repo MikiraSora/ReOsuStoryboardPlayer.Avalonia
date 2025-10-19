@@ -9,7 +9,12 @@ public class TimeSpanToStringValueConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is TimeSpan ts)
-            return ts.ToString(@"mm\:ss\.fff");
+        {
+            var str = ts.ToString(@"mm\:ss\.fff");
+            if (ts < TimeSpan.Zero)
+                str = "-" + str;
+            return str;
+        }
 
         return "00:00.000";
     }

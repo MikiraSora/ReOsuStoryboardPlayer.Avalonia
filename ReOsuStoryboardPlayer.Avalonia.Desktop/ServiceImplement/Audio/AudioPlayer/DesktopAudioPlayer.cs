@@ -34,6 +34,9 @@ public partial class DesktopAudioPlayer : ObservableObject, IAudioPlayer
     [ObservableProperty]
     private bool isPlaying;
 
+    [ObservableProperty]
+    private TimeSpan leadIn;
+
     private VolumeSampleProvider musicVolumeWrapper;
 
     private TimeSpan pauseTime;
@@ -55,18 +58,19 @@ public partial class DesktopAudioPlayer : ObservableObject, IAudioPlayer
         }
     }
 
-    public TimeSpan CurrentTime => GetTime();
+    public TimeSpan CurrentTime => GetTime() - LeadIn;
 
     public void Seek(TimeSpan seekTime, bool pause)
     {
-        seekTime = TimeSpan.FromMilliseconds(Math.Max(0,
-            Math.Min(seekTime.TotalMilliseconds, Duration.TotalMilliseconds)));
+        var actualSeekTime = TimeSpan.FromMilliseconds(Math.Max(0,
+            Math.Min(seekTime.TotalMilliseconds + LeadIn.TotalMilliseconds,
+                Duration.TotalMilliseconds + LeadIn.TotalMilliseconds)));
 
-        audioFileReader.Seek((long) (audioFileReader.WaveFormat.AverageBytesPerSecond * seekTime.TotalSeconds),
+        audioFileReader.Seek((long) (audioFileReader.WaveFormat.AverageBytesPerSecond * actualSeekTime.TotalSeconds),
             SeekOrigin.Begin);
         //more accurate
         baseOffset = audioFileReader.CurrentTime;
-        pauseTime = pause ? seekTime : pauseTime;
+        pauseTime = pause ? actualSeekTime : pauseTime;
 
         if (!pause)
             Play();
@@ -145,7 +149,7 @@ public partial class DesktopAudioPlayer : ObservableObject, IAudioPlayer
         }
     }
 
-    public async Task Load(Stream stream, int targetSampleRate)
+    public async Task Load(Stream stream, int targetSampleRate, double prependLeadInSeconds)
     {
         //release resource before loading new one.
         Dispose();
@@ -164,8 +168,12 @@ public partial class DesktopAudioPlayer : ObservableObject, IAudioPlayer
 
             var processedProvider =
                 await AudioCompatibilizer.CheckCompatible(sampleProvider, targetSampleRate);
+            var silence = new SilenceProvider(processedProvider.WaveFormat)
+                .ToSampleProvider()
+                .Take(TimeSpan.FromSeconds(prependLeadInSeconds));
+            var leadInProvider = new ConcatenatingSampleProvider([silence, processedProvider]);
 
-            audioFileReader = new BufferWaveStream(processedProvider.ToWaveProvider().ToArray(),
+            audioFileReader = new BufferWaveStream(leadInProvider.ToWaveProvider().ToArray(),
                 processedProvider.WaveFormat);
             audioFileReader.Seek(0, SeekOrigin.Begin);
 
@@ -175,6 +183,7 @@ public partial class DesktopAudioPlayer : ObservableObject, IAudioPlayer
             finishProvider.StartListen();
             finishProvider.OnReturnEmptySamples += Provider_OnReturnEmptySamples;
 
+            LeadIn = TimeSpan.FromSeconds(prependLeadInSeconds);
             Duration = totalTime;
             IsAvaliable = true;
         }

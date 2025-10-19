@@ -24,7 +24,7 @@
     </Interaction.Behaviors>
     <Grid IsVisible="{Binding StoryboardInstance,Converter={x:Static ObjectConverters.IsNotNull}}">
         <!-- 播放界面 -->
-        <controls:StoryboardPlayer WideScreen="{Binding StoryboardPlayerSetting.WideScreenOption}"
+        <controls:StoryboardPlayer PlayerSetting="{Binding StoryboardPlayerSetting}"
                                    StoryboardInstance="{Binding StoryboardInstance}"
                                    AudioPlayer="{Binding AudioPlayer}" />
         <Grid Background="Transparent">
@@ -128,7 +128,7 @@
                                     <Button.Flyout>
                                         <Flyout Placement="Top" ShowMode="Standard">
                                             <StackPanel>
-                                                <TextBlock Margin="0,0,0,5" Text="Jump to audio time"/>
+                                                <TextBlock Margin="0,0,0,5" Text="Jump to audio time" />
                                                 <StackPanel Orientation="Horizontal">
                                                     <TextBox Margin="0,0,10,0" Name="jumpToInput" Width="100"
                                                              UseFloatingWatermark="False"
@@ -212,9 +212,18 @@
                     </Grid>
                     <!--Timeline-->
                     <ProgressBar Name="timelineProgressBar" ShowProgressText="False"
-                                 CornerRadius="3" Margin="0,10" Grid.Row="2"
-                                 Value="{Binding CurrentAudioTime.TotalMilliseconds}" Minimum="0"
-                                 Maximum="{Binding AudioPlayer.Duration.TotalMilliseconds}">
+                                 Minimum="0" Maximum="1"
+                                 CornerRadius="3" Margin="0,10" Grid.Row="2">
+                        <ProgressBar.Value>
+                            <MultiBinding Converter="{StaticResource AudioPlayerProgressConverter}">
+                                <MultiBinding.Bindings>
+                                    <Binding Path="CurrentAudioTime" />
+                                    <Binding Path="AudioPlayer.Duration" />
+                                    <Binding Path="AudioPlayer.LeadIn" />
+                                </MultiBinding.Bindings>
+                            </MultiBinding>
+                        </ProgressBar.Value>
+
                         <Interaction.Behaviors>
                             <PointerMovedTrigger>
                                 <InvokeCommandAction Command="{Binding TimelineProgressBarMoveCommand}"

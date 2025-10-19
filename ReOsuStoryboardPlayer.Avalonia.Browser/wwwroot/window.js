@@ -1,5 +1,5 @@
-﻿if (!globalThis.FullScreenInterop) {
-    globalThis.FullScreenInterop = (() => {
+﻿if (!globalThis.WindowInterop) {
+    globalThis.WindowInterop = (() => {
         function isFullScreen() {
             return document.fullscreen;
         }
@@ -14,11 +14,15 @@
             }
         }
 
+        function openURL(url) {
+            globalThis.open(url);
+        }
+
         return {
-            exitFullScreen, requestFullScreen, isFullScreen
+            exitFullScreen, requestFullScreen, isFullScreen, openURL
         };
     })();
 
-    console.log("fullscreen.js initialized");
+    console.log("window.js initialized");
 }
 

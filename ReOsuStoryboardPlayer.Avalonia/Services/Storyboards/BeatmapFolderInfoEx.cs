@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using ReOsuStoryboardPlayer.Avalonia.Models;
 using ReOsuStoryboardPlayer.Avalonia.Services.Parameters;
 using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
 using ReOsuStoryboardPlayer.Core.Parser;
@@ -23,9 +24,12 @@ public class BeatmapFolderInfoEx : BeatmapFolderInfo
 
     public string osu_file_path { get; private set; }
 
-    public string audio_file_path { get; protected set; }
+    public string audio_file_path { get; private set; }
 
-    public static async Task<BeatmapFolderInfoEx> Parse(ISimpleDirectory fsRoot, string folder_path, IParameters args)
+    public double AudioLeadInSeconds { get; private set; }
+
+    public static async Task<BeatmapFolderInfoEx> Parse(ISimpleDirectory fsRoot, string folder_path, IParameters args,
+        StoryboardPlayerSetting settings)
     {
         var explicitly_osu_diff_name = "";
 
@@ -79,7 +83,15 @@ public class BeatmapFolderInfoEx : BeatmapFolderInfo
             var section = new SectionReader(Section.General, info.reader);
 
             info.audio_file_path = Path.Combine(folder_path, section.ReadProperty("AudioFilename"));
+            info.AudioLeadInSeconds = double.TryParse(section.ReadProperty("AudioLeadIn"), out var leadIn)
+                ? leadIn / 1000f
+                : settings.DefaultAudioLeadInSeconds;
+            info.AudioLeadInSeconds = info.AudioLeadInSeconds == 0 && settings.ForceApplyDefaultAudioLeadInIfValueIsZero
+                ? settings.DefaultAudioLeadInSeconds
+                : info.AudioLeadInSeconds;
+
             Log.User($"audio file path={info.audio_file_path}");
+            Log.User($"audio leadin ={info.AudioLeadInSeconds}");
 
             var wideMatch = section.ReadProperty("WidescreenStoryboard");
 

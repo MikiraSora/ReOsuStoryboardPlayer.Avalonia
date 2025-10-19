@@ -37,8 +37,4 @@
         <AvaloniaResource Include="Assets\Fonts\NotoSansSC-VariableFont_wght.ttf"/>
         <None Remove="Assets\test.osz"/>
     </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Models\"/>
-    </ItemGroup>
 </Project>

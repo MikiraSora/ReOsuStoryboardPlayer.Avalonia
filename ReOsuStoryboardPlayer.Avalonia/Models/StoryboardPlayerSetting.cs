@@ -1,16 +1,35 @@
 ﻿using System.Text.Json.Serialization.Metadata;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ReOsuStoryboardPlayer.Avalonia.Utils;
+using SkiaSharp;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Models;
 
 public partial class StoryboardPlayerSetting : ObservableObject
 {
     [ObservableProperty]
-    private int audioSampleRate = 48000;
+    public partial bool AntiAliasing { get; set; } = false;
 
     [ObservableProperty]
-    private WideScreenOption wideScreenOption;
+    public partial int AudioSampleRate { get; set; } = 48000;
+
+    /// <summary>
+    ///     if beatmap's AudioLeadIn is not set, use DefaultAudioLeadInSeconds
+    /// </summary>
+    [ObservableProperty]
+    public partial float DefaultAudioLeadInSeconds { get; set; } = 1.8f;
+
+    [ObservableProperty]
+    public partial SKFilterQuality FilterQuality { get; set; } = SKFilterQuality.Low;
+
+    /// <summary>
+    ///     if beatmap's AudioLeadIn is zero, set DefaultAudioLeadInSeconds as well.
+    /// </summary>
+    [ObservableProperty]
+    public partial bool ForceApplyDefaultAudioLeadInIfValueIsZero { get; set; }
+
+    [ObservableProperty]
+    public partial WideScreenOption WideScreenOption { get; set; } = WideScreenOption.Auto;
 
     public static JsonTypeInfo<StoryboardPlayerSetting> JsonTypeInfo =>
         JsonSourceGenerationContext.Default.StoryboardPlayerSetting;

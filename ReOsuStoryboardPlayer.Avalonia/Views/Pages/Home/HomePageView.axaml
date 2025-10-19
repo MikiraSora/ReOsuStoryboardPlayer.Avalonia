@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:pages="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Views.Pages"
     xmlns:ui="clr-namespace:ReOsuStoryboardPlayer.Avalonia.UI"
+    xmlns:avalonia="clr-namespace:FluentIcons.Avalonia;assembly=FluentIcons.Avalonia"
     x:DataType="home:HomePageViewModel"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -14,123 +15,187 @@
     <Design.DataContext>
         <home:HomePageViewModel />
     </Design.DataContext>
-    <Grid Margin="10">
-        <!-- Welcome界面 -->
-        <StackPanel>
-            <TextBlock Text="ReOsuStoryboardPlayer" FontSize="40" TextWrapping="WrapWithOverflow" />
-            <TextBlock Text="Fasdqweniowijrwerwer" TextWrapping="WrapWithOverflow" />
+    <ScrollViewer>
+        <Grid Margin="10">
+            <!-- Welcome界面 -->
+            <StackPanel>
+                <TextBlock Text="ReOsuStoryboardPlayer" FontSize="40" TextWrapping="WrapWithOverflow" />
+                <TextBlock Text="Fasdqweniowijrwerwer" TextWrapping="WrapWithOverflow" />
 
-            <Button Margin="0,10" Content="Load Storyboard" Classes="accent"
-                    Command="{Binding LoadStoryboardInstanceCommand}" />
+                <Button Margin="0,10" Content="Load Storyboard" Classes="accent"
+                        Command="{Binding LoadStoryboardInstanceCommand}" />
 
-            <Expander Margin="0,10,0,0" IsExpanded="True" ui:PercentRelativePageLayout.WidthPercent="0.75"
-                      Header="Player Settings">
-                <StackPanel>
-                    <WrapPanel ItemSpacing="10">
-                        <CheckBox IsChecked="{Binding StoryboardPlayerSetting.AllowLog}"
-                                  Content="Allow storyboard core log" />
-                        <CheckBox IsChecked="{Binding StoryboardPlayerSetting.DebugMode}"
-                                  Content="Enable debug mode" />
-                        <CheckBox IsChecked="{Binding StoryboardPlayerSetting.FunReverseEasing}"
-                                  Content="Enable funny reverse all objects' easing" />
-                        <CheckBox IsChecked="{Binding StoryboardPlayerSetting.ShowProfileSuggest}"
-                                  Content="Show profile suggest at console log" />
-                        <CheckBox IsChecked="{Binding StoryboardPlayerSetting.EnableLoopCommandUnrolling}"
-                                  Content="Enable unroll loop commands" />
-                        <CheckBox IsChecked="{Binding StoryboardPlayerSetting.EnableSplitMoveScaleCommand}"
-                                  Content="Enable split M/S commands into MX/MY/SX/SY commands" />
-                    </WrapPanel>
+                <Expander Margin="0,10,0,0" IsExpanded="True" ui:PercentRelativePageLayout.WidthPercent="0.75">
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <avalonia:SymbolIcon FontSize="20" Symbol="PlaySettings"
+                                                 IconVariant="Filled" />
+                            <TextBlock VerticalAlignment="Center" Margin="10,0" Text="Player Settings" />
+                        </StackPanel>
+                    </Expander.Header>
+                    <StackPanel>
+                        <WrapPanel ItemSpacing="10">
+                            <CheckBox IsChecked="{Binding StoryboardPlayerSetting.AllowLog}"
+                                      Content="Allow storyboard core log" />
+                            <CheckBox IsChecked="{Binding StoryboardPlayerSetting.DebugMode}"
+                                      Content="Enable debug mode" />
+                            <CheckBox IsChecked="{Binding StoryboardPlayerSetting.FunReverseEasing}"
+                                      Content="Enable funny reverse all objects' easing" />
+                            <CheckBox IsChecked="{Binding StoryboardPlayerSetting.AntiAliasing}"
+                                      Content="Enable anti-aliasing" />
+                            <CheckBox IsChecked="{Binding StoryboardPlayerSetting.ShowProfileSuggest}"
+                                      Content="Show profile suggest at console log" />
+                            <CheckBox IsChecked="{Binding StoryboardPlayerSetting.EnableLoopCommandUnrolling}"
+                                      Content="Enable unroll loop commands" />
+                            <CheckBox IsChecked="{Binding StoryboardPlayerSetting.EnableSplitMoveScaleCommand}"
+                                      Content="Enable split M/S commands into MX/MY/SX/SY commands" />
+                        </WrapPanel>
 
-                    <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="Storyboard control size:" />
-                        <ComboBox Margin="5" ItemsSource="{Binding WideScreenOptions}"
-                                  SelectedItem="{Binding StoryboardPlayerSetting.WideScreenOption}" />
+                        <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="Filter quality:" />
+                            <ComboBox Margin="5" ItemsSource="{Binding FilterQualities}"
+                                      SelectedItem="{Binding StoryboardPlayerSetting.FilterQuality}" />
+                        </StackPanel>
+
+                        <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="Storyboard control size:" />
+                            <ComboBox Margin="5" ItemsSource="{Binding WideScreenOptions}"
+                                      SelectedItem="{Binding StoryboardPlayerSetting.WideScreenOption}" />
+                        </StackPanel>
+
+                        <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="Default audio lead-in time" />
+                            <TextBox Margin="5,0" Width="50"
+                                     Text="{Binding StoryboardPlayerSetting.DefaultAudioLeadInSeconds}" />
+                            <TextBlock VerticalAlignment="Center" Text="seconds if beatmap not set" />
+                            <CheckBox Margin="5,0,0,0" IsChecked="{Binding StoryboardPlayerSetting.ForceApplyDefaultAudioLeadInIfValueIsZero}"
+                                      Content="Allow overrite if beatmap's AudioLeadIn is zero" />
+                        </StackPanel>
+
+                        <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="AudioSampleRate" />
+                            <TextBox Margin="5,0" Width="50" Text="{Binding StoryboardPlayerSetting.AudioSampleRate}" />
+                        </StackPanel>
+
+                        <StackPanel IsEnabled="{Binding IsSupportMultiThreaded}" Margin="0,5,0,0"
+                                    Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="Use" />
+                            <TextBox Margin="5,0" Width="50" Text="{Binding StoryboardPlayerSetting.UpdateThreadCount}" />
+                            <TextBlock VerticalAlignment="Center"
+                                       Text="multithreads to execute storyboard player actions" />
+                        </StackPanel>
+
+                        <StackPanel IsEnabled="{Binding IsSupportMultiThreaded}" Margin="0,5,0,0"
+                                    Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center"
+                                       Text="Will use multithreads if command count is over " />
+                            <TextBox Margin="5,0" Width="50"
+                                     Text="{Binding StoryboardPlayerSetting.ParallelParseCommandLimitCount}" />
+                        </StackPanel>
+
+                        <StackPanel IsEnabled="{Binding IsSupportMultiThreaded}" Margin="0,5,0,0"
+                                    Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="Will use multithreads if object count is over " />
+                            <TextBox Margin="5,0" Width="50"
+                                     Text="{Binding StoryboardPlayerSetting.ParallelUpdateObjectsLimitCount}" />
+                        </StackPanel>
+
+                        <Button Margin="0,10,0,0" Content="Save Settings" Command="{Binding SaveSettingCommand}" />
                     </StackPanel>
+                </Expander>
 
-                    <StackPanel IsEnabled="{Binding IsSupportMultiThreaded}" Margin="0,5,0,0" Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="Use" />
-                        <TextBox Margin="5,0" Width="50" Text="{Binding StoryboardPlayerSetting.UpdateThreadCount}" />
-                        <TextBlock VerticalAlignment="Center" Text="multithreads to execute storyboard player actions" />
+                <Expander Margin="0,10,0,0" IsExpanded="True" ui:PercentRelativePageLayout.WidthPercent="0.75">
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <avalonia:SymbolIcon FontSize="20" Symbol="Info"
+                                                 IconVariant="Filled" />
+                            <TextBlock VerticalAlignment="Center" Margin="10,0" Text="About" />
+                        </StackPanel>
+                    </Expander.Header>
+                    <StackPanel>
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="*,*,*,*,*">
+                            <!--    -->
+                            <Label
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                HorizontalAlignment="Right"
+                                Content="CommitHash:" />
+                            <Label
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                Content="{Binding ProgramCommitIdShort}"
+                                FontWeight="Bold" />
+                            <!--    -->
+                            <Label
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                HorizontalAlignment="Right"
+                                Content="CommitTime:" />
+                            <Label
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                Content="{Binding ProgramCommitDate, StringFormat=yyyy/M/dd H:mm:ss.fff}"
+                                FontWeight="Bold" />
+                            <!--    -->
+                            <Label
+                                Grid.Row="2"
+                                Grid.Column="0"
+                                HorizontalAlignment="Right"
+                                Content="BuildTime:" />
+                            <Label
+                                Grid.Row="2"
+                                Grid.Column="1"
+                                Content="{Binding ProgramBuildTime}"
+                                FontWeight="Bold" />
+                            <!--    -->
+                            <Label
+                                Grid.Row="3"
+                                Grid.Column="0"
+                                HorizontalAlignment="Right"
+                                Content="BuildConfiguration:" />
+                            <Label
+                                Grid.Row="3"
+                                Grid.Column="1"
+                                Content="{Binding ProgramBuildConfiguration}"
+                                FontWeight="Bold" />
+                            <!--    -->
+                            <Label
+                                Grid.Row="4"
+                                Grid.Column="0"
+                                HorizontalAlignment="Right"
+                                Content="BuildVersion:" />
+                            <Label
+                                Grid.Row="4"
+                                Grid.Column="1"
+                                Content="{Binding AssemblyVersion}"
+                                FontWeight="Bold" />
+                        </Grid>
+
+                        <StackPanel Margin="10" Orientation="Horizontal">
+                            <TextBlock Text="github"
+                                       Foreground="DodgerBlue"
+                                       TextDecorations="Underline"
+                                       Cursor="Hand">
+                                <Interaction.Behaviors>
+                                    <ExecuteCommandOnPointerPressedBehavior Command="{Binding OpenURLCommand }"
+                                                                            CommandParameter="https://github.com/MikiraSora/ReOsuStoryboardPlayer.Avalonia" />
+                                </Interaction.Behaviors>
+                            </TextBlock>
+                            <!--
+                            <TextBlock Margin="10,0" Text="osu!user"
+                                       Foreground="DodgerBlue"
+                                       TextDecorations="Underline"
+                                       Cursor="Hand">
+                                <Interaction.Behaviors>
+                                    <ExecuteCommandOnPointerPressedBehavior Command="{Binding OpenURLCommand }"
+                                                                            CommandParameter="https://osu.ppy.sh/users/1344395" />
+                                </Interaction.Behaviors>
+                            </TextBlock>
+                            -->
+                        </StackPanel>
                     </StackPanel>
-
-                    <StackPanel IsEnabled="{Binding IsSupportMultiThreaded}" Margin="0,5,0,0" Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="Will use multithreads if command count is over " />
-                        <TextBox Margin="5,0" Width="50"
-                                 Text="{Binding StoryboardPlayerSetting.ParallelParseCommandLimitCount}" />
-                    </StackPanel>
-
-                    <StackPanel IsEnabled="{Binding IsSupportMultiThreaded}" Margin="0,5,0,0" Orientation="Horizontal">
-                        <TextBlock VerticalAlignment="Center" Text="Will use multithreads if object count is over " />
-                        <TextBox Margin="5,0" Width="50"
-                                 Text="{Binding StoryboardPlayerSetting.ParallelUpdateObjectsLimitCount}" />
-                    </StackPanel>
-
-                    <Button Margin="0,10,0,0" Content="Save Settings" Command="{Binding SaveSettingCommand}" />
-                </StackPanel>
-            </Expander>
-
-            <Expander Margin="0,10,0,0" IsExpanded="True" ui:PercentRelativePageLayout.WidthPercent="0.75"
-                      Header="About">
-                <StackPanel>
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="*,*,*,*,*">
-                        <!--    -->
-                        <Label
-                            Grid.Row="0"
-                            Grid.Column="0"
-                            HorizontalAlignment="Right"
-                            Content="CommitHash:" />
-                        <Label
-                            Grid.Row="0"
-                            Grid.Column="1"
-                            Content="{Binding ProgramCommitIdShort}"
-                            FontWeight="Bold" />
-                        <!--    -->
-                        <Label
-                            Grid.Row="1"
-                            Grid.Column="0"
-                            HorizontalAlignment="Right"
-                            Content="CommitTime:" />
-                        <Label
-                            Grid.Row="1"
-                            Grid.Column="1"
-                            Content="{Binding ProgramCommitDate, StringFormat=yyyy/M/dd H:mm:ss.fff}"
-                            FontWeight="Bold" />
-                        <!--    -->
-                        <Label
-                            Grid.Row="2"
-                            Grid.Column="0"
-                            HorizontalAlignment="Right"
-                            Content="BuildTime:" />
-                        <Label
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            Content="{Binding ProgramBuildTime}"
-                            FontWeight="Bold" />
-                        <!--    -->
-                        <Label
-                            Grid.Row="3"
-                            Grid.Column="0"
-                            HorizontalAlignment="Right"
-                            Content="BuildConfiguration:" />
-                        <Label
-                            Grid.Row="3"
-                            Grid.Column="1"
-                            Content="{Binding ProgramBuildConfiguration}"
-                            FontWeight="Bold" />
-                        <!--    -->
-                        <Label
-                            Grid.Row="4"
-                            Grid.Column="0"
-                            HorizontalAlignment="Right"
-                            Content="BuildVersion:" />
-                        <Label
-                            Grid.Row="4"
-                            Grid.Column="1"
-                            Content="{Binding AssemblyVersion}"
-                            FontWeight="Bold" />
-                    </Grid>
-                </StackPanel>
-            </Expander>
-        </StackPanel>
-    </Grid>
+                </Expander>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </pages:PageViewBase>

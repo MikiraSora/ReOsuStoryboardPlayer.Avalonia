@@ -14,7 +14,8 @@ public partial class WebAudioInterop
     public static partial void CreatePlayer([JSMarshalAs<JSType.String>] string id);
 
     [JSImport("globalThis.WebAudioInterop.loadFromBase64")]
-    public static partial Task LoadFromBase64([JSMarshalAs<JSType.String>] string id, string base64);
+    public static partial Task LoadFromBase64([JSMarshalAs<JSType.String>] string id, string base64,
+        double prependLeadInSeconds);
 
     [JSImport("globalThis.WebAudioInterop.play")]
     public static partial void Play([JSMarshalAs<JSType.String>] string id);

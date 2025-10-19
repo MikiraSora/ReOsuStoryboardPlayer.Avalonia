@@ -13,7 +13,6 @@ using ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPlayer;
 using ReOsuStoryboardPlayer.Avalonia.Models;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
-using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio;
@@ -46,7 +45,7 @@ public class DesktopAudioManager : ObservableObject, IAudioManager
         (".wav", "Audio File")
     };
 
-    public async Task<IAudioPlayer> LoadAudio(Stream stream)
+    public async Task<IAudioPlayer> LoadAudio(Stream stream, double prependLeadInSeconds = 0)
     {
         if (stream is null)
             return null;
@@ -55,7 +54,7 @@ public class DesktopAudioManager : ObservableObject, IAudioManager
         ownAudioPlayerRefs.Add(new WeakReference<DesktopAudioPlayer>(player));
 
         var playerSetting = await persistence.Load<StoryboardPlayerSetting>(default);
-        await player.Load(stream, playerSetting.AudioSampleRate);
+        await player.Load(stream, playerSetting.AudioSampleRate, prependLeadInSeconds);
         return player;
     }
 

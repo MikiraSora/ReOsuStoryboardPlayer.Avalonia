@@ -23,7 +23,9 @@ public class BrowserPlatform(ILogger<BrowserPlatform> logger) : IPlatform
                 var rtid = Thread.CurrentThread.ManagedThreadId;
                 success = ctid != rtid;
             });
+#pragma warning disable CA1416
             t.Start();
+#pragma warning restore CA1416
             t.Join(100);
             return success;
         }

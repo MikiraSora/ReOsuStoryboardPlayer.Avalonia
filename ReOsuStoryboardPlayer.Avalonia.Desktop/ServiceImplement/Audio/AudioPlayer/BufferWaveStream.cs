@@ -1,51 +1,45 @@
-﻿using NAudio.Wave;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.InteropServices;
+using NAudio.Wave;
 
-namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPlayer
+namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPlayer;
+
+internal class BufferWaveStream : WaveStream, IWaveProvider, ISampleProvider
 {
-    internal class BufferWaveStream : WaveStream, IWaveProvider, ISampleProvider
+    private readonly WaveFormat format;
+    private readonly byte[] waveBuffer;
+
+    public BufferWaveStream(byte[] buffer, WaveFormat format)
     {
-        private readonly byte[] waveBuffer;
-        private readonly WaveFormat format;
+        waveBuffer = buffer;
+        this.format = format;
+    }
 
-        public BufferWaveStream(byte[] buffer, WaveFormat format)
-        {
-            waveBuffer = buffer;
-            this.format = format;
-        }
+    public override long Length => waveBuffer.LongLength;
 
-        public override WaveFormat WaveFormat => format;
+    public override long Position { get; set; }
 
-        public override long Length => waveBuffer.LongLength;
+    public int Read(float[] buffer, int offset, int count)
+    {
+        var floatBuffer = MemoryMarshal.Cast<byte, float>(waveBuffer);
 
-        public override long Position { get; set; } = 0;
+        var floatPosition = (int) (Position / sizeof(float));
+        var floatLength = waveBuffer.Length / sizeof(float);
 
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            var beforePosition = Position;
-            for (int i = 0; i < count && Position < waveBuffer.Length; i++)
-                buffer[offset + i] = waveBuffer[Position++];
-            return (int)(Position - beforePosition);
-        }
+        var beforePosition = floatPosition;
+        for (var i = 0; i < count && floatPosition < floatLength; i++)
+            buffer[offset + i] = floatBuffer[floatPosition++];
+        var read = floatPosition - beforePosition;
+        Position = floatPosition * sizeof(float);
+        return read;
+    }
 
-        public int Read(float[] buffer, int offset, int count)
-        {
-            var floatBuffer = MemoryMarshal.Cast<byte, float>(waveBuffer);
+    public override WaveFormat WaveFormat => format;
 
-            var floatPosition = (int)(Position / sizeof(float));
-            var floatLength = waveBuffer.Length / sizeof(float);
-
-            var beforePosition = floatPosition;
-            for (int i = 0; i < count && floatPosition < floatLength; i++)
-                buffer[offset + i] = floatBuffer[floatPosition++];
-            var read = floatPosition - beforePosition;
-            Position = floatPosition * sizeof(float);
-            return read;
-        }
+    public override int Read(byte[] buffer, int offset, int count)
+    {
+        var beforePosition = Position;
+        for (var i = 0; i < count && Position < waveBuffer.Length; i++)
+            buffer[offset + i] = waveBuffer[Position++];
+        return (int) (Position - beforePosition);
     }
 }

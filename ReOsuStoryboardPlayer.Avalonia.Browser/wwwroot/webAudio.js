@@ -16,32 +16,37 @@
                 onEnd: undefined,
                 playing: false
             });
-
         }
 
-        function hello() {
-            console.log('Hello WebAudio333!');
-        }
-
-        async function loadFromBase64(id, base64) {
+        async function loadFromBase64(id, base64, leadIn = 0) {
             const player = players.get(id);
             if (!player) return;
 
-            console.log("loadFromBase64() 11111");
+            console.log("loadFromBase64() start");
             const binary = atob(base64);
-            console.log("loadFromBase64() 2222");
             const arrayBuffer = new ArrayBuffer(binary.length);
-            console.log("loadFromBase64() 33333");
             const view = new Uint8Array(arrayBuffer);
             for (let i = 0; i < binary.length; i++) {
                 view[i] = binary.charCodeAt(i);
             }
-            console.log("loadFromBase64() 44444");
 
-            player.buffer = await player.context.decodeAudioData(arrayBuffer.slice(0));
-            console.log("loadFromBase64() 55555");
-            player.duration = player.buffer.duration;
-            console.log("loadFromBase64() 56555");
+            const decodedBuffer = await player.context.decodeAudioData(arrayBuffer.slice(0));
+
+            const totalLength = decodedBuffer.length + Math.floor(decodedBuffer.sampleRate * leadIn);
+            const channels = decodedBuffer.numberOfChannels;
+            const newBuffer = player.context.createBuffer(channels, totalLength, decodedBuffer.sampleRate);
+
+            for (let ch = 0; ch < channels; ch++) {
+                const newData = newBuffer.getChannelData(ch);
+                const srcData = decodedBuffer.getChannelData(ch);
+                newData.set(srcData, Math.floor(decodedBuffer.sampleRate * leadIn));
+            }
+
+            player.buffer = newBuffer;
+            player.duration = newBuffer.duration;
+            player.offset = 0;
+
+            console.log(`loadFromBase64() done, duration=${player.duration.toFixed(2)}, leadIn=${player.leadIn}s`);
         }
 
         function _createSource(player) {
@@ -49,7 +54,6 @@
             source.buffer = player.buffer;
 
             if (!player.gainNode) {
-                //make sure gainNode is created
                 player.gainNode = player.context.createGain();
                 player.gainNode.gain.value = player.volume;
                 player.gainNode.connect(player.context.destination);
@@ -68,7 +72,7 @@
             const player = players.get(id);
             if (!player || !player.buffer) return;
 
-            if (player.playing) return; // already playing
+            if (player.playing) return;
 
             player.source = _createSource(player);
             player.id = id;
@@ -77,7 +81,6 @@
             player.playing = true;
             player.onEnd = () => {
                 player.playing = false;
-                // 调用 C# 导出的回调
                 if (globalThis.AudioPlayer_OnPlaybackEnded)
                     globalThis.AudioPlayer_OnPlaybackEnded(player.id);
             };
@@ -86,7 +89,6 @@
         function pause(id) {
             const player = players.get(id);
             if (!player?.playing) return;
-
             stop(id, true);
         }
 
@@ -94,46 +96,47 @@
             const player = players.get(id);
             if (!player?.source) return;
 
-            //这里先清空onended避免误触发
             player.onEnd = null;
             try {
                 player.source.stop();
             } catch {
             }
             player.source.disconnect();
-            if (!keepOffset) player.offset = 0;
-            else player.offset = player.context.currentTime - player.startTime;
+            if (!keepOffset)
+                player.offset = 0;
+            else
+                player.offset = player.context.currentTime - player.startTime;
             player.playing = false;
+            console.log(`stop() keepOffset=${keepOffset} player.offset = ${player.offset}`)
         }
 
         function jumpToTime(id, seconds, isPauseAfterJumped) {
             const player = players.get(id);
             if (!player?.buffer) return;
 
-            // 停止当前播放
             stop(id);
             player.offset = Math.min(seconds, player.duration);
 
-            // 重新创建 source 并开始播放
             player.source = _createSource(player);
             player.id = id;
             player.startTime = player.context.currentTime - player.offset;
+            console.log(`stop() player.context.currentTime=${player.context.currentTime} player.offset=${player.offset} player.startTime = ${player.startTime}`)
             player.source.start(0, player.offset);
             player.playing = true;
 
-            if (isPauseAfterJumped) {
+            if (isPauseAfterJumped)
                 pause(id);
-            }
+
         }
 
         function getCurrentTime(id) {
             const player = players.get(id);
             if (!player) return 0;
-
-            if (player.playing)
-                return player.context.currentTime - player.startTime;
-            else
-                return player.offset;
+            const time = player.playing
+                ? player.context.currentTime - player.startTime
+                : player.offset;
+            console.log(`getCurrentTime() player.playing=${player.playing} time=${time}`)
+            return Math.max(0, time);
         }
 
         function getDuration(id) {
@@ -143,20 +146,27 @@
         function dispose(id) {
             const player = players.get(id);
             stop(id);
-            player.gainNode.disconnect();
-            player.gainNode = null;
+            if (player?.gainNode) {
+                player.gainNode.disconnect();
+                player.gainNode = null;
+            }
             players.delete(id);
         }
 
         function setVolume(id, volume) {
             const player = players.get(id);
             player.volume = Math.max(0, Math.min(1, volume));
-            player.gainNode.gain.value = player.volume;
+            if (player.gainNode)
+                player.gainNode.gain.value = player.volume;
         }
 
         function getVolume(id) {
             const player = players.get(id);
-            return player.volume;
+            return player?.volume ?? 1;
+        }
+
+        function hello() {
+            console.log('Hello WebAudio!');
         }
 
         return {

@@ -9,6 +9,7 @@
 
     <Application.Resources>
         <valueConverters:TimeSpanToStringValueConverter x:Key="TimeSpanToStringValueConverter" />
+        <valueConverters:AudioPlayerProgressConverter x:Key="AudioPlayerProgressConverter"/>
     </Application.Resources>
 
     <Application.Styles>

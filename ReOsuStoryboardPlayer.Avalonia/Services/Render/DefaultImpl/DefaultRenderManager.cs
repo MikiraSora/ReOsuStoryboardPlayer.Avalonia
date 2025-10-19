@@ -8,7 +8,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 namespace ReOsuStoryboardPlayer.Avalonia.Services.Render.DefaultImpl;
 
 [RegisterSingleton<IRenderManager>]
-public class DefaultRenderManager(ILogger<DefaultRenderManager> logger) : IRenderManager
+public class DefaultRenderManager() : IRenderManager
 {
     private readonly ConcurrentQueue<IRenderManager.RenderAction> pendingActions = new();
     private bool requestedInvalidateVisual;

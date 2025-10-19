@@ -22,6 +22,9 @@ public partial class BrowserAudioPlayer : ObservableObject, IAudioPlayer, IDispo
     [ObservableProperty]
     private bool isPlaying;
 
+    [ObservableProperty]
+    private TimeSpan leadIn;
+
     public BrowserAudioPlayer(ILogger<BrowserAudioPlayer> logger)
     {
         this.logger = logger;
@@ -42,7 +45,7 @@ public partial class BrowserAudioPlayer : ObservableObject, IAudioPlayer, IDispo
         }
     }
 
-    public TimeSpan CurrentTime => TimeSpan.FromSeconds(GetCurrentPlayTime());
+    public TimeSpan CurrentTime => TimeSpan.FromSeconds(GetCurrentPlayTime()) - LeadIn;
 
     public void Play()
     {
@@ -79,8 +82,9 @@ public partial class BrowserAudioPlayer : ObservableObject, IAudioPlayer, IDispo
     {
         if (!IsAvaliable)
             return;
-        WebAudioInterop.JumpToTime(id, timeSpan.TotalSeconds, pause);
-        logger.LogInformationEx($"called by id:{id}");
+        var actualSeekTime = timeSpan;
+        logger.LogInformationEx($"called by id:{id}, actualSeekTime:{actualSeekTime}, pause:{pause}");
+        WebAudioInterop.JumpToTime(id, actualSeekTime.TotalSeconds, pause);
         IsPlaying = !pause;
     }
 
@@ -100,25 +104,26 @@ public partial class BrowserAudioPlayer : ObservableObject, IAudioPlayer, IDispo
         logger.LogInformationEx($"called by id:{id}");
     }
 
-    public async Task LoadFromAudioFileBytes(byte[] audioData)
+    public async Task LoadFromAudioFileBytes(byte[] audioData, double prependLeadInSeconds = 0)
     {
         var base64 = Convert.ToBase64String(audioData);
         logger.LogDebugEx($"audioData size: {audioData.Length}");
-        await WebAudioInterop.LoadFromBase64(id, base64);
+        await WebAudioInterop.LoadFromBase64(id, base64, prependLeadInSeconds);
         logger.LogInformationEx("LoadFromBase64() done");
-        Duration = TimeSpan.FromSeconds(GetDuration());
+        LeadIn = TimeSpan.FromSeconds(prependLeadInSeconds);
+        Duration = TimeSpan.FromSeconds(GetDuration()) - LeadIn;
         logger.LogInformationEx($"Duration: {Duration}");
         logger.LogInformationEx($"called by id:{id}");
 
         IsAvaliable = true;
     }
 
-    public double GetCurrentPlayTime()
+    private double GetCurrentPlayTime()
     {
         return WebAudioInterop.GetCurrentTime(id);
     }
 
-    public double GetDuration()
+    private double GetDuration()
     {
         return WebAudioInterop.GetDuration(id);
     }

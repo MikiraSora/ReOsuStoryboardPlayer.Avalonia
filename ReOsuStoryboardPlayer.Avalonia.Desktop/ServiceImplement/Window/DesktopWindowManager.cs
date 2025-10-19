@@ -1,18 +1,17 @@
-﻿using System.Linq;
+﻿using System.Diagnostics;
+using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Injectio.Attributes;
 using ReOsuStoryboardPlayer.Avalonia.Services.Window;
-using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Window;
 
-[Injectio.Attributes.RegisterSingleton<IWindowManager>]
-public partial class DesktopWindowManager : ObservableObject, IWindowManager
+[RegisterSingleton<IWindowManager>]
+public class DesktopWindowManager : ObservableObject, IWindowManager
 {
-    [ObservableProperty]
-    private bool isFullScreen;
-
     private WindowState prevWindowState = WindowState.Normal;
 
     public DesktopWindowManager()
@@ -21,26 +20,39 @@ public partial class DesktopWindowManager : ObservableObject, IWindowManager
             prevWindowState = mainWindow.WindowState;
     }
 
-    partial void OnIsFullScreenChanged(bool oldValue, bool newValue)
+    public bool IsFullScreen
     {
-        if (newValue != oldValue)
-            ApplyFullScreen(newValue);
+        get => GetMainWindow()?.WindowState == WindowState.FullScreen;
+        set
+        {
+            ApplyFullScreen(value);
+            OnPropertyChanged();
+        }
+    }
+
+    public void OpenUrl(string url)
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = url,
+            UseShellExecute = true
+        });
     }
 
     public global::Avalonia.Controls.Window GetMainWindow()
     {
-        if (App.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktopLifetime)
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktopLifetime)
             return default;
 
-        return desktopLifetime.Windows?.FirstOrDefault();
+        return desktopLifetime.Windows.FirstOrDefault();
     }
 
-    private void ApplyFullScreen(bool isFullScreen)
+    private void ApplyFullScreen(bool enable)
     {
         if (GetMainWindow() is not global::Avalonia.Controls.Window mainWindow)
             return;
 
-        if (isFullScreen)
+        if (enable)
         {
             prevWindowState = mainWindow.WindowState;
             mainWindow.WindowState = WindowState.FullScreen;

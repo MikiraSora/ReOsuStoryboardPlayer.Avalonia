@@ -3,4 +3,6 @@
 public interface IWindowManager
 {
     bool IsFullScreen { get; set; }
+
+    void OpenUrl(string url);
 }

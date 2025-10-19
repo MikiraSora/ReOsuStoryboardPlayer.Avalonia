@@ -9,7 +9,9 @@ using Avalonia.Skia;
 using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Services.Parameters;
+using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
 using ReOsuStoryboardPlayer.Avalonia.Services.Render;
+using ReOsuStoryboardPlayer.Avalonia.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
 using ReOsuStoryboardPlayer.Core.Base;
@@ -25,14 +27,16 @@ public class StoryboardLoader
 {
     private readonly ILogger<StoryboardLoader> logger;
     private readonly IParameterManager parameterManager;
+    private readonly IPersistence persistence;
     private readonly IRenderManager renderManager;
 
     public StoryboardLoader(ILogger<StoryboardLoader> logger, IParameterManager parameterManager,
-        IRenderManager renderManager)
+        IRenderManager renderManager, IPersistence persistence)
     {
         this.logger = logger;
         this.parameterManager = parameterManager;
         this.renderManager = renderManager;
+        this.persistence = persistence;
     }
 
     public async Task<StoryboardInstance> LoadStoryboard(ISimpleDirectory fsRoot)
@@ -43,7 +47,9 @@ public class StoryboardLoader
         dumpDirectory(sb, fsRoot);
         logger.LogDebugEx(sb.ToString());
 
-        var info = await BeatmapFolderInfoEx.Parse(fsRoot, string.Empty, parameterManager.Parameters);
+        var playerSettings = await persistence.Load(JsonSourceGenerationContext.Default.StoryboardPlayerSetting);
+
+        var info = await BeatmapFolderInfoEx.Parse(fsRoot, string.Empty, parameterManager.Parameters, playerSettings);
         if (info == null)
         {
             logger?.LogErrorEx("can't create BeatmapFolderInfo");

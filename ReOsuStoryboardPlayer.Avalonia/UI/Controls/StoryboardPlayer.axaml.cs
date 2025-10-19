@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
@@ -34,9 +35,17 @@ public partial class StoryboardPlayer : UserControl
         AvaloniaProperty.RegisterDirect<StoryboardPlayer, IAudioPlayer>(nameof(AudioPlayer), o => o.audioPlayer,
             (o, v) => { o.audioPlayer = v; });
 
-    public static readonly DirectProperty<StoryboardPlayer, WideScreenOption> WideScreenProperty =
-        AvaloniaProperty.RegisterDirect<StoryboardPlayer, WideScreenOption>(nameof(WideScreen), o => o.wideScreenOption,
-            (o, v) => { o.wideScreenOption = v; });
+    public static readonly DirectProperty<StoryboardPlayer, StoryboardPlayerSetting> PlayerSettingProperty =
+        AvaloniaProperty.RegisterDirect<StoryboardPlayer, StoryboardPlayerSetting>(nameof(PlayerSetting),
+            o => o.storyboardPlayerSetting,
+            (o, v) =>
+            {
+                if (o.storyboardPlayerSetting is not null)
+                    o.storyboardPlayerSetting.PropertyChanged -= o.StoryboardPlayerSettingOnPropertyChanged;
+                o.storyboardPlayerSetting = v;
+                if (o.storyboardPlayerSetting is not null)
+                    o.storyboardPlayerSetting.PropertyChanged += o.StoryboardPlayerSettingOnPropertyChanged;
+            });
 
 
     private readonly SKPaint comonPaint;
@@ -45,18 +54,18 @@ public partial class StoryboardPlayer : UserControl
     //private readonly SKImage debugImage;
 
     private readonly ILogger<StoryboardPlayer> logger;
-    private readonly SKPaint sprintPaint;
 
     private readonly StoryboardDrawOperation storyboardDrawOperation;
 
     private IAudioPlayer audioPlayer;
 
     private volatile bool isRendering;
+    private SKPaint sprintPaint;
 
     private StoryboardInstance storyboardInstance;
+    private StoryboardPlayerSetting storyboardPlayerSetting = new();
 
     private StoryboardUpdater storyboardUpdater;
-    private WideScreenOption wideScreenOption = WideScreenOption.Auto;
 
     public StoryboardPlayer()
     {
@@ -88,16 +97,28 @@ public partial class StoryboardPlayer : UserControl
         set => SetValue(StoryboardInstanceProperty, value);
     }
 
-    public WideScreenOption WideScreen
+    public StoryboardPlayerSetting PlayerSetting
     {
-        get => GetValue(WideScreenProperty);
-        set => SetValue(WideScreenProperty, value);
+        get => GetValue(PlayerSettingProperty);
+        set => SetValue(PlayerSettingProperty, value);
     }
 
     public IAudioPlayer AudioPlayer
     {
         get => GetValue(AudioPlayerProperty);
         set => SetValue(AudioPlayerProperty, value);
+    }
+
+    private void StoryboardPlayerSettingOnPropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(PlayerSetting.AntiAliasing):
+            case nameof(PlayerSetting.FilterQuality):
+                sprintPaint.FilterQuality = PlayerSetting.FilterQuality;
+                sprintPaint.IsAntialias = PlayerSetting.AntiAliasing;
+                break;
+        }
     }
 
     private void RebuildStoryboardUpdater()
@@ -129,9 +150,10 @@ public partial class StoryboardPlayer : UserControl
 
         UpdateStoryboard();
 
-        var isWidcreenStoryboard = wideScreenOption == WideScreenOption.Auto
+        var settingWideScreenOption = storyboardPlayerSetting?.WideScreenOption ?? WideScreenOption.Auto;
+        var isWidcreenStoryboard = settingWideScreenOption == WideScreenOption.Auto
             ? storyboardInstance.Info.IsWidescreenStoryboard
-            : wideScreenOption is WideScreenOption.ForceWideScreen;
+            : settingWideScreenOption is WideScreenOption.ForceWideScreen;
 
         var storyboardWidth = isWidcreenStoryboard ? 854f : 640f;
         var storyboardHeight = 480f;

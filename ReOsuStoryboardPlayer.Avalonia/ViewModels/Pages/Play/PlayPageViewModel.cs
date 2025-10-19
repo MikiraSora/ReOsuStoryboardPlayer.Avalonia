@@ -14,7 +14,6 @@ using ReOsuStoryboardPlayer.Avalonia.Services.Dialog;
 using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 using ReOsuStoryboardPlayer.Avalonia.Services.Window;
-using ReOsuStoryboardPlayer.Avalonia.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 namespace ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Play;
@@ -206,11 +205,12 @@ public partial class PlayPageViewModel : PageViewModelBase
         if (AudioPlayer is null)
             return;
         var point = e.GetPosition(control);
-        logger.LogInformationEx($"point: {point.X}, {point.Y} width: {control.Bounds.Width} ");
 
-        var jumpToTime = Math.Clamp(point.X / control.Bounds.Width, 0, 1) *
-                         AudioPlayer.Duration.TotalMilliseconds;
-        AudioPlayer?.Seek(TimeSpan.FromMilliseconds(jumpToTime), true);
+        var jumpToTime = TimeSpan.FromMilliseconds(Math.Clamp(point.X / control.Bounds.Width, 0, 1) *
+            (AudioPlayer.Duration + AudioPlayer.LeadIn).TotalMilliseconds - AudioPlayer.LeadIn.TotalMilliseconds);
+        AudioPlayer?.Seek(jumpToTime, true);
+        logger.LogInformationEx(
+            $"point: {point.X}, {point.Y} width: {control.Bounds.Width} inputJumpTime: {jumpToTime}, after: {AudioPlayer.CurrentTime} ");
         OnPropertyChanged(nameof(CurrentAudioTime));
         e.Handled = true;
     }

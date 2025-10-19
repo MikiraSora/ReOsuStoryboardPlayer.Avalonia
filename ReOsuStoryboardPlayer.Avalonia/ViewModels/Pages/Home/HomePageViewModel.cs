@@ -13,10 +13,12 @@ using ReOsuStoryboardPlayer.Avalonia.Services.Parameters;
 using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
 using ReOsuStoryboardPlayer.Avalonia.Services.Plaform;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
+using ReOsuStoryboardPlayer.Avalonia.Services.Window;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem.Impl.Zip;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs.OpenStoryboard;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Play;
+using SkiaSharp;
 
 namespace ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Home;
 
@@ -31,6 +33,7 @@ public partial class HomePageViewModel : PageViewModelBase
     private readonly IPlatform platform;
     private readonly IStoryboardLoadDialog storyboardLoadDialog;
     private readonly StoryboardLoader storyboardLoader;
+    private readonly IWindowManager windowManager;
 
     [ObservableProperty]
     private StoryboardPlayerSetting storyboardPlayerSetting;
@@ -44,6 +47,7 @@ public partial class HomePageViewModel : PageViewModelBase
         IAudioManager audioManager,
         IParameterManager parameterManager,
         IPlatform platform,
+        IWindowManager windowManager,
         ILogger<HomePageViewModel> logger)
     {
         this.dialogManager = dialogManager;
@@ -54,6 +58,7 @@ public partial class HomePageViewModel : PageViewModelBase
         this.audioManager = audioManager;
         this.parameterManager = parameterManager;
         this.platform = platform;
+        this.windowManager = windowManager;
         this.logger = logger;
 
         Initaliaze();
@@ -77,6 +82,7 @@ public partial class HomePageViewModel : PageViewModelBase
     }
 
     public WideScreenOption[] WideScreenOptions { get; } = Enum.GetValues<WideScreenOption>();
+    public SKFilterQuality[] FilterQualities { get; } = Enum.GetValues<SKFilterQuality>();
 
     public bool IsSupportMultiThreaded => platform.SupportMultiThread;
 
@@ -153,6 +159,12 @@ public partial class HomePageViewModel : PageViewModelBase
         playViewModel.StoryboardPlayTime = 0;
         playViewModel.AudioPlayer = audio;
         logger.LogInformationEx($"setup PlayPageViewModel done: {instance}");
+    }
+
+    [RelayCommand]
+    private void OpenURL(string url)
+    {
+        windowManager.OpenUrl(url);
     }
 
     [RelayCommand]

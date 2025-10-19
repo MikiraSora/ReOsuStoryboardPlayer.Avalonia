@@ -7,18 +7,18 @@ namespace ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 
 public interface IAudioManager
 {
-    Task<IAudioPlayer> LoadAudio(Stream stream);
+    Task<IAudioPlayer> LoadAudio(Stream stream, double prependLeadInSeconds);
 
-    async Task<IAudioPlayer> LoadAudio(ISimpleFile file)
+    async Task<IAudioPlayer> LoadAudio(ISimpleFile file, double prependLeadInSeconds)
     {
         using var fs = new MemoryStream(await file.ReadAllBytes());
-        return await LoadAudio(fs);
+        return await LoadAudio(fs, prependLeadInSeconds);
     }
 
     async Task<IAudioPlayer> LoadAudio(StoryboardInstance storyboardInstance)
     {
         var audioFilePath = storyboardInstance.Info.audio_file_path;
         using var fs = await SimpleIO.OpenRead(storyboardInstance.FileSystemFolder, audioFilePath);
-        return await LoadAudio(fs);
+        return await LoadAudio(fs, storyboardInstance.Info.AudioLeadInSeconds);
     }
 }

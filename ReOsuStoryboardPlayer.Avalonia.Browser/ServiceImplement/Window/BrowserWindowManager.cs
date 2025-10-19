@@ -1,22 +1,27 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Injectio.Attributes;
 using ReOsuStoryboardPlayer.Avalonia.Services.Window;
-using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Window;
 
-[Injectio.Attributes.RegisterSingleton<IWindowManager>]
+[RegisterSingleton<IWindowManager>]
 public class BrowserWindowManager : ObservableObject, IWindowManager
 {
     public bool IsFullScreen
     {
-        get => FullScreenInterop.IsFullScreen();
+        get => WindowInterop.IsFullScreen();
         set
         {
             if (value)
-                FullScreenInterop.RequestFullScreen();
+                WindowInterop.RequestFullScreen();
             else
-                FullScreenInterop.ExitFullScreen();
+                WindowInterop.ExitFullScreen();
             OnPropertyChanged();
         }
+    }
+
+    public void OpenUrl(string url)
+    {
+        WindowInterop.OpenURL(url);
     }
 }
