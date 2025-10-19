@@ -10,6 +10,7 @@
                 source: null,
                 gainNode: null,
                 startTime: 0,
+                leadIn: 0,
                 offset: 0,
                 duration: 0,
                 volume: 1,
@@ -45,6 +46,7 @@
             player.buffer = newBuffer;
             player.duration = newBuffer.duration;
             player.offset = 0;
+            player.leadIn = leadIn;
 
             console.log(`loadFromBase64() done, duration=${player.duration.toFixed(2)}, leadIn=${player.leadIn}s`);
         }
@@ -115,7 +117,7 @@
             if (!player?.buffer) return;
 
             stop(id);
-            player.offset = Math.min(seconds, player.duration);
+            player.offset = Math.min(seconds + player.leadIn, player.duration);
 
             player.source = _createSource(player);
             player.id = id;
@@ -135,7 +137,7 @@
             const time = player.playing
                 ? player.context.currentTime - player.startTime
                 : player.offset;
-            console.log(`getCurrentTime() player.playing=${player.playing} time=${time}`)
+            //console.log(`getCurrentTime() player.playing=${player.playing} time=${time}`)
             return Math.max(0, time);
         }
 
