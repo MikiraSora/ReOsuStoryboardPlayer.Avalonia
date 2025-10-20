@@ -8,7 +8,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Browser.ServiceImplement.Audio;
 
-public partial class BrowserAudioPlayer : ObservableObject, IAudioPlayer, IDisposable
+public partial class BrowserAudioPlayer : ObservableObject, IAudioPlayer
 {
     private readonly string id;
     private readonly ILogger<BrowserAudioPlayer> logger;

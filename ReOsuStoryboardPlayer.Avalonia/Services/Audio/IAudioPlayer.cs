@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 
-public interface IAudioPlayer : INotifyPropertyChanged
+public interface IAudioPlayer : INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     ///     applied LeadIn

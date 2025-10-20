@@ -39,4 +39,9 @@ public class ZipSimpleFile : ISimpleFile
     {
         return $"File: {FullPath}, Length: {FileLength}";
     }
+
+    public void Dispose()
+    {
+        //nothing to do
+    }
 }

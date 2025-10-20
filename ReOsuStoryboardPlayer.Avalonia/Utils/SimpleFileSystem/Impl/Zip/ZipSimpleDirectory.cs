@@ -54,6 +54,11 @@ public class ZipSimpleDirectory : ISimpleDirectory
         return results.ToArray();
     }
 
+    public void Dispose()
+    {
+        //nothing to do
+    }
+
     private static Regex WildcardToRegex(string pattern)
     {
         var sb = new StringBuilder();

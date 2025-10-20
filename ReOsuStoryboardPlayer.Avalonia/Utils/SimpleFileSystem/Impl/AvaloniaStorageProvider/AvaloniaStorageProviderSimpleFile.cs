@@ -34,6 +34,10 @@ public class AvaloniaStorageProviderSimpleFile : ISimpleFile, IDisposable
 
     public async Task<byte[]> ReadAllBytes()
     {
+#if DEBUG
+        if (file == null)
+            throw new ObjectDisposedException($"AvaloniaStorageProviderSimpleFile {FullPath} is disposed.");
+#endif
         if (file == null)
             return [];
         using var fs = await file.OpenReadAsync();

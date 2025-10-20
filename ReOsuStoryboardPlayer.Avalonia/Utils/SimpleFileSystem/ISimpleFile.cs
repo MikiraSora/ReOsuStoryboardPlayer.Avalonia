@@ -1,11 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
 
-public interface ISimpleFile
+public interface ISimpleFile : IDisposable
 {
     ISimpleDirectory ParentDictionary { get; }
-    
+
     string FullPath { get; }
 
     /// <summary>

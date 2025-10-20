@@ -36,6 +36,14 @@ public class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory
         return _files.ContainsKey(fileName);
     }
 
+    public void Dispose()
+    {
+        foreach (var childDictionary in ChildDictionaries)
+            childDictionary?.Dispose();
+        foreach (var childFile in ChildFiles)
+            childFile?.Dispose();
+    }
+
     public ISimpleFile[] GetFiles(string searchPattern = "*")
     {
         var regex = WildcardToRegex(searchPattern);

@@ -1,6 +1,8 @@
-﻿namespace ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
+﻿using System;
 
-public interface ISimpleDirectory
+namespace ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
+
+public interface ISimpleDirectory : IDisposable
 {
     ISimpleDirectory ParentDictionary { get; }
 
