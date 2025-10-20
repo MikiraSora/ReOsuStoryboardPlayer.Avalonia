@@ -68,6 +68,8 @@ public partial class StoryboardPlayer : UserControl
 
     private volatile bool isRendering;
 
+    private ByteVec4? prevSpritePrintColor;
+
     private StoryboardInstance storyboardInstance;
     private StoryboardPlayerSetting storyboardPlayerSetting = new();
 
@@ -341,12 +343,15 @@ public partial class StoryboardPlayer : UserControl
         skCanvas.Save();
 
         sprintPaint.BlendMode = obj.IsAdditive ? SKBlendMode.Plus : SKBlendMode.SrcOver;
-        sprintPaint.ColorFilter = SKColorFilter.CreateBlendMode(
-            new SKColor(obj.Color.X, obj.Color.Y, obj.Color.Z, obj.Color.W),
-            SKBlendMode.Modulate);
-        var r =SKColorFilter.CreateBlendMode(
-            new SKColor(obj.Color.X, obj.Color.Y, obj.Color.Z, obj.Color.W),
-            SKBlendMode.Modulate);
+
+        if (prevSpritePrintColor is not ByteVec4 prevColor || prevColor != obj.Color)
+        {
+            sprintPaint.ColorFilter?.Dispose();
+            sprintPaint.ColorFilter = SKColorFilter.CreateBlendMode(
+                new SKColor(obj.Color.X, obj.Color.Y, obj.Color.Z, obj.Color.W),
+                SKBlendMode.Modulate);
+            prevSpritePrintColor = obj.Color;
+        }
 
         var origin = new SKPoint(-obj.OriginOffset.X * (obj.IsHorizonFlip ? -1 : 1) * (obj.Scale.X < 0 ? -1 : 1),
                          obj.OriginOffset.Y * (obj.IsVerticalFlip ? -1 : 1) * (obj.Scale.Y < 0 ? -1 : 1)) -
