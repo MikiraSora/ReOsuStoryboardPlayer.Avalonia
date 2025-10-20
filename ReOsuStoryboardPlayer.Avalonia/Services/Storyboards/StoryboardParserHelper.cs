@@ -65,38 +65,13 @@ public static class StoryboardParserHelper
 
     private static void InitOptimzerManager()
     {
-        if (!optimzer_add)
+        if (optimzer_add)
             return;
-/*
-        try
-        {
-            var base_type = typeof(OptimzerBase);
-            var need_load_optimzer = AppDomain.CurrentDomain.GetAssemblies()
-                .Select(x => x.GetTypes())
-                .SelectMany(l => l)
-                .Where(x => x.IsClass && !x.IsAbstract && x.IsSubclassOf(base_type)).Select(x =>
-                {
-                    try
-                    {
-                        return Activator.CreateInstance(x);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Warn($"Can't load optimzer \"{x.Name}\" :" + e.Message);
-                        return null;
-                    }
-                }).OfType<OptimzerBase>();
 
-            foreach (var optimzer in need_load_optimzer)
-        }
-        catch (Exception e)
-        {
-            Log.Warn($"InitOptimzerManager() throw exception: {e.Message}");
-        }
-*/
         StoryboardOptimzerManager.AddOptimzer(new RuntimeOptimzer());
         StoryboardOptimzerManager.AddOptimzer(new ParserStaticOptimzer());
         StoryboardOptimzerManager.AddOptimzer(new ConflictCommandRecoverOptimzer());
+
         optimzer_add = true;
     }
 }

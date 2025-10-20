@@ -54,6 +54,5 @@ internal sealed class Program
                     collection.AddTypeCollectedActivator(ViewTypeCollectedActivator.Default);
                 }
             )
-            .With(new BrowserPlatformOptions(){})
             .LogToTrace();
 }
