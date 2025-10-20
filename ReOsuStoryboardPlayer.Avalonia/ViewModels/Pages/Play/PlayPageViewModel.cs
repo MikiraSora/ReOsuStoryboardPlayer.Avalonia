@@ -83,12 +83,15 @@ public partial class PlayPageViewModel : PageViewModelBase
 
             logger.LogInformationEx($"user loaded storyboard instance: {instance}");
             Stop();
-            
-            AudioPlayer?.Dispose();
+
+            var oldAudioPlayer = AudioPlayer;
             AudioPlayer = await audioManager.LoadAudio(instance);
-            StoryboardInstance?.Dispose(); //dispose prev
+            oldAudioPlayer?.Dispose();
+
+            var oldInstance = StoryboardInstance;
             StoryboardInstance = instance;
-            
+            oldInstance?.Dispose();
+
             StoryboardPlayTime = 0;
         }
         catch (Exception e)
