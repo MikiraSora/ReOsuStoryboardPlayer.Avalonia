@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReOsuStoryboardPlayer.Core"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReOsuStoryboardPlayer.Avalonia.SourceGenerator", "Dependencies\ReOsuStoryboardPlayer.Avalonia.SourceGenerator\ReOsuStoryboardPlayer.Avalonia.SourceGenerator.csproj", "{48961094-1BAB-474C-B20F-B0FFC15E8A2B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReOsuStoryboardPlayer.Avalonia.Android", "ReOsuStoryboardPlayer.Avalonia.Android\ReOsuStoryboardPlayer.Avalonia.Android.csproj", "{3128EB13-A888-4706-8BEC-10F08916BFFB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,10 @@ Global
 		{48961094-1BAB-474C-B20F-B0FFC15E8A2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48961094-1BAB-474C-B20F-B0FFC15E8A2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48961094-1BAB-474C-B20F-B0FFC15E8A2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3128EB13-A888-4706-8BEC-10F08916BFFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3128EB13-A888-4706-8BEC-10F08916BFFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3128EB13-A888-4706-8BEC-10F08916BFFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3128EB13-A888-4706-8BEC-10F08916BFFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
