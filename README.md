@@ -22,7 +22,7 @@ Program can build/run on Windows/Browser/Android(WIP)
 - [x] Fix/Optimize render
 - [x] Integrate content
 - [ ] Add Storyboard debugger who want debug his storyboard?
-- [ ] Support Android
+- [x] Support Android
 - [ ] Fix memory leak in heavy/cool storybaord
 - [ ] Use low level render implement(Skia's performance and API design no longer meet requirements)
 
