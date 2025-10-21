@@ -12,6 +12,7 @@ using ReOsuStoryboardPlayer.Avalonia.Models;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using ReOsuStoryboardPlayer.Avalonia.Services.Dialog;
 using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
+using ReOsuStoryboardPlayer.Avalonia.Services.Render;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 using ReOsuStoryboardPlayer.Avalonia.Services.Window;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
@@ -22,9 +23,10 @@ public partial class PlayPageViewModel : PageViewModelBase
 {
     private readonly IAudioManager audioManager;
     private readonly IDialogManager dialogManager;
-    private readonly IStoryboardLoadDialog iStoryboardLoadDialog;
     private readonly ILogger<PlayPageViewModel> logger;
     private readonly IPersistence persistence;
+    private readonly IRenderManager renderManager;
+    private readonly IStoryboardLoadDialog storyboardLoadDialog;
     private readonly IWindowManager windowManager;
 
     [ObservableProperty]
@@ -46,17 +48,18 @@ public partial class PlayPageViewModel : PageViewModelBase
 
     public PlayPageViewModel(
         IDialogManager dialogManager,
-        IStoryboardLoadDialog iStoryboardLoadDialog,
+        IStoryboardLoadDialog storyboardLoadDialog,
         IPersistence persistence,
         ILogger<PlayPageViewModel> logger,
-        IWindowManager windowManager,
+        IWindowManager windowManager, IRenderManager renderManager,
         IAudioManager audioManager)
     {
         this.dialogManager = dialogManager;
-        this.iStoryboardLoadDialog = iStoryboardLoadDialog;
+        this.storyboardLoadDialog = storyboardLoadDialog;
         this.persistence = persistence;
         this.logger = logger;
         this.windowManager = windowManager;
+        this.renderManager = renderManager;
         this.audioManager = audioManager;
 
         Initialize();
@@ -77,7 +80,7 @@ public partial class PlayPageViewModel : PageViewModelBase
     {
         try
         {
-            var instance = await iStoryboardLoadDialog.OpenLoaderDialog();
+            var instance = await storyboardLoadDialog.OpenLoaderDialog();
             if (instance is null || token.IsCancellationRequested)
                 return;
 
@@ -86,13 +89,15 @@ public partial class PlayPageViewModel : PageViewModelBase
 
             var oldAudioPlayer = AudioPlayer;
             AudioPlayer = await audioManager.LoadAudio(instance);
+            logger.LogInformationEx("Begin dispose old audio player.");
             oldAudioPlayer?.Dispose();
 
             var oldInstance = StoryboardInstance;
             StoryboardInstance = instance;
-            oldInstance?.Dispose();
+            logger.LogInformationEx("Begin dispose old storyboard instance.");
+            oldInstance.Dispose();
 
-            StoryboardPlayTime = 0;
+            StoryboardPlayTime = -(float)AudioPlayer.LeadIn.TotalMilliseconds;
         }
         catch (Exception e)
         {

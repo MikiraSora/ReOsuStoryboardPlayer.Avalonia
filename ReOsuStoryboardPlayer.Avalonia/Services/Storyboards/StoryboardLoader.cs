@@ -314,7 +314,7 @@ public class StoryboardLoader
             if (tex != null)
             {
                 group = CacheDrawSpriteInstanceMap[image_name] =
-                    new SpriteResource(fix_image, tex);
+                    new SpriteResource(fix_image, tex, OnDisposeSpriteResource);
                 logger.LogDebugEx($"Created Storyboard sprite instance from image file :{fix_image}");
             }
 
@@ -337,5 +337,15 @@ public class StoryboardLoader
                 return null;
             }
         }
+    }
+
+    private void OnDisposeSpriteResource(SpriteResource obj)
+    {
+        //skimage dispose must in render thread/context
+        renderManager.InvokeInRender(_ =>
+        {
+            obj.Image.Dispose();
+            obj.Image = null;
+        });
     }
 }

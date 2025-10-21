@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Avalonia;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
@@ -30,7 +31,7 @@ public class StoryboardInstance(
         Resource?.Dispose();
         FileSystemFolder?.Dispose();
 
-        (Application.Current as App)?.RootServiceProvider.Resolve<ILogger<StoryboardInstance>>()
+        (Application.Current as App)?.RootServiceProvider.GetService<ILogger<StoryboardInstance>>()
             .LogInformationEx($"storyboard instance {StoryboardInfo} has been disposed");
 
         isDisposed = true;
