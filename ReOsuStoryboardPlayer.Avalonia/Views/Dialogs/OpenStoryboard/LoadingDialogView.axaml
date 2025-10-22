@@ -1,21 +1,21 @@
 ﻿<views:ViewBase xmlns="https://github.com/avaloniaui"
-				xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-				xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-				xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-				xmlns:ui="using:FluentAvalonia.UI.Controls"
-				xmlns:ui2="using:ReOsuStoryboardPlayer.Avalonia.UI"
-				xmlns:dialogs="clr-namespace:ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs.OpenStoryboard"
-				xmlns:views="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Views;assembly=ReOsuStoryboardPlayer.Avalonia"
-				mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-				Height="150"
-				x:DataType="dialogs:LoadingDialogViewModel"
-				x:Class="ReOsuStoryboardPlayer.Avalonia.Views.Dialogs.OpenStoryboard.LoadingDialogView">
-	<Design.DataContext>
-		<dialogs:LoadingDialogViewModel />
-	</Design.DataContext>
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                xmlns:ui="using:FluentAvalonia.UI.Controls"
+                xmlns:ui2="using:ReOsuStoryboardPlayer.Avalonia.UI"
+                xmlns:dialogs="clr-namespace:ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs.OpenStoryboard"
+                xmlns:views="clr-namespace:ReOsuStoryboardPlayer.Avalonia.Views;assembly=ReOsuStoryboardPlayer.Avalonia"
+                mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+                Height="150" ui2:PercentRelativePageLayout.WidthPercent="0.75"
+                x:DataType="dialogs:LoadingDialogViewModel"
+                x:Class="ReOsuStoryboardPlayer.Avalonia.Views.Dialogs.OpenStoryboard.LoadingDialogView">
+    <Design.DataContext>
+        <dialogs:LoadingDialogViewModel />
+    </Design.DataContext>
 
-	<Grid ui2:PercentRelativePageLayout.WidthPercent="0.75" ColumnDefinitions="Auto,*" Margin="10">
-		<ui:ProgressRing VerticalAlignment="Center" IsIndeterminate="True" BorderThickness="10" Width="50" Height="50" />
-		<TextBlock Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" Text="{Binding Message}" Margin="4,2" />
-	</Grid>
+    <Grid ColumnDefinitions="Auto,*" Margin="10">
+        <ui:ProgressRing VerticalAlignment="Center" IsIndeterminate="True" BorderThickness="10" Width="50" Height="50" />
+        <TextBlock Grid.Column="1" TextWrapping="Wrap" VerticalAlignment="Center" Text="{Binding Message}" Margin="4,2" />
+    </Grid>
 </views:ViewBase>

@@ -10,8 +10,11 @@ using ReOsuStoryboardPlayer.Avalonia.Services.Window;
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Window;
 
 [RegisterSingleton<IWindowManager>]
-public class DesktopWindowManager : ObservableObject, IWindowManager
+public partial class DesktopWindowManager : ObservableObject, IWindowManager
 {
+    [ObservableProperty]
+    private string mainWindowTitle = "ReOsuStoryboardPlayer.Avalonia for Windows";
+
     private WindowState prevWindowState = WindowState.Normal;
 
     public DesktopWindowManager()

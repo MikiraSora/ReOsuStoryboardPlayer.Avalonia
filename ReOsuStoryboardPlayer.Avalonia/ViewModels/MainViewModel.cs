@@ -1,14 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Services.Navigation;
+using ReOsuStoryboardPlayer.Avalonia.Services.Window;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Home;
-using ReOsuStoryboardPlayer.Avalonia.Views;
 
 namespace ReOsuStoryboardPlayer.Avalonia.ViewModels;
 
@@ -48,15 +47,19 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     private IPageNavigationManager pageNavigationManager;
 
+    [ObservableProperty]
+    private IWindowManager windowManager;
+
     public MainViewModel(
         ILogger<MainViewModel> logger,
-        IPageNavigationManager pageNavigationManager)
+        IPageNavigationManager pageNavigationManager, IWindowManager windowManager)
     {
         this.logger = logger;
+        WindowManager = windowManager;
         PageNavigationManager = pageNavigationManager;
 
         ProcessInit();
-        
+
         PageNavigationManager.PropertyChanged += PageNavigationManagerOnPropertyChanged;
     }
 

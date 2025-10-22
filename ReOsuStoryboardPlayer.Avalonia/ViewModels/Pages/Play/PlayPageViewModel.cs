@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -75,6 +76,35 @@ public partial class PlayPageViewModel : PageViewModelBase
             await persistence.Load(StoryboardPlayerSetting.JsonTypeInfo);
     }
 
+    partial void OnStoryboardInstanceChanged(StoryboardInstance value)
+    {
+        UpdateTitle();
+    }
+
+    partial void OnAudioPlayerChanged(IAudioPlayer oldValue, IAudioPlayer newValue)
+    {
+        if (oldValue != null)
+            oldValue.PropertyChanged -= OnAudioPlayerPropertyChanged;
+        if (newValue != null)
+            newValue.PropertyChanged += OnAudioPlayerPropertyChanged;
+    }
+
+    private void OnAudioPlayerPropertyChanged(object sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(IAudioPlayer.IsPlaying):
+                UpdateTitle();
+                break;
+        }
+    }
+
+    private void UpdateTitle()
+    {
+        windowManager.MainWindowTitle =
+            $"{(AudioPlayer?.IsPlaying ?? false ? "Playing" : "Paused")} {StoryboardInstance?.StoryboardInfo.BeatmapSetId} {StoryboardInstance?.StoryboardInfo.Artist} - {StoryboardInstance?.StoryboardInfo.Title} [{StoryboardInstance?.StoryboardInfo.DifficultyName}]";
+    }
+
     [RelayCommand(AllowConcurrentExecutions = false)]
     private async Task LoadStoryboardInstance(CancellationToken token = default)
     {
@@ -97,7 +127,7 @@ public partial class PlayPageViewModel : PageViewModelBase
             logger.LogInformationEx("Begin dispose old storyboard instance.");
             oldInstance.Dispose();
 
-            StoryboardPlayTime = -(float)AudioPlayer.LeadIn.TotalMilliseconds;
+            StoryboardPlayTime = -(float) AudioPlayer.LeadIn.TotalMilliseconds;
         }
         catch (Exception e)
         {

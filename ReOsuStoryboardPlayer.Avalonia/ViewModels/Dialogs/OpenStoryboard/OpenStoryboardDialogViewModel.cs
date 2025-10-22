@@ -235,11 +235,12 @@ public partial class OpenStoryboardDialogViewModel(
 
     private async Task<bool> LoadFromDownloadingZipUrl(string dlUrl)
     {
-        using var loadingDialog = new LoadingDialogViewModel();
-        dialogManager.ShowDialog(loadingDialog).NoWait();
-
         try
         {
+            using var loadingDialog = new LoadingDialogViewModel();
+            dialogManager.ShowDialog(loadingDialog).NoWait();
+            await loadingDialog.WaitForAttachedView();
+            
             var zipFileBytes = await DownloadFile(dlUrl);
             var dir = await ZipFileSystemBuilder.LoadFromZipFileBytes(zipFileBytes);
             var instance = await storyboardLoader.LoadStoryboard(dir);
@@ -256,9 +257,6 @@ public partial class OpenStoryboardDialogViewModel(
 
     private async Task<bool> TryLoadFromParsingBeatmapUrl(string beatmapUrl)
     {
-        using var loadingDialog = new LoadingDialogViewModel();
-        dialogManager.ShowDialog(loadingDialog).NoWait();
-
         try
         {
             var match = Regex.Match(beatmapUrl, @"beatmapsets/(\d+)", RegexOptions.IgnoreCase);
@@ -267,6 +265,10 @@ public partial class OpenStoryboardDialogViewModel(
                 logger.LogErrorEx($"beatmapset can't be matched: {beatmapUrl}");
                 return false;
             }
+            
+            using var loadingDialog = new LoadingDialogViewModel();
+            dialogManager.ShowDialog(loadingDialog).NoWait();
+            await loadingDialog.WaitForAttachedView();
 
             var beatmapSetId = int.Parse(match.Groups[1].Value);
             byte[] zipFileBytes;

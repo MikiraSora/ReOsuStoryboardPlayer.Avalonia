@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Threading.Tasks;
 using Avalonia.Controls;
-using Avalonia.Threading;
-using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using ReOsuStoryboardPlayer.Avalonia.Utils;
@@ -13,12 +9,13 @@ namespace ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs.OpenStoryboard;
 
 public partial class LoadingDialogViewModel : DialogViewModelBase, IDisposable
 {
-    private TaskCompletionSource waitForAttachedViewTokenSource = new();
-
     [ObservableProperty]
     private string message;
 
-    public override string DialogIdentifier { get; } = nameof(LoadingDialogViewModel);
+    private TaskCompletionSource waitForAttachedViewTokenSource = new();
+
+    public override string DialogIdentifier { get; } =
+        nameof(LoadingDialogViewModel) + DateTime.UtcNow.Ticks;
 
     public override string Title { get; } = "Loading";
 

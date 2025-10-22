@@ -5,8 +5,11 @@ using ReOsuStoryboardPlayer.Avalonia.Services.Window;
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Window;
 
 [RegisterSingleton<IWindowManager>]
-public class BrowserWindowManager : ObservableObject, IWindowManager
+public partial class BrowserWindowManager : ObservableObject, IWindowManager
 {
+    [ObservableProperty]
+    private string mainWindowTitle = "ReOsuStoryboardPlayer.Avalonia for Browser";
+
     public bool IsFullScreen
     {
         get => WindowInterop.IsFullScreen();
