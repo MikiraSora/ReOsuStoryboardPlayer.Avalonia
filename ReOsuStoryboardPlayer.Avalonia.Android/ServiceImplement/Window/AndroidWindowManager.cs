@@ -7,7 +7,7 @@ using System;
 namespace ReOsuStoryboardPlayer.Avalonia.Android.ServiceImplement.Window;
 
 [RegisterSingleton<IWindowManager>]
-public class BrowserWindowManager : ObservableObject, IWindowManager
+public partial class BrowserWindowManager : ObservableObject, IWindowManager
 {
     public bool IsFullScreen
     {
@@ -18,11 +18,14 @@ public class BrowserWindowManager : ObservableObject, IWindowManager
         }
     }
 
+    [ObservableProperty]
+    private string mainWindowTitle;
+
     public void OpenUrl(string url)
     {
         try
         {
-            var context =  global::Android.App.Application.Context;
+            var context = global::Android.App.Application.Context;
 
             var intent = new Intent(Intent.ActionView);
             intent.SetData(global::Android.Net.Uri.Parse(url));
