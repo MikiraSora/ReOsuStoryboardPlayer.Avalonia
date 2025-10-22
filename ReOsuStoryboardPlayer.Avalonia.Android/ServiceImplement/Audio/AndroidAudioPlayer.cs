@@ -68,12 +68,12 @@ namespace ReOsuStoryboardPlayer.Avalonia.Android.ServiceImplement.Audio
             this.wavGenerator = wavGenerator;
         }
 
-        public async Task Load(System.IO.Stream stream, double prependLeadInSeconds)
+        public async Task Load(System.IO.Stream stream, double prependLeadInSeconds, int updateThreadCount, int audioSampleRate)
         {
             LeadIn = TimeSpan.FromSeconds(prependLeadInSeconds);
             player = new MediaPlayer();
 
-            var output = wavGenerator.GenerateWavFileStream(stream, prependLeadInSeconds, 48000, 1);
+            var output = wavGenerator.GenerateWavFileStream(stream, prependLeadInSeconds, audioSampleRate, updateThreadCount);
 
             // 将流保存到临时文件，因为 MediaPlayer 不支持直接读取 Stream
             var uri = await WriteToRandomTempFile(output, ".audioFile");
@@ -166,7 +166,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Android.ServiceImplement.Audio
 
             player.SeekTo((int)position.TotalMilliseconds);
             if (pause)
-                player.Pause();
+                Pause();
         }
 
         public void Dispose()

@@ -6,9 +6,21 @@
 		<ApplicationId>moe.MikiraSora.ReOsuStoryboardPlayer</ApplicationId>
 		<ApplicationVersion>1</ApplicationVersion>
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<AcceptAndroidSDKLicenses>true</AcceptAndroidSDKLicenses>
 		<AndroidPackageFormat>apk</AndroidPackageFormat>
+		<RuntimeIdentifiers>android-arm64;android-x64</RuntimeIdentifiers>
 		<LangVersion>preview</LangVersion>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<JavaMaximumHeapSize>2G</JavaMaximumHeapSize>
 		<AndroidEnableProfiledAot>False</AndroidEnableProfiledAot>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<JavaMaximumHeapSize>2G</JavaMaximumHeapSize>
+		<AndroidEnableProfiledAot>False</AndroidEnableProfiledAot>
+	</PropertyGroup>
+	<PropertyGroup Label="Avalonia">
+	  <AvaloniaXamlIlDebuggerLaunch>True</AvaloniaXamlIlDebuggerLaunch>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -20,8 +32,8 @@
 	<ItemGroup>
 		<PackageReference Include="Avalonia.Android" Version="$(AvaloniaVersion)" />
 		<PackageReference Include="Xamarin.AndroidX.Core.SplashScreen" Version="1.0.1.1" />
-	    <PackageReference Include="Xamarin.AndroidX.Media3.ExoPlayer" Version="1.8.0" />
-</ItemGroup>
+		<PackageReference Include="Xamarin.AndroidX.Media3.ExoPlayer" Version="1.8.0" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\ReOsuStoryboardPlayer.Avalonia\ReOsuStoryboardPlayer.Avalonia.csproj" />

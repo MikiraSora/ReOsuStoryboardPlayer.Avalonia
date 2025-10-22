@@ -20,6 +20,6 @@
         <Button
             Classes="DialogButton"
             Command="{Binding CloseCommand}"
-            Content="关闭" />
+            Content="Close" />
     </StackPanel>
 </dialogs:DialogViewBase>

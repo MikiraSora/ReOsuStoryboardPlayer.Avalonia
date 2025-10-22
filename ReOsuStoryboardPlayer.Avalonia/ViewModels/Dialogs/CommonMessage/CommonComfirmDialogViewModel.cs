@@ -32,7 +32,7 @@ public partial class CommonComfirmDialogViewModel : DialogViewModelBase
 
     public override string DialogIdentifier => nameof(CommonComfirmDialogViewModel);
 
-    public override string Title => "需要确认";
+    public override string Title => "Comfirm";
 
     [RelayCommand]
     private void Yes()

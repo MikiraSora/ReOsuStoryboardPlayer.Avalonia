@@ -73,7 +73,7 @@
                         </StackPanel>
 
                         <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
-                            <TextBlock VerticalAlignment="Center" Text="AudioSampleRate" />
+                            <TextBlock VerticalAlignment="Center" Text="AudioSampleRate(-1 means dont resample)" />
                             <TextBox Margin="5,0" Width="50" Text="{Binding StoryboardPlayerSetting.AudioSampleRate}" />
                         </StackPanel>
 

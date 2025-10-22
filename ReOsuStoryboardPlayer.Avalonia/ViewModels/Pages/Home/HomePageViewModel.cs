@@ -138,6 +138,10 @@ public partial class HomePageViewModel : PageViewModelBase
             if (instance is null || token.IsCancellationRequested)
                 return;
 
+            using var loadingDialog = new LoadingDialogViewModel();
+            dialogManager.ShowDialog(loadingDialog).NoWait();
+            await loadingDialog.WaitForAttachedView();
+
             await LoadStoryboardInstance(instance);
         }
         catch (Exception e)

@@ -5,23 +5,18 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using ReOsuStoryboardPlayer.Avalonia.Utils;
 
 namespace ReOsuStoryboardPlayer.Avalonia.ViewModels.Dialogs.OpenStoryboard;
 
-public class LoadingDialogViewModel : DialogViewModelBase, IDisposable
+public partial class LoadingDialogViewModel : DialogViewModelBase, IDisposable
 {
-    private bool isRequestRollToEnd;
-    private Control view;
     private TaskCompletionSource waitForAttachedViewTokenSource = new();
 
-    public LoadingDialogViewModel()
-    {
-        Messages.CollectionChanged += MessagesOnCollectionChanged;
-    }
-
-    public ObservableCollection<string> Messages { get; set; } = new();
+    [ObservableProperty]
+    private string message;
 
     public override string DialogIdentifier { get; } = nameof(LoadingDialogViewModel);
 
@@ -40,7 +35,6 @@ public class LoadingDialogViewModel : DialogViewModelBase, IDisposable
     public override void OnViewBeforeUnload(Control view)
     {
         base.OnViewBeforeUnload(view);
-        this.view = default;
         WeakReferenceMessenger.Default.Unregister<EventBoardcastLoggerProvider.LogEntry>(this);
         waitForAttachedViewTokenSource = new TaskCompletionSource();
     }
@@ -48,36 +42,12 @@ public class LoadingDialogViewModel : DialogViewModelBase, IDisposable
     public override void OnViewAfterLoaded(Control view)
     {
         base.OnViewAfterLoaded(view);
-        this.view = view;
         WeakReferenceMessenger.Default.Register<EventBoardcastLoggerProvider.LogEntry>(this, OnLogRecordRecv);
         waitForAttachedViewTokenSource?.TrySetResult();
     }
 
-    private void OnLogRecordRecv(object recipient, EventBoardcastLoggerProvider.LogEntry message)
+    private void OnLogRecordRecv(object recipient, EventBoardcastLoggerProvider.LogEntry msg)
     {
-        Messages.Add(message.logRecord);
-    }
-
-    private void MessagesOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-    {
-        if (isRequestRollToEnd)
-            return;
-        if (e.Action == NotifyCollectionChangedAction.Add)
-        {
-            var scollViewer = view.FindDescendantOfType<ScrollViewer>();
-            if (scollViewer is null)
-                return;
-            var isAtBottom = Math.Abs(scollViewer.Offset.Y - scollViewer.Extent.Height + scollViewer.Viewport.Height) <
-                             10;
-            if (isAtBottom)
-            {
-                isRequestRollToEnd = true;
-                Dispatcher.UIThread.Post(() =>
-                {
-                    scollViewer.ScrollToEnd();
-                    isRequestRollToEnd = false;
-                });
-            }
-        }
+        Message = msg.logRecord;
     }
 }

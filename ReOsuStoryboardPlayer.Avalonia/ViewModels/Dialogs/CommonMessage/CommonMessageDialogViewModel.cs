@@ -29,8 +29,8 @@ public partial class CommonMessageDialogViewModel : DialogViewModelBase
 
     public override string Title => DialogMessageType switch
     {
-        DialogMessageType.Error => "错误",
-        DialogMessageType.Info or _ => "消息"
+        DialogMessageType.Error => "Error",
+        DialogMessageType.Info or _ => "Info"
     };
 
     [RelayCommand]

@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <AvaloniaResource Include="Assets\**"/>
+        <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
 
     <PropertyGroup>
@@ -21,29 +21,30 @@
     </PropertyGroup>
 
     <Target Name="GenerateBuildTimeClass" BeforeTargets="BeforeBuild">
-        <WriteLinesToFile File="$(IntermediateOutputPath)BuildTime.cs" Lines="namespace DpMapSubscribeTool { public static class BuildTime { public static string Value = &quot;$(BuildTimeUtc)&quot;%3B } }" Overwrite="true"/>
+        <WriteLinesToFile File="$(IntermediateOutputPath)BuildTime.cs" Lines="namespace DpMapSubscribeTool { public static class BuildTime { public static string Value = &quot;$(BuildTimeUtc)&quot;%3B } }" Overwrite="true" />
         <ItemGroup>
-            <Compile Include="$(IntermediateOutputPath)BuildTime.cs"/>
+            <Compile Include="$(IntermediateOutputPath)BuildTime.cs" />
         </ItemGroup>
     </Target>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)"/>
-        <PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="11.1.5"/>
+        <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="11.1.5" />
         <PackageReference Include="Avalonia.Skia" Version="11.3.7" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)"/>
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-        <PackageReference Include="AvaloniaDialogs" Version="3.7.0"/>
+        <PackageReference Include="AvaloniaDialogs" Version="3.7.0" />
 
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)"/>
-        <PackageReference Include="DialogHost.Avalonia" Version="0.9.3"/>
-        <PackageReference Include="DynamicData" Version="9.4.1"/>
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
+        <PackageReference Include="DialogHost.Avalonia" Version="0.9.3" />
+        <PackageReference Include="DynamicData" Version="9.4.1" />
+        <PackageReference Include="FluentAvalonia.ProgressRing" Version="1.69.2" />
         <PackageReference Include="FluentIcons.Avalonia" Version="1.1.312" />
         <PackageReference Include="FluentIcons.Common" Version="1.1.312" />
-        <PackageReference Include="Injectio" Version="5.1.0"/>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10"/>
+        <PackageReference Include="Injectio" Version="5.1.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
         <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.10" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.10" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.10" />
@@ -71,15 +72,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\Dependencies\ReOsuStoryboardPlayer.Avalonia.SourceGenerator\ReOsuStoryboardPlayer.Avalonia.SourceGenerator.csproj"/>
-        <ProjectReference Include="..\Dependencies\ReOsuStoryboardPlayer\ReOsuStoryboardPlayer.Core\ReOsuStoryboardPlayer.Core.csproj"/>
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\Dependencies\ReOsuStoryboardPlayer.Avalonia.SourceGenerator\ReOsuStoryboardPlayer.Avalonia.SourceGenerator.csproj" />
+        <ProjectReference Include="..\Dependencies\ReOsuStoryboardPlayer\ReOsuStoryboardPlayer.Core\ReOsuStoryboardPlayer.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <AdditionalFiles Include="UI\Controls\StoryboardPlayer.axaml"/>
+        <AdditionalFiles Include="UI\Controls\StoryboardPlayer.axaml" />
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="SourceGenerator\"/>
+        <Folder Include="SourceGenerator\" />
     </ItemGroup>
 </Project>

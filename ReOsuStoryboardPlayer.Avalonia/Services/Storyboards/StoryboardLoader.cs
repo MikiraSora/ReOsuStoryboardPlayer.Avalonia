@@ -10,6 +10,7 @@ using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Services.Parameters;
 using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
+using ReOsuStoryboardPlayer.Avalonia.Services.Plaform;
 using ReOsuStoryboardPlayer.Avalonia.Services.Render;
 using ReOsuStoryboardPlayer.Avalonia.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
@@ -27,19 +28,29 @@ public class StoryboardLoader
 {
     private readonly ILogger<StoryboardLoader> logger;
     private readonly IParameterManager parameterManager;
+    private readonly IPlatform platform;
     private readonly IPersistence persistence;
     private readonly IRenderManager renderManager;
 
-    public StoryboardLoader(ILogger<StoryboardLoader> logger, IParameterManager parameterManager,
+    public StoryboardLoader(ILogger<StoryboardLoader> logger, IParameterManager parameterManager, IPlatform platform,
         IRenderManager renderManager, IPersistence persistence)
     {
         this.logger = logger;
         this.parameterManager = parameterManager;
+        this.platform = platform;
         this.renderManager = renderManager;
         this.persistence = persistence;
     }
 
+
     public async Task<StoryboardInstance> LoadStoryboard(ISimpleDirectory fsRoot)
+    {
+        if (platform.SupportMultiThread)
+            return await Task.Run(async () => await LoadStoryboardInternal(fsRoot));
+        return await LoadStoryboardInternal(fsRoot);
+    }
+
+    public async Task<StoryboardInstance> LoadStoryboardInternal(ISimpleDirectory fsRoot)
     {
         logger.LogInformationEx($"fsRoot loaded: {fsRoot}");
 
@@ -95,7 +106,7 @@ public class StoryboardLoader
 
         void AdjustZ(List<StoryboardObject> list)
         {
-            list.Sort((a, b) => (int) (a.FileLine - b.FileLine));
+            list.Sort((a, b) => (int)(a.FileLine - b.FileLine));
         }
 
         List<StoryboardObject> CombineStoryboardObjects(List<StoryboardObject> osb_list,

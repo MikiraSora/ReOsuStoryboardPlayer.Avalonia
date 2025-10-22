@@ -175,7 +175,7 @@ namespace AcbGenerator
         {
             var ms = new MemoryStream();
 
-            if (waveFile.WaveFmt.SamplingRate != targetSampleRate)
+            if (waveFile.WaveFmt.SamplingRate != targetSampleRate && targetSampleRate > 0)
             {
                 logger.LogInformationEx($"Resampling from {waveFile.WaveFmt.SamplingRate} to {targetSampleRate}...");
                 var resampler = new Resampler();
@@ -187,6 +187,7 @@ namespace AcbGenerator
                         parallelThread: (uint)Math.Max(1, threads)))
                     .ToArray();
 
+                logger.LogInformationEx($"Resampling done");
                 new WaveFile(resampledChannels).SaveTo(ms, true);
             }
             else
@@ -244,14 +245,17 @@ namespace AcbGenerator
             int sampleRate = mp3.Frequency;
             int channels = mp3.ChannelCount;
 
-            var samples = new List<float>(sampleRate * channels * 10); // 预分配一点空间
+            var samples = new List<float>[channels];
+            for (int i = 0; i < channels; i++)
+                samples[i] = new();
             var buffer = new byte[4096];
+            var idx = 0;
 
             int read;
             while ((read = mp3.Read(buffer, 0, buffer.Length)) > 0)
             {
                 for (int i = 0; i < read; i += 2)
-                    samples.Add(BitConverter.ToInt16(buffer, i) / 32768f);
+                    samples[idx++ % channels].Add(BitConverter.ToInt16(buffer, i) / 32768f);
             }
 
             return MakeWaveFile(samples, sampleRate, channels);
@@ -265,29 +269,26 @@ namespace AcbGenerator
             int sampleRate = vorbis.SampleRate;
             int channels = vorbis.Channels;
 
-            var samples = new List<float>(sampleRate * channels * 10);
-            var buffer = new float[4096 * channels];
+            var samples = new List<float>[channels];
+            for (int i = 0; i < channels; i++)
+                samples[i] = new();
+            var buffer = new float[4096];
+            var idx = 0;
 
             int read;
             while ((read = vorbis.ReadSamples(buffer, 0, buffer.Length)) > 0)
             {
                 for (int i = 0; i < read; i++)
-                    samples.Add(buffer[i]);
+                    samples[idx++ % channels].Add(buffer[i]);
             }
 
             return MakeWaveFile(samples, sampleRate, channels);
         }
 
-        private WaveFile MakeWaveFile(List<float> samples, int sampleRate, int channels)
+        private WaveFile MakeWaveFile(List<float>[] samples, int sampleRate, int channels)
         {
-            IEnumerable<float> ChannelIterator(int offset)
-            {
-                for (int i = offset; i < samples.Count; i += channels)
-                    yield return samples[i];
-            }
-
             var signals = Enumerable.Range(0, channels)
-                .Select(ch => new DiscreteSignal(sampleRate, ChannelIterator(ch)))
+                .Select(ch => new DiscreteSignal(sampleRate, samples[ch]))
                 .ToArray();
 
             return new WaveFile(signals);
