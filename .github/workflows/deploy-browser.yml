@@ -44,8 +44,11 @@ jobs:
       with:
         dotnet-version: 9.0.x
         
-    - name: Setup wasm-tool-net8
+    - name: Setup wasm-tool
       run: dotnet workload install wasm-tools
+      
+    - name: Setup android
+      run: dotnet workload install android
 
     - name: Restore dependencies
       run: dotnet restore ReOsuStoryboardPlayer.Avalonia.sln
@@ -79,6 +82,7 @@ jobs:
       id: deployment
 
       uses: actions/deploy-pages@v4
+
 
 
 
