@@ -4,6 +4,7 @@ using Android.OS;
 using Android.Views;
 using Avalonia;
 using Avalonia.Android;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Android.Utils.Logging;
@@ -38,6 +39,12 @@ public class MainActivity : AvaloniaMainActivity<App>
             .WithInterFont();
     }
 
+    protected override void OnCreate(Bundle savedInstanceState)
+    {
+        base.OnCreate(savedInstanceState);
+        Window?.AddFlags(WindowManagerFlags.KeepScreenOn);
+    }
+
     protected override void OnResume()
     {
         base.OnResume();
@@ -46,19 +53,16 @@ public class MainActivity : AvaloniaMainActivity<App>
 
     private void EnterFullScreen()
     {
-        if (Build.VERSION.SdkInt >= BuildVersionCodes.R)
-        {
-            // Android 11+
-            var controller = Window.InsetsController;
-            if (controller != null)
-            {
-                // 隐藏状态栏和导航栏
-                controller.Hide(WindowInsets.Type.StatusBars() | WindowInsets.Type.NavigationBars());
-
-                // 设置行为：用户滑动时临时显示系统栏，之后自动隐藏
-                controller.SystemBarsBehavior =
-                    (int) WindowInsetsControllerBehavior.ShowTransientBarsBySwipe;
-            }
-        }
+        // 隐藏状态栏和导航栏
+        Window.AddFlags(WindowManagerFlags.Fullscreen);
+        Window.DecorView.SystemUiVisibility =
+            (StatusBarVisibility)(
+                SystemUiFlags.LayoutStable |
+                SystemUiFlags.LayoutHideNavigation |
+                SystemUiFlags.LayoutFullscreen |
+                SystemUiFlags.HideNavigation |
+                SystemUiFlags.Fullscreen |
+                SystemUiFlags.ImmersiveSticky
+            );
     }
 }

@@ -8,19 +8,22 @@
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<AcceptAndroidSDKLicenses>true</AcceptAndroidSDKLicenses>
 		<AndroidPackageFormat>apk</AndroidPackageFormat>
-		<RuntimeIdentifiers>android-arm64;android-x64</RuntimeIdentifiers>
 		<LangVersion>preview</LangVersion>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
 		<JavaMaximumHeapSize>2G</JavaMaximumHeapSize>
 		<AndroidEnableProfiledAot>False</AndroidEnableProfiledAot>
+		<RunAOTCompilation>false</RunAOTCompilation>
+		<AvaloniaXamlIlDebuggerLaunch>True</AvaloniaXamlIlDebuggerLaunch>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<JavaMaximumHeapSize>2G</JavaMaximumHeapSize>
-		<AndroidEnableProfiledAot>False</AndroidEnableProfiledAot>
-	</PropertyGroup>
-	<PropertyGroup Label="Avalonia">
-	  <AvaloniaXamlIlDebuggerLaunch>True</AvaloniaXamlIlDebuggerLaunch>
+		<AndroidEnableProfiledAot>True</AndroidEnableProfiledAot>
+		<UseFastDeployment>false</UseFastDeployment>
+		<RunAOTCompilation>true</RunAOTCompilation>
+		<PublishTrimmed>true</PublishTrimmed>
 	</PropertyGroup>
 
 	<ItemGroup>
