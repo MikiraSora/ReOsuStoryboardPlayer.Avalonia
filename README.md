@@ -2,11 +2,13 @@
 ---------------
 ### Introduction
 This repository is developed based on another repository [ReOsuStoryboardPlayer.Core](https://github.com/MikiraSora/ReOsuStoryboardPlayer/tree/master/ReOsuStoryboardPlayer.Core), primarily for learning Avalonia development and NativeAOT.
-Program can build/run on Windows/Browser/Android(WIP)
+Program can build/run on Windows/Browser/Android
 
-### Play
+### Play & Download
 [Browser Online](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/)</br>
 [Browser Online (with play beatmap/storyboard)](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia?loadBeatmapSetId=548679)
+
+Android App .apk: [arm64](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/downloads/android_arm64.apk) | [x86_64](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/downloads/android_x64.apk)
 
 ### Technology
 
@@ -23,8 +25,9 @@ Program can build/run on Windows/Browser/Android(WIP)
 - [x] Integrate content
 - [ ] Add Storyboard debugger who want debug his storyboard?
 - [x] Support Android
-- [ ] Fix memory leak in heavy/cool storybaord
+- [x] Fix memory leak in heavy/cool storybaord
 - [ ] Use low level render implement(Skia's performance and API design no longer meet requirements)
+- [ ] Optimize others
 
 ### Screenshot
 <img width="1915" height="1001" alt="image" src="https://github.com/user-attachments/assets/59d5471d-2586-4f1f-8441-49cab3e95ec1" />
