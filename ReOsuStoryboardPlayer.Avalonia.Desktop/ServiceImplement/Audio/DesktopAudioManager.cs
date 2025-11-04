@@ -17,7 +17,7 @@ using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio;
 
-[RegisterSingleton<IAudioManager>]
+
 public class DesktopAudioManager : ObservableObject, IAudioManager
 {
     private readonly ILogger<DesktopAudioPlayer> audioLogger;

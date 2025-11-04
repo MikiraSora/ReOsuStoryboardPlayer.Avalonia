@@ -11,7 +11,7 @@ public partial class StoryboardPlayerSetting : ObservableObject
     public partial bool AntiAliasing { get; set; } = false;
 
     [ObservableProperty]
-    public partial int AudioSampleRate { get; set; } = -1;
+    public partial int AudioSampleRate { get; set; } = 48000;
 
     /// <summary>
     ///     if beatmap's AudioLeadIn is not set, use DefaultAudioLeadInSeconds
