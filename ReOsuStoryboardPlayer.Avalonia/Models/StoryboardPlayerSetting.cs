@@ -10,6 +10,16 @@ public partial class StoryboardPlayerSetting : ObservableObject
     [ObservableProperty]
     public partial bool AntiAliasing { get; set; } = false;
 
+    public enum WASAPIPeriod
+    {
+        Minimal,
+        Default,
+        Maximal,
+    }
+
+    [ObservableProperty]
+    public partial WASAPIPeriod WindowsAudioPeriod { get; set; } = WASAPIPeriod.Minimal;
+
     [ObservableProperty]
     public partial int AudioSampleRate { get; set; } = 48000;
 

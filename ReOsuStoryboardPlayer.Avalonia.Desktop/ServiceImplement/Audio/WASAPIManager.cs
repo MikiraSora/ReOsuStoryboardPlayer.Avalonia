@@ -6,7 +6,9 @@ using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPlayer;
 using ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils;
+using ReOsuStoryboardPlayer.Avalonia.Models;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
+using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,9 +27,10 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
     [RegisterSingleton<IAudioManager>]
     internal partial class WASAPIManager : IAudioManager
     {
-        public WASAPIManager(ILogger<WASAPIManager> logger)
+        public WASAPIManager(ILogger<WASAPIManager> logger, IPersistence persistence)
         {
             this.logger = logger;
+            this.persistence = persistence;
             comWrappers = new StrategyBasedComWrappers();
             isRunning = true;
             eventWaitHandle = new EventWaitHandle(true, EventResetMode.AutoReset);
@@ -36,8 +39,9 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
             playerLock = new Lock();
             Init();
         }
-        private MF MFUtils;
         private ILogger<WASAPIManager> logger;
+        private IPersistence persistence;
+        private MF MFUtils;
         private ComWrappers comWrappers;
         private IMMDevice mmDevice;
         private IAudioClient3 audioClient;
@@ -66,8 +70,9 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
             return client;
         }
 
-        private void Init()
+        private async void Init()
         {
+            var playerSetting = await persistence.Load<StoryboardPlayerSetting>(default);
             mmDevice = GetDefaultAudioEndpoint();
             var hr = mmDevice.Activate(typeof(IAudioClient3).GUID, DirectN.CLSCTX.CLSCTX_ALL, 0, out var audioClientPtr);
             Marshal.ThrowExceptionForHR(hr);
@@ -82,7 +87,13 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
             frameSize = (uint)mixWaveFormatEx.nBlockAlign;
             hr = audioClient.GetSharedModeEnginePeriod(mixWaveFormatEx, out var defaultPeriod, out var fundamentalPeriod, out var minPeriod, out var maxPeriod);
             Marshal.ThrowExceptionForHR(hr);
-            hr = audioClient.InitializeSharedAudioStream(0x00040000, minPeriod, mixWaveFormatEx, 0);
+            var period = playerSetting.WindowsAudioPeriod switch
+            {
+                StoryboardPlayerSetting.WASAPIPeriod.Minimal => minPeriod,
+                StoryboardPlayerSetting.WASAPIPeriod.Default => defaultPeriod,
+                StoryboardPlayerSetting.WASAPIPeriod.Maximal => maxPeriod,
+            };
+            hr = audioClient.InitializeSharedAudioStream(0x00040000, period, mixWaveFormatEx, 0);
             Marshal.ThrowExceptionForHR(hr);
             hr = audioClient.SetEventHandle(eventWaitHandle.Handle);
             Marshal.ThrowExceptionForHR(hr);
@@ -144,12 +155,12 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
                         var frameBuffer = MemoryMarshal.Cast<byte, ushort>(buffer);
                         for (int i = 0; i < mixSpan.Length; i++)
                         {
-                            frameBuffer[i] = (ushort)(mixSpan[i]*ushort.MaxValue);
+                            frameBuffer[i] = (ushort)((mixSpan[i]*0.5+0.5)*ushort.MaxValue);
                         }
                     }
                     else
                     {
-                        
+                        //24位没写 :)
                     }
                 }
                 hr = audioRenderClient.ReleaseBuffer(framesToWrite, 0);
