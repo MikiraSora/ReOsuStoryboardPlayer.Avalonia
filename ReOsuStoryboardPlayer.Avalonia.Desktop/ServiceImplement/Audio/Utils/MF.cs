@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 using System.Threading.Tasks;
+using static ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils.MF;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
 {
@@ -23,15 +24,12 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
 
         public static class MFGuids
         {
-            // attribute keys
             public static readonly Guid MF_MT_MAJOR_TYPE = new("48eba18e-f8c9-4687-bf11-0a74c9f96a8f");
             public static readonly Guid MF_MT_SUBTYPE = new("f7e34c9a-42e8-4714-b74b-cb29d72c35e5");
 
-            // major/subtypes
             public static readonly Guid MFMediaType_Audio = new("73647561-0000-0010-8000-00aa00389b71");   // 'audio'
             public static readonly Guid MFAudioFormat_PCM = new("00000001-0000-0010-8000-00aa00389b71");   // PCM 16-bit
             public static readonly Guid MFAudioFormat_Float = new("00000003-0000-0010-8000-00aa00389b71"); // PCM float32
-
 
             public static readonly Guid MF_MT_AUDIO_NUM_CHANNELS = new("37e48bf5-645e-4c5b-89de-ada9e29b696a");
             public static readonly Guid MF_MT_AUDIO_SAMPLES_PER_SECOND = new("5faeeae7-0290-4c31-9e8a-c534f68d9dba");
@@ -46,11 +44,12 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
 
         public IMFSourceReader MFCreateSourceReaderFromByteStream(Stream stream)
         {
-            ManagedMFByteStream managedMFByteStream = new ManagedMFByteStream(stream, comWrappers);
-            IntPtr pByteStream = comWrappers.GetOrCreateComInterfaceForObject(managedMFByteStream, CreateComInterfaceFlags.None);
-            var hr = MFCreateSourceReaderFromByteStream(pByteStream, IntPtr.Zero, out IntPtr ppSourceReader);
+            //ManagedMFByteStream managedMFByteStream = new ManagedMFByteStream(stream);
+            ManagedIStream managedIStream = new ManagedIStream(stream);
+            MFCreateMFByteStreamOnStream(managedIStream, out var byteStream);
+            var hr = MFCreateSourceReaderFromByteStream(byteStream, IntPtr.Zero, out var ppSourceReader);
             Marshal.ThrowExceptionForHR(hr);
-            return comWrappers.GetOrCreateObjectForComInstance(ppSourceReader, CreateObjectFlags.None) as IMFSourceReader;
+            return ppSourceReader;
         }
 
         public IMFMediaType MFCreateMediaType()
@@ -69,9 +68,12 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
         [LibraryImport("Mfplat.dll")]
         public static partial int MFCreateMediaType(out IntPtr ppMFType);
 
+        [LibraryImport("Mfplat.dll")]
+        public static partial int MFCreateMFByteStreamOnStream([MarshalUsing(typeof(UniqueComInterfaceMarshaller<IStream>))] IStream stream, [MarshalUsing(typeof(UniqueComInterfaceMarshaller<IMFByteStream>))] out IMFByteStream byteStream);
+
         [LibraryImport("Mfreadwrite.dll")]
-        public static partial int MFCreateSourceReaderFromByteStream(IntPtr pByteStream, IntPtr pAttributes, out IntPtr ppSourceReader);
-        
+        public static partial int MFCreateSourceReaderFromByteStream([MarshalUsing(typeof(UniqueComInterfaceMarshaller<IMFByteStream>))] IMFByteStream pByteStream, IntPtr pAttributes, [MarshalUsing(typeof(UniqueComInterfaceMarshaller<IMFSourceReader>))] out IMFSourceReader ppSourceReader);
+
         [Flags]
         internal enum Capabilities
         {
@@ -86,34 +88,89 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
             DoseNotUseNetwork = 0x800,
         }
 
-        internal enum MFByteStreamSeekOrigin
+        [GeneratedComClass]
+        internal partial class ManagedIStream : IStream
         {
-            Begin = 0,
-            Current
-        }
+            private Stream _stream;
 
-        [GeneratedComInterface]
-        [Guid("a27003cf-2354-4f2a-8d6a-ab7cff15437e")]
-        internal partial interface IMFAsyncCallback
-        {
-            [PreserveSig]
-            int GetParameters(out int pdwFlags, out int pdwQueue);
-            void Invoke(IntPtr pAsyncResult);
-        }
+            public ManagedIStream(Stream stream)
+            {
+                _stream = stream;
+            }
 
-        [GeneratedComInterface]
-        [Guid("ac6b7889-0740-4d51-8619-905994a55cc6")]
-        internal partial interface IMFAsyncResult
-        {
-            IntPtr GetState();
-            [PreserveSig]
-            int GetStatus();
-            void SetStates(int hrStatus);
-            IntPtr GetObject();
-            [PreserveSig]
-            IntPtr GetStateNoAddRef();
-            int _Result(); //在最后偷偷藏一个自己用的方法
+            public HRESULT Clone([MarshalUsing(typeof(UniqueComInterfaceMarshaller<IStream>))] out IStream ppstm)
+            {
+                ppstm = null;
+                return 0x80004001;
+            }
 
+            public HRESULT Commit(uint grfCommitFlags)
+            {
+                _stream.Flush();
+                return 0;
+            }
+
+            public HRESULT CopyTo([MarshalUsing(typeof(UniqueComInterfaceMarshaller<IStream>))] IStream pstm, ulong cb, nint pcbRead, nint pcbWritten)
+            {
+                return 0x80004001;
+            }
+
+            public HRESULT LockRegion(ulong libOffset, ulong cb, uint dwLockType)
+            {
+                return 0;
+            }
+
+            public unsafe HRESULT Read(nint pv, uint cb, nint pcbRead)
+            {
+                *(int*)(pcbRead) = _stream.Read(new Span<byte>(pv.ToPointer(), (int)cb));
+                return 0;
+            }
+
+            public HRESULT Revert()
+            {
+                return 0;
+            }
+
+            public unsafe HRESULT Seek(long dlibMove, STREAM_SEEK dwOrigin, nint plibNewPosition)
+            {
+                var result = _stream.Seek(dlibMove, (SeekOrigin)dwOrigin);
+                if (plibNewPosition != 0)
+                {
+                    *(long*)(plibNewPosition) = result;
+                }
+                return 0;
+            }
+
+            public HRESULT SetSize(ulong libNewSize)
+            {
+                _stream.SetLength((long)libNewSize);
+                return 0;
+            }
+
+            public HRESULT Stat(out STATSTG pstatstg, uint grfStatFlag)
+            {
+                pstatstg = new()
+                {
+                    type = 2,
+                    cbSize = (ulong)_stream.Length,
+                };
+                return 0;
+            }
+
+            public HRESULT UnlockRegion(ulong libOffset, ulong cb, uint dwLockType)
+            {
+                return 0;
+            }
+
+            public unsafe HRESULT Write(nint pv, uint cb, nint pcbWritten)
+            {
+                _stream.Write(new Span<byte>(pv.ToPointer(), (int)cb));
+                if (pcbWritten != 0)
+                {
+                    *(uint*)(pcbWritten) = cb;
+                }
+                return 0;
+            }
         }
 
         [GeneratedComClass]
@@ -121,23 +178,26 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
         {
             private readonly IntPtr _state;
             private int hr;
-            private int result;
+            private uint result;
 
-            public ManagedMFAsyncResult(IntPtr state, int result)
+            public ManagedMFAsyncResult(IntPtr state, uint result)
             {
                 _state = state;
                 this.result = result;
             }
 
-            public nint GetObject()
+            public HRESULT GetObject(out nint ppObject)
             {
+                ppObject = Marshal.AllocCoTaskMem(4);
+                Marshal.WriteInt32(ppObject, (int)result);
                 return 0;
             }
 
-            public nint GetState()
+            public HRESULT GetState(out nint ppunkState)
             {
                 if (_state != IntPtr.Zero) Marshal.AddRef(_state);
-                return _state;
+                ppunkState = _state;
+                return 0;
             }
 
             public nint GetStateNoAddRef()
@@ -145,151 +205,152 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
                 return _state;
             }
 
-            public int GetStatus()
-            {
-                return hr;
-            }
-
             public void SetStates(int hrStatus)
             {
                 hr = hrStatus;
             }
 
-            public int _Result()
+            public HRESULT SetStatus(HRESULT hrStatus)
+            {
+                hr = hrStatus;
+                return 0;
+            }
+
+            public HRESULT GetStatus()
+            {
+                return hr;
+            }
+
+            public uint GetResult()
             {
                 return result;
             }
-        }
-
-        [GeneratedComInterface]
-        [Guid("ad4c1b00-4bf7-422f-9175-756693d9130d")]
-        internal partial interface IMFByteStream
-        {
-            Capabilities GetCapabilities();
-            long GetLength();
-            void SetLength(long length);
-            long GetCurrentPosition();
-            void SetCurrentPosition(long position);
-            [return:MarshalAs(UnmanagedType.Bool)]
-            bool IsEndOfStream();
-            int Read(IntPtr pb, int cb);
-            void BeginRead(IntPtr pb, int cb, IMFAsyncCallback pCallback, IntPtr punkState);
-            int EndRead(IMFAsyncResult pResult);
-            int Write(IntPtr pb, int cb);
-            void BeginWrite(IntPtr pb, int cb, IMFAsyncCallback pCallback, IntPtr punkState);
-            int EndWrite(IMFAsyncResult pResult);
-            long Seek(MFByteStreamSeekOrigin seekOrigin, long seekOffset,int seekFlags);
-            void Flush();
-            void Close();
         }
 
         [GeneratedComClass]
         internal partial class ManagedMFByteStream : IMFByteStream
         {
             private Stream stream;
-            private ComWrappers comWrappers;
-            public ManagedMFByteStream(Stream stream,ComWrappers comWrappers)
+            public ManagedMFByteStream(Stream stream)
             {
                 this.stream = stream;
-                this.comWrappers = comWrappers;
             }
-            public unsafe void BeginRead(nint pb, int cb, IMFAsyncCallback pCallback, nint punkState)
+
+            public HRESULT BeginRead(nint pb, uint cb, [MarshalUsing(typeof(UniqueComInterfaceMarshaller<IMFAsyncCallback>))] IMFAsyncCallback pCallback, nint punkState)
             {
                 __MemoryManager __memoryManager = new __MemoryManager(pb, cb);
-                
                 stream.ReadAsync(__memoryManager.Memory).AsTask().ContinueWith(t =>
                 {
                     int readBytes = t.Result;
-                    ManagedMFAsyncResult asyncResult = new ManagedMFAsyncResult(punkState, readBytes);
-                    pCallback.Invoke(comWrappers.GetOrCreateComInterfaceForObject(asyncResult, CreateComInterfaceFlags.None));
+                    ManagedMFAsyncResult asyncResult = new(punkState, (uint)readBytes);
+                    pCallback.Invoke(asyncResult);
                 });
+                return 0;
             }
 
-            public void BeginWrite(nint pb, int cb, IMFAsyncCallback pCallback, nint punkState)
+            public HRESULT BeginWrite(nint pb, uint cb, [MarshalUsing(typeof(UniqueComInterfaceMarshaller<IMFAsyncCallback>))] IMFAsyncCallback pCallback, nint punkState)
             {
                 __MemoryManager __memoryManager = new __MemoryManager(pb, cb);
                 stream.WriteAsync(__memoryManager.Memory).AsTask().ContinueWith(t =>
                 {
                     ManagedMFAsyncResult asyncResult = new ManagedMFAsyncResult(punkState, cb);
-                    pCallback.Invoke(comWrappers.GetOrCreateComInterfaceForObject(asyncResult, CreateComInterfaceFlags.None));
+                    pCallback.Invoke(asyncResult);
                 });
+                return 0;
             }
 
-            public void Close()
+            public HRESULT EndRead([MarshalUsing(typeof(UniqueComInterfaceMarshaller<IMFAsyncResult>))] IMFAsyncResult pResult, out uint pcbRead)
+            {
+                pResult.GetObject(out var ppObject);
+                pcbRead = (uint)Marshal.ReadInt32(ppObject);
+                Marshal.FreeCoTaskMem(ppObject);
+                return 0;
+            }
+
+            public HRESULT EndWrite([MarshalUsing(typeof(UniqueComInterfaceMarshaller<IMFAsyncResult>))] IMFAsyncResult pResult, out uint pcbWritten)
+            {
+                pResult.GetObject(out var ppObject);
+                pcbWritten = (uint)Marshal.ReadInt32(ppObject);
+                Marshal.FreeCoTaskMem(ppObject);
+                return 0;
+            }
+
+            public HRESULT GetCapabilities(out uint pdwCapabilities)
+            {
+                Capabilities flags = (stream.CanRead ? Capabilities.Readable : 0) | (stream.CanWrite ? Capabilities.Writable : 0) | (stream.CanSeek ? Capabilities.Seekable : 0);
+                flags |= Capabilities.DoseNotUseNetwork;
+                pdwCapabilities = (uint)flags;
+                return 0;
+            }
+
+            public HRESULT GetCurrentPosition(out ulong pqwPosition)
+            {
+                pqwPosition = (ulong)stream.Position;
+                return 0;
+            }
+
+
+            public HRESULT GetLength(out ulong pqwLength)
+            {
+                pqwLength = (ulong)stream.Length;
+                return 0;
+            }
+
+            public HRESULT IsEndOfStream(out BOOL pfEndOfStream)
+            {
+                pfEndOfStream = stream.Position >= stream.Length;
+                return 0;
+            }
+
+            public unsafe HRESULT Read(nint pb, uint cb, out uint pcbRead)
+            {
+                pcbRead = (uint)stream.Read(new Span<byte>((void*)pb, (int)cb));
+                return 0;
+            }
+
+            public HRESULT Seek(MFBYTESTREAM_SEEK_ORIGIN seekOrigin, long llSeekOffset, uint dwSeekFlags, out ulong pqwCurrentPosition)
+            {
+                pqwCurrentPosition = (ulong)stream.Seek(llSeekOffset, seekOrigin == MFBYTESTREAM_SEEK_ORIGIN.msoBegin ? SeekOrigin.Begin : SeekOrigin.Current);
+                return 0;
+            }
+
+            public HRESULT SetCurrentPosition(ulong qwPosition)
+            {
+                stream.Position = (long)qwPosition;
+                return 0;
+            }
+
+            public HRESULT SetLength(ulong qwLength)
+            {
+                stream.SetLength((long)qwLength);
+                return 0;
+            }
+
+            public unsafe HRESULT Write(nint pb, uint cb, out uint pcbWritten)
+            {
+                stream.Write(new ReadOnlySpan<byte>((void*)pb, (int)cb));
+                pcbWritten = cb;
+                return 0;
+            }
+
+            public HRESULT Close()
             {
                 stream.Close();
+                return 0;
             }
 
-            public int EndRead(IMFAsyncResult pResult)
-            {
-                return pResult._Result();
-            }
-
-            public int EndWrite(IMFAsyncResult pResult)
-            {
-                return pResult._Result();
-            }
-
-            public void Flush()
+            public HRESULT Flush()
             {
                 stream.Flush();
-            }
-
-            public Capabilities GetCapabilities()
-            {
-                Capabilities flags = (stream.CanRead ? Capabilities.Readable : 0)| (stream.CanWrite ? Capabilities.Writable : 0) | (stream.CanSeek ? Capabilities.Seekable : 0);
-                flags |= Capabilities.DoseNotUseNetwork;
-                return flags;
-            }
-
-            public long GetCurrentPosition()
-            {
-                return stream.Position;
-            }
-
-            public long GetLength()
-            {
-                return stream.Length;
-            }
-
-            [return: MarshalAs(UnmanagedType.Bool)]
-            public bool IsEndOfStream()
-            {
-                return stream.Position >= stream.Length;
-            }
-
-            public unsafe int Read(nint pb, int cb)
-            {
-                return stream.Read(new Span<byte>((void*)pb, cb));
-            }
-
-            public long Seek(MFByteStreamSeekOrigin seekOrigin, long seekOffset, int seekFlags)
-            {
-                return stream.Seek(seekOffset, seekOrigin == MFByteStreamSeekOrigin.Begin ? SeekOrigin.Begin : SeekOrigin.Current);
-            }
-
-            public void SetCurrentPosition(long position)
-            {
-                stream.Position = position;
-            }
-
-            public void SetLength(long length)
-            {
-                stream.SetLength(length);
-            }
-
-            public unsafe int Write(nint pb, int cb)
-            {
-                stream.Write(new ReadOnlySpan<byte>((void*)pb, cb));
-                return cb;
+                return 0;
             }
         }
 
         public class __MemoryManager : MemoryManager<byte>
         {
             private IntPtr ptr;
-            private int length;
-            public __MemoryManager(IntPtr ptr,int length)
+            private uint length;
+            public __MemoryManager(IntPtr ptr, uint length)
             {
                 this.ptr = ptr;
                 this.length = length;
@@ -297,7 +358,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
 
             public unsafe override Span<byte> GetSpan()
             {
-                return new Span<byte>(ptr.ToPointer(), length);
+                return new Span<byte>(ptr.ToPointer(), (int)length);
             }
 
             public unsafe override MemoryHandle Pin(int elementIndex = 0)

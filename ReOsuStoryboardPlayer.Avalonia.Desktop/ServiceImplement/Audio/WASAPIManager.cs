@@ -124,12 +124,12 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
                     for (var i = 0; i < playerSpan.Length; i++)
                     {
                         var player = playerSpan[i];
-                        player.MixIntoFloat(mixSpan, mixSpan.Length);
+                        player.MixIntoFloat(mixSpan, (int)framesToWrite);
                     }
                 }
                 for (int i = 0; i < mixSpan.Length; i++)
                 {
-                    mixSpan[i] = float.Clamp(mixSpan[i], 0.0f, 1.0f);
+                    mixSpan[i] = float.Clamp(mixSpan[i], -1f, 1f);
                 }
                 hr = audioRenderClient.GetBuffer(framesToWrite, out var bufferPtr);
                 Span<byte> buffer = new((void*)bufferPtr, (int)(framesToWrite*frameSize));

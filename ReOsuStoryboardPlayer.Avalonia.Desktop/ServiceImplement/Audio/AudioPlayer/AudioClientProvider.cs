@@ -70,6 +70,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
             totalFrames = pcmFloat.Length / (channels * sizeof(float));
             cursorFrames = 0;
             IsPlaying = false;
+            IsAvaliable = true;
             return true;
         }
 
