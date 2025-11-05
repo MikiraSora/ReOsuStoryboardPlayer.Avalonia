@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using DirectN;
+using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using System;
@@ -15,8 +16,9 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
 {
     internal partial class AudioClientProvider : ObservableObject, IAudioPlayer
     {
-        MF MFUtils;
         ComWrappers comWrappers;
+        ILogger<AudioClientProvider> logger;
+        public Action removeAction;
         private byte[] pcmFloat;
         private int totalFrames;
         private int cursorFrames;
@@ -38,17 +40,17 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
 
         public TimeSpan CurrentTime => TimeSpan.FromSeconds(cursorFrames / (double)sampleRate);
 
-        public AudioClientProvider(MF MFUtils, ComWrappers comWrappers)
+        public AudioClientProvider(ComWrappers comWrappers, ILogger<AudioClientProvider> logger)
         {
-            this.MFUtils = MFUtils;
             this.comWrappers = comWrappers;
+            this.logger = logger;
         }
 
         public void Play() => IsPlaying = true;
         public void Pause() => IsPlaying = false;
         public void Stop() { IsPlaying = false; cursorFrames = 0; }
 
-        public void Seek(TimeSpan TimeSpan, bool pause) { cursorFrames = (int)(TimeSpan.TotalSeconds * sampleRate); IsPlaying = !pause; }
+        public void Seek(TimeSpan TimeSpan, bool pause) { cursorFrames = (int)(TimeSpan.TotalSeconds * sampleRate); /*IsPlaying = !pause; */}
 
         public async Task<bool> Load(Stream stream, WAVEFORMATEX deviceMix)
         {
@@ -56,10 +58,10 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
             {
                 channels = deviceMix.nChannels;
                 sampleRate = (int)deviceMix.nSamplesPerSec;
-                var reader = MFUtils.MFCreateSourceReaderFromByteStream(stream);
+                var reader = MF.MFCreateSourceReaderFromByteStream(stream);
                 reader.SetStreamSelection(unchecked((uint)DirectN.MF_SOURCE_READER_CONSTANTS.MF_SOURCE_READER_ALL_STREAMS), false);
                 reader.SetStreamSelection(unchecked((uint)DirectN.MF_SOURCE_READER_CONSTANTS.MF_SOURCE_READER_FIRST_AUDIO_STREAM), true);
-                var outType = MFUtils.MFCreateMediaType();
+                var outType = MF.MFCreateMediaType();
                 outType.SetGUID(MF.MFGuids.MF_MT_MAJOR_TYPE, MF.MFGuids.MFMediaType_Audio);
                 outType.SetGUID(MF.MFGuids.MF_MT_SUBTYPE, MF.MFGuids.MFAudioFormat_Float);
                 outType.SetUINT32(MF.MFGuids.MF_MT_AUDIO_NUM_CHANNELS, (uint)channels);
@@ -88,7 +90,6 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
                     unchecked((uint)DirectN.MF_SOURCE_READER_CONSTANTS.MF_SOURCE_READER_FIRST_AUDIO_STREAM),
                     0, 0, (nint)(&dwFlags), 0, (nint)(&pSample));
                 Marshal.ThrowExceptionForHR(hr);
-
                 if ((dwFlags & (int)DirectN.MF_SOURCE_READER_FLAG.MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED) != 0)
                     throw new NotSupportedException("Type change not supported.");
                 if ((dwFlags & (int)DirectN.MF_SOURCE_READER_FLAG.MF_SOURCE_READERF_ENDOFSTREAM) != 0)
@@ -141,7 +142,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
                 {
                     // TODO: 释放托管状态(托管对象)
                 }
-
+                removeAction();
                 // TODO: 释放未托管的资源(未托管的对象)并重写终结器
                 // TODO: 将大型字段设置为 null
                 disposedValue = true;
@@ -149,11 +150,11 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
         }
 
         // // TODO: 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
-        // ~AudioClientProvider()
-        // {
-        //     // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
-        //     Dispose(disposing: false);
-        // }
+        ~AudioClientProvider()
+        {
+            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+            Dispose(disposing: false);
+        }
 
         public void Dispose()
         {

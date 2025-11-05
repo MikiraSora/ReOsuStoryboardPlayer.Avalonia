@@ -13,12 +13,12 @@ using static ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
 {
-    internal partial class MF
+    internal partial class MF : IDisposable
     {
-        private ComWrappers comWrappers;
-        public MF(ComWrappers comWrappers)
+        private bool disposedValue;
+
+        public MF()
         {
-            this.comWrappers = comWrappers;
             var hr = MFStartup(0x20070, 0);
         }
 
@@ -42,7 +42,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
             public static readonly Guid MF_MT_AUDIO_CHANNEL_MASK = new("55fb5765-644a-4caf-8479-938983bb1588");
         }
 
-        public IMFSourceReader MFCreateSourceReaderFromByteStream(Stream stream)
+        public static IMFSourceReader MFCreateSourceReaderFromByteStream(Stream stream)
         {
             //ManagedMFByteStream managedMFByteStream = new ManagedMFByteStream(stream);
             ManagedIStream managedIStream = new ManagedIStream(stream);
@@ -52,11 +52,11 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
             return ppSourceReader;
         }
 
-        public IMFMediaType MFCreateMediaType()
+        public static IMFMediaType MFCreateMediaType()
         {
             var hr = MFCreateMediaType(out var ppMFType);
             Marshal.ThrowExceptionForHR(hr);
-            return comWrappers.GetOrCreateObjectForComInstance(ppMFType, CreateObjectFlags.None) as IMFMediaType;
+            return ppMFType;
         }
 
         [LibraryImport("Mfplat.dll")]
@@ -66,7 +66,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
         public static partial int MFShutdown();
 
         [LibraryImport("Mfplat.dll")]
-        public static partial int MFCreateMediaType(out IntPtr ppMFType);
+        public static partial int MFCreateMediaType([MarshalUsing(typeof(UniqueComInterfaceMarshaller<IMFMediaType>))] out IMFMediaType ppMFType);
 
         [LibraryImport("Mfplat.dll")]
         public static partial int MFCreateMFByteStreamOnStream([MarshalUsing(typeof(UniqueComInterfaceMarshaller<IStream>))] IStream stream, [MarshalUsing(typeof(UniqueComInterfaceMarshaller<IMFByteStream>))] out IMFByteStream byteStream);
@@ -171,6 +171,31 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
                 }
                 return 0;
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                }
+                MFShutdown();
+                disposedValue = true;
+            }
+        }
+
+        ~MF()
+        {
+            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -54,40 +54,40 @@ public class DesktopAudioManager : ObservableObject, IAudioManager
         ownAudioPlayerRefs.Add(new WeakReference<DesktopAudioPlayer>(player));
 
         var playerSetting = await persistence.Load<StoryboardPlayerSetting>(default);
-        //await player.Load(stream, playerSetting.AudioSampleRate, prependLeadInSeconds);
+        await player.Load(stream, playerSetting.AudioSampleRate, prependLeadInSeconds);
         return player;
     }
 
     private async void Initalize()
     {
-        //var playerSetting = await persistence.Load<StoryboardPlayerSetting>(default);
-        //var audioOutputType = AudioOutputType.Wasapi;
+        var playerSetting = await persistence.Load<StoryboardPlayerSetting>(default);
+        var audioOutputType = AudioOutputType.Wasapi;
 
-        //try
-        //{
-        //    audioOutputDevice = audioOutputType switch
-        //    {
-        //        AudioOutputType.Asio => new AsioOut {AutoStop = false},
-        //        _ => new WasapiOut(AudioClientShareMode.Shared, 0)
-        //        //AudioOutputType.WaveOut or _ => new WaveOut() { DesiredLatency = 100 },
-        //    };
-        //}
-        //catch (Exception e)
-        //{
-        //    logger.LogErrorEx(e, $"Can't create audio output device:{audioOutputType}");
-        //    throw;
-        //}
+        try
+        {
+            audioOutputDevice = audioOutputType switch
+            {
+                AudioOutputType.Asio => new AsioOut { AutoStop = false },
+                _ => new WasapiOut(AudioClientShareMode.Shared, 0)
+                //AudioOutputType.WaveOut or _ => new WaveOut() { DesiredLatency = 100 },
+            };
+        }
+        catch (Exception e)
+        {
+            logger.LogErrorEx(e, $"Can't create audio output device:{audioOutputType}");
+            throw;
+        }
 
-        //logger.LogDebugEx($"audioOutputDevice: {audioOutputDevice}");
+        logger.LogDebugEx($"audioOutputDevice: {audioOutputDevice}");
 
-        ////var format = WaveFormat.CreateIeeeFloatWaveFormat(playerSetting.AudioSampleRate, 2);
+        var format = WaveFormat.CreateIeeeFloatWaveFormat(playerSetting.AudioSampleRate, 2);
 
-        //masterMixer = new MixingSampleProvider();
-        //masterMixer.ReadFully = true;
-        //audioOutputDevice.Init(masterMixer);
-        //audioOutputDevice.Play();
+        masterMixer = new MixingSampleProvider(format);
+        masterMixer.ReadFully = true;
+        audioOutputDevice.Init(masterMixer);
+        audioOutputDevice.Play();
 
-        //logger.LogInformationEx($"Audio output will use {audioOutputType}");
+        logger.LogInformationEx($"Audio output will use {audioOutputType}");
     }
 
     public void Dispose()

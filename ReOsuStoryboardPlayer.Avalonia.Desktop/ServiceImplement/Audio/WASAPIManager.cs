@@ -27,19 +27,21 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
     [RegisterSingleton<IAudioManager>]
     internal partial class WASAPIManager : IAudioManager
     {
-        public WASAPIManager(ILogger<WASAPIManager> logger, IPersistence persistence)
+        public WASAPIManager(ILogger<WASAPIManager> logger, ILogger<AudioClientProvider> clientLogger, IPersistence persistence)
         {
             this.logger = logger;
+            this.clientLogger = clientLogger;
             this.persistence = persistence;
             comWrappers = new StrategyBasedComWrappers();
             isRunning = true;
             eventWaitHandle = new EventWaitHandle(true, EventResetMode.AutoReset);
-            MFUtils = new MF(comWrappers);
+            MFUtils = new MF();
             players = new();
             playerLock = new Lock();
             Init();
         }
         private ILogger<WASAPIManager> logger;
+        private ILogger<AudioClientProvider> clientLogger;
         private IPersistence persistence;
         private MF MFUtils;
         private ComWrappers comWrappers;
@@ -61,12 +63,19 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
         private List<AudioClientProvider> players;
         public async Task<IAudioPlayer> LoadAudio(Stream stream, double prependLeadInSeconds)
         {
-            AudioClientProvider client = new(MFUtils,comWrappers);
+            AudioClientProvider client = new(comWrappers,clientLogger);
             await client.Load(stream, mixWaveFormatEx);
             lock (playerLock)
             {
                 players.Add(client);
             }
+            client.removeAction = () =>
+            {
+                lock (playerLock)
+                {
+                    players.Remove(client);
+                }
+            };
             GC.Collect();//趁机GC一下 skia加载会产生大量的垃圾 GC会中断音频线程
             return client;
         }
@@ -75,6 +84,11 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
         {
             var playerSetting = await persistence.Load<StoryboardPlayerSetting>(default);
             mmDevice = GetDefaultAudioEndpoint();
+            mmDevice.OpenPropertyStore(STGM.STGM_READ, out var propertyStore);
+            PROPERTYKEY friendNameKey = new(new(0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20, 0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0), 14);
+            propertyStore.GetValue(friendNameKey, out var friendlyNameValue);
+            string friendName = Marshal.PtrToStringUni(friendlyNameValue.Anonymous.Anonymous.Anonymous.pwszVal.Value);
+            logger.LogInformation($"WASAPI AudioEndpoint Name:{friendName}");
             var hr = mmDevice.Activate(typeof(IAudioClient3).GUID, DirectN.CLSCTX.CLSCTX_ALL, 0, out var audioClientPtr);
             Marshal.ThrowExceptionForHR(hr);
             audioClient = comWrappers.GetOrCreateObjectForComInstance(audioClientPtr, CreateObjectFlags.None) as IAudioClient3;
@@ -85,15 +99,18 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
             mixWaveFormatEx = CreateFormat(mixWaveFormatEx.nSamplesPerSec, mixWaveFormatEx.wBitsPerSample, mixWaveFormatEx.nChannels);
             outChannels = mixWaveFormatEx.nChannels;
             outIsFloat = (mixWaveFormatEx.wFormatTag == 3);
+            logger.LogInformation($"WASAPI MixFormat SampleRate:{mixWaveFormatEx.nSamplesPerSec} Bits:{mixWaveFormatEx.wBitsPerSample} Channels:{mixWaveFormatEx.nChannels}");
             frameSize = (uint)mixWaveFormatEx.nBlockAlign;
             hr = audioClient.GetSharedModeEnginePeriod(mixWaveFormatEx, out var defaultPeriod, out var fundamentalPeriod, out var minPeriod, out var maxPeriod);
             Marshal.ThrowExceptionForHR(hr);
+            logger.LogInformation($"DefaultPeriod:{defaultPeriod} FundamentalPeriod:{fundamentalPeriod} MinimalPeriod:{minPeriod} MaximalPeriod:{maxPeriod}");
             var period = playerSetting.WindowsAudioPeriod switch
             {
                 StoryboardPlayerSetting.WASAPIPeriod.Minimal => minPeriod,
                 StoryboardPlayerSetting.WASAPIPeriod.Default => defaultPeriod,
                 StoryboardPlayerSetting.WASAPIPeriod.Maximal => maxPeriod,
             };
+            logger.LogInformation($"SelectedPeriod:{period}");
             hr = audioClient.InitializeSharedAudioStream(0x00040000, period, mixWaveFormatEx, 0);
             Marshal.ThrowExceptionForHR(hr);
             hr = audioClient.SetEventHandle(eventWaitHandle.Handle);
@@ -103,8 +120,10 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
             audioRenderClient = comWrappers.GetOrCreateObjectForComInstance(audioRenderClientPtr, CreateObjectFlags.None) as IAudioRenderClient;
             hr = audioClient.Start();
             Marshal.ThrowExceptionForHR(hr);
+            logger.LogInformation($"AudioClient Start");
             hr = audioClient.GetBufferSize(out bufferFrameCount);
             Marshal.ThrowExceptionForHR(hr);
+            logger.LogInformation($"WASAPI BufferFrameCount:{bufferFrameCount}");
             audioBuffer = new byte[bufferFrameCount * mixWaveFormatEx.nBlockAlign];
             mixScratchFloat = new float[bufferFrameCount * outChannels];
             audioThread = new Thread(AudioThreadEntryPoint)
@@ -113,12 +132,14 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
                 Name = "WASAPI Audio Thread"
             };
             audioThread.Start();
+            logger.LogInformation($"AudioThread Start");
         }
 
         private unsafe void AudioThreadEntryPoint()
         {
             uint taskIndex = 0;
             IntPtr mmcssHandle = AvSetMmThreadCharacteristicsW("Pro Audio", out taskIndex);
+            logger.LogInformation($"AudioThread Task Name:Pro Audio");
             while (isRunning)
             {
                 eventWaitHandle.WaitOne();
