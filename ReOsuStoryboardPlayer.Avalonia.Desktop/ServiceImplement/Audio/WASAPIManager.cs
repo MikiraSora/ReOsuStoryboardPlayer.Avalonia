@@ -67,6 +67,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
             {
                 players.Add(client);
             }
+            GC.Collect();//趁机GC一下 skia加载会产生大量的垃圾 GC会中断音频线程
             return client;
         }
 

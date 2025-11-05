@@ -52,23 +52,26 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
 
         public async Task<bool> Load(Stream stream, WAVEFORMATEX deviceMix)
         {
-            channels = deviceMix.nChannels;
-            sampleRate = (int)deviceMix.nSamplesPerSec;
-            var reader = MFUtils.MFCreateSourceReaderFromByteStream(stream);
-            reader.SetStreamSelection(unchecked((uint)DirectN.MF_SOURCE_READER_CONSTANTS.MF_SOURCE_READER_ALL_STREAMS), false);
-            reader.SetStreamSelection(unchecked((uint)DirectN.MF_SOURCE_READER_CONSTANTS.MF_SOURCE_READER_FIRST_AUDIO_STREAM), true);
-            var outType = MFUtils.MFCreateMediaType();
-            outType.SetGUID(MF.MFGuids.MF_MT_MAJOR_TYPE, MF.MFGuids.MFMediaType_Audio);
-            outType.SetGUID(MF.MFGuids.MF_MT_SUBTYPE, MF.MFGuids.MFAudioFormat_Float);
-            outType.SetUINT32(MF.MFGuids.MF_MT_AUDIO_NUM_CHANNELS, (uint)channels);
-            outType.SetUINT32(MF.MFGuids.MF_MT_AUDIO_SAMPLES_PER_BLOCK, (uint)channels);
-            outType.SetUINT32(MF.MFGuids.MF_MT_AUDIO_BITS_PER_SAMPLE, (uint)sampleRate);
-            reader.SetCurrentMediaType(unchecked((uint)DirectN.MF_SOURCE_READER_CONSTANTS.MF_SOURCE_READER_FIRST_AUDIO_STREAM), IntPtr.Zero, outType);
-            using var ms = new MemoryStream(capacity: 1 << 20);
-            DecodeFloatPcm(reader, ms);
-            pcmFloat = ms.ToArray();
-            totalFrames = pcmFloat.Length / (channels * sizeof(float));
-            cursorFrames = 0;
+            await Task.Run(() =>
+            {
+                channels = deviceMix.nChannels;
+                sampleRate = (int)deviceMix.nSamplesPerSec;
+                var reader = MFUtils.MFCreateSourceReaderFromByteStream(stream);
+                reader.SetStreamSelection(unchecked((uint)DirectN.MF_SOURCE_READER_CONSTANTS.MF_SOURCE_READER_ALL_STREAMS), false);
+                reader.SetStreamSelection(unchecked((uint)DirectN.MF_SOURCE_READER_CONSTANTS.MF_SOURCE_READER_FIRST_AUDIO_STREAM), true);
+                var outType = MFUtils.MFCreateMediaType();
+                outType.SetGUID(MF.MFGuids.MF_MT_MAJOR_TYPE, MF.MFGuids.MFMediaType_Audio);
+                outType.SetGUID(MF.MFGuids.MF_MT_SUBTYPE, MF.MFGuids.MFAudioFormat_Float);
+                outType.SetUINT32(MF.MFGuids.MF_MT_AUDIO_NUM_CHANNELS, (uint)channels);
+                outType.SetUINT32(MF.MFGuids.MF_MT_AUDIO_SAMPLES_PER_SECOND, (uint)sampleRate);
+                outType.SetUINT32(MF.MFGuids.MF_MT_AUDIO_BITS_PER_SAMPLE, 32);
+                reader.SetCurrentMediaType(unchecked((uint)DirectN.MF_SOURCE_READER_CONSTANTS.MF_SOURCE_READER_FIRST_AUDIO_STREAM), IntPtr.Zero, outType);
+                using var ms = new MemoryStream(capacity: 1 << 20);
+                DecodeFloatPcm(reader, ms);
+                pcmFloat = ms.ToArray();
+                totalFrames = pcmFloat.Length / (channels * sizeof(float));
+                cursorFrames = 0;
+            });
             IsPlaying = false;
             IsAvaliable = true;
             return true;
