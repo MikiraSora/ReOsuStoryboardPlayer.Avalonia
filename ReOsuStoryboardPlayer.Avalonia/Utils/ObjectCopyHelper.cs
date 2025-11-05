@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Utils;
@@ -8,13 +9,13 @@ public static class ObjectCopyHelper
 {
     private static readonly Dictionary<int, Action<object, object>> cacheCopyFuncMap = new();
 
-    public static void CopyProperties<FROM, TO>(FROM from, TO to)
+    public static void CopyProperties<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] FROM, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TO>(FROM from, TO to)
     {
         var copyFunc = GetCopyFunc<FROM, TO>();
         copyFunc(from, to);
     }
 
-    private static Action<object, object> GetCopyFunc<FROM, TO>()
+    private static Action<object, object> GetCopyFunc<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] FROM, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)] TO>()
     {
         var fromType = typeof(FROM);
         var toType = typeof(TO);

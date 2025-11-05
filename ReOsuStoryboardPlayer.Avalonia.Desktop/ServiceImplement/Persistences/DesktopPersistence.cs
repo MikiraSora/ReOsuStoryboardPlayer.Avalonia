@@ -1,26 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
-using System.Threading.Tasks;
-using Injectio.Attributes;
+﻿using Injectio.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Services.Dialog;
 using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
 using ReOsuStoryboardPlayer.Avalonia.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Persistences;
 
 [RegisterSingleton<IPersistence>]
-public class DesktopPersistence : IPersistence
+public partial class DesktopPersistence : IPersistence
 {
     private readonly Dictionary<string, object> cacheObj = new();
     private readonly IDialogManager dialogManager;
-    private readonly object locker = new();
+    private readonly Lock locker = new();
     private readonly ILogger<DesktopPersistence> logger;
     private readonly IServiceProvider provider;
     private readonly string savePath;
@@ -39,7 +42,7 @@ public class DesktopPersistence : IPersistence
         this.provider = provider;
         this.logger = logger;
         this.dialogManager = dialogManager;
-        savePath = Path.Combine(Path.GetDirectoryName(typeof(DesktopPersistence).Assembly.Location) ?? string.Empty,
+        savePath = Path.Combine(Path.GetDirectoryName(System.AppContext.BaseDirectory) ?? string.Empty,
             "setting.json");
     }
 
@@ -56,26 +59,26 @@ public class DesktopPersistence : IPersistence
             {
                 var key = GetKey<T>();
 
-                settingMap[key] = JsonSerializer.Serialize(obj, serializerOptions);
-                var content = JsonSerializer.Serialize(settingMap);
+                settingMap[key] = JsonSerializer.Serialize(obj, typeInfo);
+                var content = JsonSerializer.Serialize(settingMap,DictionaryJsonSerializerContext.Default.DictionaryStringString);
 
                 File.WriteAllText(savePath, content);
             }
         });
     }
 
-    public Task<T> Load<T>(JsonTypeInfo<T> typeInfo) where T : new()
+    public Task<T> Load<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(JsonTypeInfo<T> typeInfo) where T : new()
     {
         return Task.Run(() =>
         {
             lock (locker)
             {
-                return LoadInternal<T>();
+                return LoadInternal<T>(typeInfo);
             }
         });
     }
 
-    private T LoadInternal<T>()
+    private T LoadInternal<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(JsonTypeInfo<T> jsonTypeInfo)
     {
         var key = GetKey<T>();
 
@@ -84,7 +87,6 @@ public class DesktopPersistence : IPersistence
             logger.LogDebugEx($"return cached {typeof(T).Name} object, hash = {obj.GetHashCode()}");
             return (T) obj;
         }
-
         if (settingMap is null)
         {
             if (File.Exists(savePath))
@@ -95,7 +97,7 @@ public class DesktopPersistence : IPersistence
                 else
                     try
                     {
-                        settingMap = JsonSerializer.Deserialize<Dictionary<string, string>>(content, serializerOptions);
+                        settingMap = JsonSerializer.Deserialize<Dictionary<string, string>>(content, DictionaryJsonSerializerContext.Default.DictionaryStringString);
                     }
                     catch (Exception e)
                     {
@@ -117,7 +119,7 @@ public class DesktopPersistence : IPersistence
         T cw = default;
         if (settingMap.TryGetValue(key, out var jsonContent))
         {
-            cw = JsonSerializer.Deserialize<T>(jsonContent);
+            cw = JsonSerializer.Deserialize<T>(jsonContent,jsonTypeInfo);
             logger.LogDebugEx($"create new {typeof(T).Name} object from setting.json, hash = {cw.GetHashCode()}");
         }
         else
@@ -131,8 +133,14 @@ public class DesktopPersistence : IPersistence
         return cw;
     }
 
-    private string GetKey<T>()
+    private static string GetKey<T>()
     {
         return typeof(T).FullName;
+    }
+
+    [JsonSerializable(typeof(Dictionary<string, string>))]
+    internal partial class DictionaryJsonSerializerContext : JsonSerializerContext
+    {
+
     }
 }

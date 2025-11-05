@@ -1,9 +1,6 @@
-﻿using CommunityToolkit.HighPerformance;
-using DirectN;
+﻿using DirectN;
 using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
-using NAudio.CoreAudioApi;
-using NAudio.Wave;
 using ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPlayer;
 using ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Models;
@@ -13,14 +10,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Documents;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
 {
