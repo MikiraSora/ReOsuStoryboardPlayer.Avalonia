@@ -66,9 +66,8 @@ jobs:
         
     - name: Build Windows (x64)
       run: |
-        dotnet publish ReOsuStoryboardPlayer.Avalonia.Android/ReOsuStoryboardPlayer.Avalonia.Desktop.csproj \
+        dotnet publish ReOsuStoryboardPlayer.Avalonia.Desktop/ReOsuStoryboardPlayer.Avalonia.Desktop.csproj \
           -p:PublishProfile=FolderProfile
-        cp ./android/x64/moe.MikiraSora.ReOsuStoryboardPlayer-Signed.apk ./publish/wwwroot/downloads/android_x64.apk
         
     - name: Compress Build Windows
       run: Compress-Archive -Path "bin\publish\*" -DestinationPath "./publish/wwwroot/downloads/win_x64.zip"
@@ -94,6 +93,7 @@ jobs:
       id: deployment
 
       uses: actions/deploy-pages@v4
+
 
 
 
