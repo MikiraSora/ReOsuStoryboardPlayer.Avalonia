@@ -8,7 +8,9 @@ Program can build/run on Windows/Browser/Android
 [Browser Online](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/)</br>
 [Browser Online (with play beatmap/storyboard)](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia?loadBeatmapSetId=548679)
 
-Android App .apk: [arm64](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/downloads/android_arm64.apk) | [x86_64](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/downloads/android_x64.apk)
+Android: [arm64](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/downloads/android_arm64.apk) | [x86_64](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/downloads/android_x64.apk)
+
+Windows: [x64](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/downloads/win_x64.zip)
 
 ### Technology
 
