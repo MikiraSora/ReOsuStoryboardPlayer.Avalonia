@@ -100,13 +100,13 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
             var period = playerSetting.WindowsAudioPeriod switch
             {
                 StoryboardPlayerSetting.WASAPIPeriod.Minimal => minPeriod,
-                StoryboardPlayerSetting.WASAPIPeriod.Default => defaultPeriod,
                 StoryboardPlayerSetting.WASAPIPeriod.Maximal => maxPeriod,
+                _ => defaultPeriod,
             };
             logger.LogInformation($"SelectedPeriod:{period}");
             hr = audioClient.InitializeSharedAudioStream(0x00040000, period, mixWaveFormatEx, 0);
             Marshal.ThrowExceptionForHR(hr);
-            hr = audioClient.SetEventHandle(eventWaitHandle.Handle);
+            hr = audioClient.SetEventHandle(eventWaitHandle.SafeWaitHandle.DangerousGetHandle());
             Marshal.ThrowExceptionForHR(hr);
             hr = audioClient.GetService(typeof(IAudioRenderClient).GUID, out var audioRenderClientPtr);
             Marshal.ThrowExceptionForHR(hr);
