@@ -41,31 +41,22 @@ jobs:
 
     - name: Build Browser project
       run: |
-        dotnet publish ReOsuStoryboardPlayer.Avalonia.Browser/ReOsuStoryboardPlayer.Avalonia.Browser.csproj \
-          -c Release \
-          -o ./publish
+        dotnet publish ReOsuStoryboardPlayer.Avalonia.Browser/ReOsuStoryboardPlayer.Avalonia.Browser.csproj -c Release -o ./publish
           
     - name: Build Android (arm64)
       run: |
-        dotnet publish ReOsuStoryboardPlayer.Avalonia.Android/ReOsuStoryboardPlayer.Avalonia.Android.csproj \
-          -c Release \
-          -r android-arm64 \
-          -o ./android/arm64
+        dotnet publish ReOsuStoryboardPlayer.Avalonia.Android/ReOsuStoryboardPlayer.Avalonia.Android.csproj -c Release -r android-arm64 -o ./android/arm64
         mkdir -p ./publish/wwwroot/downloads
         cp ./android/arm64/moe.MikiraSora.ReOsuStoryboardPlayer-Signed.apk ./publish/wwwroot/downloads/android_arm64.apk
         
     - name: Build Android (x64)
       run: |
-        dotnet publish ReOsuStoryboardPlayer.Avalonia.Android/ReOsuStoryboardPlayer.Avalonia.Android.csproj \
-          -c Release \
-          -r android-x64 \
-          -o ./android/x64
+        dotnet publish ReOsuStoryboardPlayer.Avalonia.Android/ReOsuStoryboardPlayer.Avalonia.Android.csproj -c Release -r android-x64 -o ./android/x64
         cp ./android/x64/moe.MikiraSora.ReOsuStoryboardPlayer-Signed.apk ./publish/wwwroot/downloads/android_x64.apk
         
     - name: Build Windows (x64)
       run: |
-        dotnet publish ReOsuStoryboardPlayer.Avalonia.Desktop/ReOsuStoryboardPlayer.Avalonia.Desktop.csproj \
-          -p:PublishProfile=FolderProfile
+        dotnet publish ReOsuStoryboardPlayer.Avalonia.Desktop/ReOsuStoryboardPlayer.Avalonia.Desktop.csproj -p:PublishProfile=FolderProfile
         
     - name: Compress Build Windows
       run: Compress-Archive -Path "bin\publish\*" -DestinationPath "./publish/wwwroot/downloads/win_x64.zip"
@@ -91,6 +82,7 @@ jobs:
       id: deployment
 
       uses: actions/deploy-pages@v4
+
 
 
 
