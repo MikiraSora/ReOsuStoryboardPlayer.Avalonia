@@ -83,6 +83,7 @@ public partial class HomePageViewModel : PageViewModelBase
 
     public WideScreenOption[] WideScreenOptions { get; } = Enum.GetValues<WideScreenOption>();
     public SKFilterQuality[] FilterQualities { get; } = Enum.GetValues<SKFilterQuality>();
+    public StoryboardPlayerSetting.WASAPIPeriod[] WASAPIPeriods { get; } = Enum.GetValues<StoryboardPlayerSetting.WASAPIPeriod>();
 
     public bool IsSupportMultiThreaded => platform.SupportMultiThread;
 

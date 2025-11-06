@@ -2,6 +2,7 @@
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <LangVersion>preview</LangVersion>
+		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">true</IsAotCompatible>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

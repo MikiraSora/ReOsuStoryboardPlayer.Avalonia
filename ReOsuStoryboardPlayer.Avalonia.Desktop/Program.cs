@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,8 @@ using ReOsuStoryboardPlayer.Avalonia.Desktop.Utils.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Utils.Injections;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
+//using Avalonia.Winit;
+//using VelloSharp.Avalonia.Vello;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop;
 
@@ -45,7 +48,10 @@ internal class Program
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
-            .UsePlatformDetect()
+            //.UseWinit()
+            //.UseVello()
+            .UseWin32()
+            .UseSkia()
             .WithInterFont()
             .AppendDependencyInject(collection =>
                 {

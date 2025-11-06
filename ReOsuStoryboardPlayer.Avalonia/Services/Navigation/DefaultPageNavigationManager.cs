@@ -56,7 +56,7 @@ public partial class DefaultPageNavigationManager : ObservableObject, IPageNavig
         return Task.CompletedTask;
     }
 
-    public async Task<T> PushPage<T>() where T : PageViewModelBase
+    public async Task<T> PushPage<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]T>() where T : PageViewModelBase
     {
         var page = viewModelFactory.CreateViewModel<T>();
         await PushPage(page);
