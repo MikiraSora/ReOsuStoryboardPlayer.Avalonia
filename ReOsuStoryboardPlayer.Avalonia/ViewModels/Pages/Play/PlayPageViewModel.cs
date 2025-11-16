@@ -1,9 +1,6 @@
-﻿using System;
-using System.ComponentModel;
-using System.Threading;
-using System.Threading.Tasks;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Rendering.Composition;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -17,6 +14,10 @@ using ReOsuStoryboardPlayer.Avalonia.Services.Render;
 using ReOsuStoryboardPlayer.Avalonia.Services.Storyboards;
 using ReOsuStoryboardPlayer.Avalonia.Services.Window;
 using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
+using System;
+using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ReOsuStoryboardPlayer.Avalonia.ViewModels.Pages.Play;
 
@@ -29,6 +30,7 @@ public partial class PlayPageViewModel : PageViewModelBase
     private readonly IRenderManager renderManager;
     private readonly IStoryboardLoadDialog storyboardLoadDialog;
     private readonly IWindowManager windowManager;
+    private Compositor compositor;
 
     [ObservableProperty]
     private IAudioPlayer audioPlayer;
@@ -64,6 +66,21 @@ public partial class PlayPageViewModel : PageViewModelBase
         this.audioManager = audioManager;
 
         Initialize();
+    }
+
+    public void UpdateCallbackEntryPoint(Compositor compositor)
+    {
+        this.compositor = compositor;
+        OnCompositionUpdate();
+    }
+
+    private void OnCompositionUpdate()
+    {
+        if (AudioPlayer?.IsPlaying is true)
+        {
+            OnPropertyChanged(nameof(CurrentAudioTime));
+        }
+        compositor.RequestCompositionUpdate(OnCompositionUpdate);
     }
 
     public override string Title => "主页";

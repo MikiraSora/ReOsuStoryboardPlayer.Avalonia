@@ -6,10 +6,15 @@ using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Numerics;
+using System.Numerics.Tensors;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPlayer
@@ -35,22 +40,62 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
         [ObservableProperty]
         private TimeSpan leadIn;
         private bool disposedValue;
+        private TimeSpan stopwatchOffset;
+        private long stopwatchTimestamp;
+        private Lock playLock;
 
         public TimeSpan Duration => TimeSpan.FromSeconds(totalFrames / (double)sampleRate);
 
-        public TimeSpan CurrentTime => TimeSpan.FromSeconds(cursorFrames / (double)sampleRate);
+        public TimeSpan CurrentTime
+        {
+            get
+            {
+                lock (playLock)
+                {
+                    if (IsPlaying)
+                    {
+                        return Stopwatch.GetElapsedTime(stopwatchTimestamp) + stopwatchOffset;
+                    }
+                    else
+                    {
+                        return TimeSpan.FromSeconds(cursorFrames / (double)sampleRate);
+                    }
+                }
+            }
+        }
 
         public AudioClientProvider(ComWrappers comWrappers, ILogger<AudioClientProvider> logger)
         {
             this.comWrappers = comWrappers;
             this.logger = logger;
+            playLock = new();
         }
 
-        public void Play() => IsPlaying = true;
-        public void Pause() => IsPlaying = false;
-        public void Stop() { IsPlaying = false; cursorFrames = 0; }
+        public void Play()
+        {
+            lock (playLock)
+            {
+                IsPlaying = true;
+                stopwatchOffset = TimeSpan.FromSeconds(cursorFrames / (double)sampleRate);
+                stopwatchTimestamp = Stopwatch.GetTimestamp();
+            }
+        }
+        public void Pause()
+        {
+            lock (playLock)
+            {
+                IsPlaying = false;
+            }
+        }
+        public void Stop() {
+            lock (playLock)
+            {
+                IsPlaying = false;
+                cursorFrames = 0;
+            }
+        }
 
-        public void Seek(TimeSpan TimeSpan, bool pause) { cursorFrames = (int)(TimeSpan.TotalSeconds * sampleRate); /*IsPlaying = !pause; */}
+        public void Seek(TimeSpan TimeSpan, bool pause) { cursorFrames = (int)(TimeSpan.TotalSeconds * sampleRate);Play(); }
 
         public async Task<bool> Load(Stream stream, WAVEFORMATEX deviceMix)
         {
@@ -83,7 +128,6 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
         {
             int dwFlags = 0;
             nint pSample = 0;
-
             while (true)
             {
                 var hr = reader.ReadSample(
@@ -108,30 +152,28 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
 
         public int MixIntoFloat(Span<float> mixBuffer, int frames)
         {
-            if (!IsPlaying) return 0;
-            var leadInFrames = LeadIn.Seconds * SampleRate;
-            if (leadInFrames > 0)
+            lock (playLock)
             {
-                int consume = Math.Min(frames, leadInFrames);
-                leadInFrames -= consume;
-                return consume;
+                if (!IsPlaying) return 0;
+                var leadInFrames = LeadIn.Seconds * SampleRate;
+                if (leadInFrames > 0)
+                {
+                    int consume = Math.Min(frames, leadInFrames);
+                    leadInFrames -= consume;
+                    return consume;
+                }
+                int remainFrames = totalFrames - cursorFrames;
+                if (remainFrames <= 0) { IsPlaying = false; return 0; }
+                int framesToMix = Math.Min(frames, remainFrames);
+                int srcFloatOffset = cursorFrames * channels;
+                int srcFloatCount = framesToMix * channels;
+                var src = MemoryMarshal.Cast<byte, float>(pcmFloat.AsSpan()).Slice(srcFloatOffset, srcFloatCount);
+                var dst = mixBuffer[..srcFloatCount];
+                TensorPrimitives.Multiply(src, Volume, dst);
+                cursorFrames += framesToMix;
+                if (cursorFrames >= totalFrames) IsPlaying = false;
+                return framesToMix;
             }
-
-            int remainFrames = totalFrames - cursorFrames;
-            if (remainFrames <= 0) { IsPlaying = false; return 0; }
-
-            int framesToMix = Math.Min(frames, remainFrames);
-            int srcFloatOffset = cursorFrames * channels;
-            int srcFloatCount = framesToMix * channels;
-
-            var src = MemoryMarshal.Cast<byte, float>(pcmFloat.AsSpan()).Slice(srcFloatOffset, srcFloatCount);
-            var dst = mixBuffer[..srcFloatCount];
-            for (int i = 0; i < srcFloatCount; i++)
-                dst[i] += src[i] * Volume;
-
-            cursorFrames += framesToMix;
-            if (cursorFrames >= totalFrames) IsPlaying = false;
-            return framesToMix;
         }
 
         protected virtual void Dispose(bool disposing)
