@@ -28,7 +28,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 9.0.x
+        dotnet-version: 10.0.x
         
     - name: Setup wasm-tool
       run: dotnet workload install wasm-tools
@@ -82,6 +82,7 @@ jobs:
       id: deployment
 
       uses: actions/deploy-pages@v4
+
 
 
 
