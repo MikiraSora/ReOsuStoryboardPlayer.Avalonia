@@ -4,8 +4,6 @@ using AndroidX.Core.Content;
 using AndroidX.Media3.Common;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.Logging;
-using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
-using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
+using ReOsuStoryboardPlayer.Avalonia.Utils.MethodExtensions;
 using static Android.Icu.Text.Transliterator;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Android.ServiceImplement.Audio
