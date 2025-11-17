@@ -16,7 +16,7 @@ Windows: [x64](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/downl
 * UI Framework: [Avalonia](https://github.com/AvaloniaUI/Avalonia)
 * Rendering Implementation: [SkiaSharp](https://github.com/mono/SkiaSharp)
 * Storyboard Implementation: [ReOsuStoryboardPlayer.Core](https://github.com/MikiraSora/ReOsuStoryboardPlayer/tree/master/ReOsuStoryboardPlayer.Core)
-* Audio Implementation: [NAudio (Windows)](https://github.com/naudio/NAudio) / [WebAudio](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Audio_API)
+* Audio Implementation: [WASAPI&Media Foundation (Windows) Powered by DirectNAot](https://github.com/smourier/DirectNAot) / [WebAudio](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Audio_API)
 
 ### Todos:
 

@@ -162,7 +162,7 @@ public partial class StoryboardPlayer : UserControl
         UpdateStoryboard();
 
 #if DEBUG
-        var storyboardUpdateCostTime = stopwatch.ElapsedMilliseconds;
+        var storyboardUpdateCostTime = stopwatch.Elapsed.TotalMilliseconds;
         stopwatch.Restart();
 #endif
 
@@ -216,13 +216,13 @@ public partial class StoryboardPlayer : UserControl
         canvas.Restore();
 
 #if DEBUG
-        var storyboardRenderCostTime = stopwatch.ElapsedMilliseconds;
+        var storyboardRenderCostTime = stopwatch.Elapsed.TotalMilliseconds;
         var fps = 1000.0f / (storyboardRenderCostTime + storyboardUpdateCostTime);
 
         string[] lines =
         [
             $"Bounds: {storyboardDrawOperation.Bounds} Dpi: {this.GetVisualRoot()?.RenderScaling ?? 1:F2}x ClientSize:{this.GetVisualRoot()?.ClientSize}",
-            $"FPS/Update/Render: {(float.IsInfinity(fps) ? "--" : fps.ToString("F2"))}/{storyboardUpdateCostTime:F2}ms/{storyboardRenderCostTime:F2}ms",
+            $"FPS/Update/Render: {(double.IsInfinity(fps) ? "--" : fps.ToString("F2"))}/{storyboardUpdateCostTime:F2}ms/{storyboardRenderCostTime:F2}ms",
             $"Rendering Objs: {storyboardUpdater.UpdatingStoryboardObjects.Count}",
             $"Executing Cmds: {storyboardUpdater.UpdatingStoryboardObjects.Sum(x => x.ExecutedCommands.Count)}"
         ];

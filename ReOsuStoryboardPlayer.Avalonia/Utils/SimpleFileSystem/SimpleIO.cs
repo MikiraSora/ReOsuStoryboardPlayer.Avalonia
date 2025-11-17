@@ -24,54 +24,47 @@ public static class SimpleIO
         return dir != null;
     }
 
-    public static async Task<Stream> OpenRead(ISimpleDirectory root, string path)
+    public static Task<Stream> OpenRead(ISimpleDirectory root, string path)
     {
         var file = FindFile(root, path);
-        if (file is null)
-            throw new FileNotFoundException($"File not found: {path}");
-
-        return new MemoryStream(await file.ReadAllBytes());
+        return file is null ? throw new FileNotFoundException($"File not found: {path}") : file.OpenRead();
     }
 
-    public static Task<string[]> ReadAllLines(ISimpleDirectory root, string path)
+    public static ValueTask<string[]> ReadAllLines(ISimpleDirectory root, string path)
     {
         var file = FindFile(root, path);
-        if (file is null)
-            throw new FileNotFoundException($"File not found: {path}");
-
-        return file.ReadAllLines();
+        return file is null ? throw new FileNotFoundException($"File not found: {path}") : file.ReadAllLines();
     }
 
     public static ISimpleFile[] GetFiles(ISimpleDirectory root, string path, string searchPattern = "*")
     {
         var dir = FindDirectory(root, path);
         if (dir == null)
-            return Array.Empty<ISimpleFile>();
+            return [];
 
         var regex = WildcardToRegex(searchPattern);
 
-        return dir.ChildFiles
-            .Where(f => regex.IsMatch(f.FileName))
-            .ToArray();
+        return [.. dir.ChildFiles.Where(f => regex.IsMatch(f.FileName))];
     }
 
     public static string[] GetFilePaths(ISimpleDirectory root, string path, string searchPattern = "*")
     {
         var dir = FindDirectory(root, path);
         if (dir == null)
-            return Array.Empty<string>();
+            return [];
 
         var regex = WildcardToRegex(searchPattern);
 
-        return dir.ChildFiles
+        return [.. dir.ChildFiles
             .Where(f => regex.IsMatch(f.FileName))
-            .Select(f => f.FullPath)
-            .ToArray();
+            .Select(f => f.FullPath)];
     }
+
+    private static readonly char[] separator = ['/', '\\'];
 
     public static ISimpleFile FindFile(ISimpleDirectory root, string path)
     {
-        var parts = path.Split(new[] {'/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
+        var parts = path.Split(separator, StringSplitOptions.RemoveEmptyEntries);
         var dirPath = string.Join('/', parts.Take(parts.Length - 1));
         var fileName = parts.LastOrDefault();
 
@@ -88,7 +81,7 @@ public static class SimpleIO
         if (string.IsNullOrWhiteSpace(path))
             return root;
 
-        var parts = path.Split(new[] {'/', '\\'}, StringSplitOptions.RemoveEmptyEntries);
+        var parts = path.Split(separator, StringSplitOptions.RemoveEmptyEntries);
         var current = root;
 
         foreach (var part in parts)
@@ -124,7 +117,7 @@ public static class SimpleIO
                 '?' => ".",
                 _ => Regex.Escape(c.ToString())
             });
-        sb.Append("$");
+        sb.Append('$');
         return new Regex(sb.ToString(), RegexOptions.IgnoreCase | RegexOptions.Compiled);
     }
 }

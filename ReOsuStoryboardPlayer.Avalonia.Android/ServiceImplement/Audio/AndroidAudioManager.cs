@@ -30,6 +30,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Android.ServiceImplement.Audio
             var player = serviceProvider.Resolve<AndroidAudioPlayer>();
 
             await Task.Run(() => player.Load(stream, prependLeadInSeconds, playerSetting.UpdateThreadCount, playerSetting.AudioSampleRate));
+            stream.Dispose();
             return player;
         }
     }

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Numerics.Tensors;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
 using System.Threading;
@@ -17,7 +18,6 @@ using System.Threading.Tasks;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
 {
-    [RegisterSingleton<IAudioManager>]
     internal partial class WASAPIManager : IAudioManager
     {
         public WASAPIManager(ILogger<WASAPIManager> logger, ILogger<AudioClientProvider> clientLogger, IPersistence persistence)
@@ -58,6 +58,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
         {
             AudioClientProvider client = new(comWrappers,clientLogger);
             await client.Load(stream, mixWaveFormatEx);
+            stream.Dispose();
             lock (playerLock)
             {
                 players.Add(client);
@@ -153,10 +154,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
                         player.MixIntoFloat(mixSpan, (int)framesToWrite);
                     }
                 }
-                for (int i = 0; i < mixSpan.Length; i++)
-                {
-                    mixSpan[i] = float.Clamp(mixSpan[i], -1f, 1f);
-                }
+                TensorPrimitives.Clamp(mixSpan, -1f, 1f, mixSpan);
                 hr = audioRenderClient.GetBuffer(framesToWrite, out var bufferPtr);
                 Span<byte> buffer = new((void*)bufferPtr, (int)(framesToWrite*frameSize));
                 if (outIsFloat)

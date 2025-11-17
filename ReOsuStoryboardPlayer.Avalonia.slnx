@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Dependencies/">
+    <Project Path="Dependencies/ReOsuStoryboardPlayer.Avalonia.SourceGenerator/ReOsuStoryboardPlayer.Avalonia.SourceGenerator.csproj" />
+    <Project Path="Dependencies/ReOsuStoryboardPlayer/ReOsuStoryboardPlayer.Core/ReOsuStoryboardPlayer.Core.csproj" />
+  </Folder>
+  <Project Path="ReOsuStoryboardPlayer.Avalonia.Android/ReOsuStoryboardPlayer.Avalonia.Android.csproj" />
+  <Project Path="ReOsuStoryboardPlayer.Avalonia.Browser/ReOsuStoryboardPlayer.Avalonia.Browser.csproj" />
+  <Project Path="ReOsuStoryboardPlayer.Avalonia.Desktop/ReOsuStoryboardPlayer.Avalonia.Desktop.csproj" />
+  <Project Path="ReOsuStoryboardPlayer.Avalonia/ReOsuStoryboardPlayer.Avalonia.csproj" />
+</Solution>

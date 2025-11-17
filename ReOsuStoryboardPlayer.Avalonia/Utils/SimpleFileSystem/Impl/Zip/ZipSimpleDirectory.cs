@@ -11,8 +11,8 @@ namespace ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem.Impl.Zip;
 
 public class ZipSimpleDirectory : ISimpleDirectory
 {
-    private readonly Dictionary<string, ZipSimpleDirectory> _dirs = new();
-    private readonly Dictionary<string, ZipSimpleFile> _files = new();
+    private readonly Dictionary<string, ZipSimpleDirectory> _dirs = [];
+    private readonly Dictionary<string, ZipSimpleFile> _files = [];
 
     public ZipSimpleDirectory(ISimpleDirectory parent, string name)
     {
@@ -22,9 +22,9 @@ public class ZipSimpleDirectory : ISimpleDirectory
 
     public ISimpleDirectory ParentDictionary { get; }
 
-    public ISimpleDirectory[] ChildDictionaries => _dirs.Values.ToArray<ISimpleDirectory>();
+    public ISimpleDirectory[] ChildDictionaries => [.. _dirs.Values];
 
-    public ISimpleFile[] ChildFiles => _files.Values.ToArray<ISimpleFile>();
+    public ISimpleFile[] ChildFiles => [.. _files.Values];
     public string FullPath => Path.Combine(ParentDictionary?.FullPath ?? string.Empty, DirectoryName);
 
     public string DirectoryName { get; }
@@ -51,7 +51,7 @@ public class ZipSimpleDirectory : ISimpleDirectory
                 results.Add(kv.Value);
         }
 
-        return results.ToArray();
+        return [.. results];
     }
 
     public void Dispose()
@@ -62,7 +62,7 @@ public class ZipSimpleDirectory : ISimpleDirectory
     private static Regex WildcardToRegex(string pattern)
     {
         var sb = new StringBuilder();
-        sb.Append("^");
+        sb.Append('^');
         for (var i = 0; i < pattern.Length; i++)
         {
             var c = pattern[i];
@@ -72,7 +72,7 @@ public class ZipSimpleDirectory : ISimpleDirectory
                     sb.Append(".*");
                     break;
                 case '?':
-                    sb.Append(".");
+                    sb.Append('.');
                     break;
                 default:
                     sb.Append(Regex.Escape(c.ToString()));
@@ -80,7 +80,7 @@ public class ZipSimpleDirectory : ISimpleDirectory
             }
         }
 
-        sb.Append("$");
+        sb.Append('$');
         return new Regex(sb.ToString(), RegexOptions.Compiled | RegexOptions.IgnoreCase);
     }
 
@@ -99,14 +99,14 @@ public class ZipSimpleDirectory : ISimpleDirectory
     /// </summary>
     public static async Task<ISimpleDirectory> LoadFromZipFileBytes(byte[] bytes)
     {
-        var root = new ZipSimpleDirectory(null, "");
+        var root = new ZipSimpleDirectory(null, string.Empty);
 
-        using var ms = new MemoryStream(bytes);
-        using var archive = new ZipArchive(ms, ZipArchiveMode.Read);
+        var ms = new MemoryStream(bytes);
+        var archive = new ZipArchive(ms, ZipArchiveMode.Read);
 
         foreach (var entry in archive.Entries)
         {
-            var pathParts = entry.FullName.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
+            var pathParts = entry.FullName.Split('/', StringSplitOptions.RemoveEmptyEntries);
             if (pathParts.Length == 0) continue;
 
             var current = root;
@@ -123,15 +123,10 @@ public class ZipSimpleDirectory : ISimpleDirectory
             }
 
             // 如果是文件
-            if (!entry.FullName.EndsWith("/"))
+            if (!entry.FullName.EndsWith('/'))
             {
-                using var es = entry.Open();
-                using var msEntry = new MemoryStream();
-                await es.CopyToAsync(msEntry);
-                var data = msEntry.ToArray();
-
                 var fileName = pathParts[^1];
-                var file = new ZipSimpleFile(current, fileName, data);
+                var file = new ZipSimpleFile(current, fileName, entry);
                 current.AddFile(file);
             }
         }
