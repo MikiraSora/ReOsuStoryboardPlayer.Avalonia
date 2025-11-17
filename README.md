@@ -5,8 +5,7 @@ This repository is developed based on another repository [ReOsuStoryboardPlayer.
 Program can build/run on Windows/Browser/Android
 
 ### Play & Download
-[Browser Online](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/)</br>
-[Browser Online (with play beatmap/storyboard)](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia?loadBeatmapSetId=548679)
+[Browser Online](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/) (Play [Demo1](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia?loadBeatmapSetId=548679) [Demo2](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia?loadBeatmapSetId=402680) [Demo3](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia?loadBeatmapSetId=499488))
 
 Android: [arm64](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/downloads/android_arm64.apk) | [x86_64](https://mikirasora.github.io/ReOsuStoryboardPlayer.Avalonia/downloads/android_x64.apk)
 
