@@ -3,16 +3,15 @@ using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPlayer;
 using ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils;
+using ReOsuStoryboardPlayer.Avalonia.Desktop.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Models;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using ReOsuStoryboardPlayer.Avalonia.Services.Persistences;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Numerics.Tensors;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.Marshalling;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,7 +24,6 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
             this.logger = logger;
             this.clientLogger = clientLogger;
             this.persistence = persistence;
-            comWrappers = new StrategyBasedComWrappers();
             isRunning = true;
             eventWaitHandle = new EventWaitHandle(true, EventResetMode.AutoReset);
             MFUtils = new MF();
@@ -37,7 +35,6 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
         private ILogger<AudioClientProvider> clientLogger;
         private IPersistence persistence;
         private MF MFUtils;
-        private ComWrappers comWrappers;
         private IMMDevice mmDevice;
         private IAudioClient3 audioClient;
         private IAudioRenderClient audioRenderClient;
@@ -56,7 +53,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
         private List<AudioClientProvider> players;
         public async Task<IAudioPlayer> LoadAudio(Stream stream, double prependLeadInSeconds)
         {
-            AudioClientProvider client = new(comWrappers,clientLogger);
+            AudioClientProvider client = new(clientLogger);
             await client.Load(stream, mixWaveFormatEx);
             stream.Dispose();
             lock (playerLock)
@@ -83,10 +80,8 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
             propertyStore.GetValue(friendNameKey, out var friendlyNameValue);
             string friendName = Marshal.PtrToStringUni(friendlyNameValue.Anonymous.Anonymous.Anonymous.pwszVal.Value);
             logger.LogInformation($"WASAPI AudioEndpoint Name:{friendName}");
-            var hr = mmDevice.Activate(typeof(IAudioClient3).GUID, DirectN.CLSCTX.CLSCTX_ALL, 0, out var audioClientPtr);
-            Marshal.ThrowExceptionForHR(hr);
-            audioClient = comWrappers.GetOrCreateObjectForComInstance(audioClientPtr, CreateObjectFlags.None) as IAudioClient3;
-            hr = audioClient.GetMixFormat(out var mixFormatPtr);
+            audioClient = mmDevice.Activate<IAudioClient3>();
+            var hr = audioClient.GetMixFormat(out var mixFormatPtr);
             Marshal.ThrowExceptionForHR(hr);
             mixWaveFormatEx = Marshal.PtrToStructure<WAVEFORMATEX>(mixFormatPtr);
             Marshal.FreeCoTaskMem(mixFormatPtr);
@@ -109,9 +104,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
             Marshal.ThrowExceptionForHR(hr);
             hr = audioClient.SetEventHandle(eventWaitHandle.SafeWaitHandle.DangerousGetHandle());
             Marshal.ThrowExceptionForHR(hr);
-            hr = audioClient.GetService(typeof(IAudioRenderClient).GUID, out var audioRenderClientPtr);
-            Marshal.ThrowExceptionForHR(hr);
-            audioRenderClient = comWrappers.GetOrCreateObjectForComInstance(audioRenderClientPtr, CreateObjectFlags.None) as IAudioRenderClient;
+            audioRenderClient = audioClient.GetService<IAudioRenderClient>();
             hr = audioClient.Start();
             Marshal.ThrowExceptionForHR(hr);
             logger.LogInformation($"AudioClient Start");
@@ -137,8 +130,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
             while (isRunning)
             {
                 eventWaitHandle.WaitOne();
-                uint currentPadding = 0;
-                var hr = audioClient.GetCurrentPadding(out currentPadding);
+                var hr = audioClient.GetCurrentPadding(out uint currentPadding);
                 uint framesToWrite = bufferFrameCount - currentPadding;
                 if (framesToWrite == 0)
                     continue;
@@ -197,7 +189,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
             };
         }
 
-        private IMMDevice GetDefaultAudioEndpoint()
+        private static IMMDevice GetDefaultAudioEndpoint()
         {
             IMMDevice device;
             var hr = ActivateMMDeviceEnumerator().GetDefaultAudioEndpoint(EDataFlow.eRender, ERole.eConsole, out device);
@@ -205,29 +197,35 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio
             return device;
         }
 
-        private IMMDeviceEnumerator ActivateMMDeviceEnumerator()
+        private static IMMDeviceEnumerator ActivateMMDeviceEnumerator()
         {
-            return ActivateClass<IMMDeviceEnumerator>(new("BCDE0395-E52F-467C-8E3D-C4579291692E"), new("A95664D2-9614-4F35-A746-DE8DB63617E6"));
+            return COMUtils.ActivateClass<IMMDeviceEnumerator>(new("BCDE0395-E52F-467C-8E3D-C4579291692E"), new("A95664D2-9614-4F35-A746-DE8DB63617E6"));
         }
-
-        private I ActivateClass<I>(Guid clsid, Guid iid) where I : class
-        {
-            Debug.Assert(iid == typeof(I).GUID);
-            int hr = CoCreateInstance(ref clsid, IntPtr.Zero, 1, ref iid, out IntPtr obj);
-            Marshal.ThrowExceptionForHR(hr);
-            return comWrappers.GetOrCreateObjectForComInstance(obj, CreateObjectFlags.None) as I;
-        }
-
-        [LibraryImport("Ole32")]
-        [return: MarshalAs(UnmanagedType.Error)]
-        private static partial int CoCreateInstance(
-            ref Guid rclsid,
-            IntPtr pUnkOuter,
-            int dwClsContext,
-            ref Guid riid,
-            out IntPtr ppObj);
 
         [LibraryImport("Avrt.dll", SetLastError = true)]
         private static partial IntPtr AvSetMmThreadCharacteristicsW([MarshalAs(UnmanagedType.LPWStr)] string taskName, out uint taskIndex);
+    }
+
+    internal static class WASAPIExtensions
+    {
+        extension(IMMDevice source)
+        {
+            public T Activate<T>() where T : class
+            {
+                var hr = source.Activate(typeof(T).GUID, DirectN.CLSCTX.CLSCTX_ALL, 0, out var ptr);
+                Marshal.ThrowExceptionForHR(hr);
+                return COMUtils.GetManaged<T>(ptr);
+            }
+        }
+
+        extension(IAudioClient source)
+        {
+            public T GetService<T>() where T : class
+            {
+                var hr = source.GetService(typeof(T).GUID, out var ptr);
+                Marshal.ThrowExceptionForHR(hr);
+                return COMUtils.GetManaged<T>(ptr);
+            }
+        }
     }
 }

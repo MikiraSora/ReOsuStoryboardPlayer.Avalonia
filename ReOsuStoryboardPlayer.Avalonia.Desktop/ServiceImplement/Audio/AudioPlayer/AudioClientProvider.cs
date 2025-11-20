@@ -2,6 +2,7 @@
 using DirectN;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils;
+using ReOsuStoryboardPlayer.Avalonia.Desktop.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,6 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
 {
     internal partial class AudioClientProvider : ObservableObject, IAudioPlayer
     {
-        ComWrappers comWrappers;
         ILogger<AudioClientProvider> logger;
         public Action removeAction;
         private byte[] pcmFloat;
@@ -65,9 +65,8 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
             }
         }
 
-        public AudioClientProvider(ComWrappers comWrappers, ILogger<AudioClientProvider> logger)
+        public AudioClientProvider(ILogger<AudioClientProvider> logger)
         {
-            this.comWrappers = comWrappers;
             this.logger = logger;
             playLock = new();
         }
@@ -155,7 +154,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
                     break;
                 if (pSample == 0)
                     continue;
-                var sample = (IMFSample)comWrappers.GetOrCreateObjectForComInstance(pSample, CreateObjectFlags.None);
+                var sample = COMUtils.GetManaged<IMFSample>(pSample);
                 hr = sample.ConvertToContiguousBuffer(out var buffer);
                 Marshal.ThrowExceptionForHR(hr);
                 int curLen;

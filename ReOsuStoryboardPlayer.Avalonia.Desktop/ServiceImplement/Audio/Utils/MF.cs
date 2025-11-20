@@ -45,7 +45,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils
         public static IMFSourceReader MFCreateSourceReaderFromByteStream(Stream stream)
         {
             //ManagedMFByteStream managedMFByteStream = new ManagedMFByteStream(stream);
-            ManagedIStream managedIStream = new ManagedIStream(stream);
+            ManagedIStream managedIStream = new(stream);
             MFCreateMFByteStreamOnStream(managedIStream, out var byteStream);
             var hr = MFCreateSourceReaderFromByteStream(byteStream, IntPtr.Zero, out var ppSourceReader);
             Marshal.ThrowExceptionForHR(hr);
