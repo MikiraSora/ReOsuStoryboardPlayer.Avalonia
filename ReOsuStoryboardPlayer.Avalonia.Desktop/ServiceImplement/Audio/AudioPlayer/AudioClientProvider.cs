@@ -2,6 +2,7 @@
 using DirectN;
 using Microsoft.Extensions.Logging;
 using ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.Utils;
+using ReOsuStoryboardPlayer.Avalonia.Desktop.Utils;
 using ReOsuStoryboardPlayer.Avalonia.Services.Audio;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,6 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
 {
     internal partial class AudioClientProvider : ObservableObject, IAudioPlayer
     {
-        ComWrappers comWrappers;
         ILogger<AudioClientProvider> logger;
         public Action removeAction;
         private byte[] pcmFloat;
@@ -43,6 +43,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
         private TimeSpan stopwatchOffset;
         private long stopwatchTimestamp;
         private Lock playLock;
+        private bool mediaend;
 
         public TimeSpan Duration => TimeSpan.FromSeconds(totalFrames / (double)sampleRate);
 
@@ -64,9 +65,8 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
             }
         }
 
-        public AudioClientProvider(ComWrappers comWrappers, ILogger<AudioClientProvider> logger)
+        public AudioClientProvider(ILogger<AudioClientProvider> logger)
         {
-            this.comWrappers = comWrappers;
             this.logger = logger;
             playLock = new();
         }
@@ -75,6 +75,10 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
         {
             lock (playLock)
             {
+                if (mediaend)
+                {
+                    cursorFrames = 0;
+                }
                 IsPlaying = true;
                 stopwatchOffset = TimeSpan.FromSeconds(cursorFrames / (double)sampleRate);
                 stopwatchTimestamp = Stopwatch.GetTimestamp();
@@ -87,7 +91,8 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
                 IsPlaying = false;
             }
         }
-        public void Stop() {
+        public void Stop()
+        {
             lock (playLock)
             {
                 IsPlaying = false;
@@ -95,7 +100,15 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
             }
         }
 
-        public void Seek(TimeSpan TimeSpan, bool pause) { cursorFrames = (int)(TimeSpan.TotalSeconds * sampleRate);Play(); }
+        public void Seek(TimeSpan TimeSpan, bool pause)
+        {
+            lock (playLock)
+            {
+                cursorFrames = (int)(TimeSpan.TotalSeconds * sampleRate);
+                stopwatchOffset = TimeSpan.FromSeconds(cursorFrames / (double)sampleRate);
+                stopwatchTimestamp = Stopwatch.GetTimestamp();
+            }
+        }
 
         public async Task<bool> Load(Stream stream, WAVEFORMATEX deviceMix)
         {
@@ -119,6 +132,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
                 totalFrames = pcmFloat.Length / (channels * sizeof(float));
                 cursorFrames = 0;
             });
+            OnPropertyChanged(nameof(Duration));
             IsPlaying = false;
             IsAvaliable = true;
             return true;
@@ -140,7 +154,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
                     break;
                 if (pSample == 0)
                     continue;
-                var sample = (IMFSample)comWrappers.GetOrCreateObjectForComInstance(pSample, CreateObjectFlags.None);
+                var sample = COMUtils.GetManaged<IMFSample>(pSample);
                 hr = sample.ConvertToContiguousBuffer(out var buffer);
                 Marshal.ThrowExceptionForHR(hr);
                 int curLen;
@@ -155,13 +169,6 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
             lock (playLock)
             {
                 if (!IsPlaying) return 0;
-                var leadInFrames = LeadIn.Seconds * SampleRate;
-                if (leadInFrames > 0)
-                {
-                    int consume = Math.Min(frames, leadInFrames);
-                    leadInFrames -= consume;
-                    return consume;
-                }
                 int remainFrames = totalFrames - cursorFrames;
                 if (remainFrames <= 0) { IsPlaying = false; return 0; }
                 int framesToMix = Math.Min(frames, remainFrames);
@@ -171,7 +178,7 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
                 var dst = mixBuffer[..srcFloatCount];
                 TensorPrimitives.Multiply(src, Volume, dst);
                 cursorFrames += framesToMix;
-                if (cursorFrames >= totalFrames) IsPlaying = false;
+                if (cursorFrames >= totalFrames) { IsPlaying = false; mediaend = true; }
                 return framesToMix;
             }
         }
@@ -182,25 +189,18 @@ namespace ReOsuStoryboardPlayer.Avalonia.Desktop.ServiceImplement.Audio.AudioPla
             {
                 if (disposing)
                 {
-                    // TODO: 释放托管状态(托管对象)
                 }
                 removeAction();
-                // TODO: 释放未托管的资源(未托管的对象)并重写终结器
-                // TODO: 将大型字段设置为 null
                 disposedValue = true;
             }
         }
-
-        // // TODO: 仅当“Dispose(bool disposing)”拥有用于释放未托管资源的代码时才替代终结器
         ~AudioClientProvider()
         {
-            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
             Dispose(disposing: false);
         }
 
         public void Dispose()
         {
-            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }

@@ -9,8 +9,9 @@ namespace ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem.Impl.AvaloniaSto
 public class AvaloniaStorageProviderSimpleFile : ISimpleFile, IDisposable
 {
     private IStorageFile file;
+    private WeakReference<byte[]> data;
 
-    public AvaloniaStorageProviderSimpleFile(ISimpleDirectory parent, string fileName, int fileLength,
+    public AvaloniaStorageProviderSimpleFile(ISimpleDirectory parent, string fileName, long fileLength,
         IStorageFile file)
     {
         this.file = file;
@@ -30,27 +31,38 @@ public class AvaloniaStorageProviderSimpleFile : ISimpleFile, IDisposable
 
     public string FileName { get; }
 
-    public int FileLength { get; }
+    public long FileLength { get; }
 
-    public async Task<byte[]> ReadAllBytes()
+    private static readonly string[] separator = new[] {"\r\n", "\n"};
+
+    public async ValueTask<byte[]> ReadAllBytes()
     {
 #if DEBUG
-        if (file == null)
-            throw new ObjectDisposedException($"AvaloniaStorageProviderSimpleFile {FullPath} is disposed.");
+        ObjectDisposedException.ThrowIf(file == null, $"AvaloniaStorageProviderSimpleFile {FullPath} is disposed.");
 #endif
         if (file == null)
             return [];
+        if (data !=null && data.TryGetTarget(out var target))
+        {
+            return target;
+        }
+        byte[] buffer = new byte[FileLength];
+        data = new(buffer);
         using var fs = await file.OpenReadAsync();
-        using var ms = new MemoryStream();
-        await fs.CopyToAsync(ms);
-        return ms.ToArray();
+        await fs.ReadExactlyAsync(buffer);
+        return buffer;
     }
 
-    public async Task<string[]> ReadAllLines()
+    public async ValueTask<string[]> ReadAllLines()
     {
         var text = Encoding.UTF8.GetString(await ReadAllBytes());
-        var lines = text.Split(new[] {"\r\n", "\n"}, StringSplitOptions.None);
+        var lines = text.Split(separator, StringSplitOptions.None);
         return lines;
+    }
+
+    public async Task<Stream> OpenRead()
+    {
+        return new SeekableStream(await file.OpenReadAsync(),FileLength);
     }
 
     public override string ToString()

@@ -16,6 +16,7 @@ public class BrowserAudioManager(ILogger<BrowserAudioManager> logger, IServicePr
     {
         using var ms = new MemoryStream();
         await stream.CopyToAsync(ms);
+        stream.Dispose();
         logger.LogInformationEx("ms copied");
         var audioPlayer = serviceProvider.Resolve<BrowserAudioPlayer>();
         logger.LogInformationEx("audioPlayer created");

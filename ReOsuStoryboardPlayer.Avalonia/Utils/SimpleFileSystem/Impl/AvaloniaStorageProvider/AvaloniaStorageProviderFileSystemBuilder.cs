@@ -16,7 +16,7 @@ public class AvaloniaStorageProviderFileSystemBuilder
                     case IStorageFile childFile:
                         var prop = await childFile.GetBasicPropertiesAsync();
                         var childJsfsFile =
-                            new AvaloniaStorageProviderSimpleFile(jsfsDir, childFile.Name, (int) (prop.Size ?? 0), childFile);
+                            new AvaloniaStorageProviderSimpleFile(jsfsDir, childFile.Name, (long) (prop.Size ?? 0), childFile);
                         jsfsDir.AddFile(childJsfsFile);
                         break;
                     case IStorageFolder childFolder:

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -7,13 +8,14 @@ namespace ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem.Impl.Zip;
 
 public class ZipSimpleFile : ISimpleFile
 {
-    private readonly byte[] _data;
+    private readonly ZipArchiveEntry _entry;
+    private WeakReference<byte[]> _data; 
 
-    public ZipSimpleFile(ISimpleDirectory parent, string fileName, byte[] data)
+    public ZipSimpleFile(ISimpleDirectory parent, string fileName, ZipArchiveEntry entry)
     {
         ParentDictionary = parent;
         FileName = fileName;
-        _data = data;
+        _entry = entry;
     }
 
     public ISimpleDirectory ParentDictionary { get; }
@@ -21,18 +23,33 @@ public class ZipSimpleFile : ISimpleFile
 
     public string FileName { get; }
 
-    public int FileLength => _data.Length;
+    public long FileLength => _entry.Length;
 
-    public Task<byte[]> ReadAllBytes()
+    private static readonly string[] separator = ["\r\n", "\n"];
+
+    public async ValueTask<byte[]> ReadAllBytes()
     {
-        return Task.FromResult(_data);
+        if (_data != null && _data.TryGetTarget(out var target))
+        {
+            return target;
+        }
+        var buffer = new byte[FileLength];
+        _data = new(buffer);
+        using var stream = await _entry.OpenAsync();
+        await stream.ReadExactlyAsync(buffer);
+        return buffer;
     }
 
-    public Task<string[]> ReadAllLines()
+    public async Task<Stream> OpenRead()
     {
-        var text = Encoding.UTF8.GetString(_data);
-        var lines = text.Split(new[] {"\r\n", "\n"}, StringSplitOptions.None);
-        return Task.FromResult(lines);
+        return new SeekableStream(await _entry.OpenAsync(),FileLength); 
+    }
+
+    public async ValueTask<string[]> ReadAllLines()
+    {
+        var text = Encoding.UTF8.GetString(await ReadAllBytes());
+        var lines = text.Split(separator, StringSplitOptions.None);
+        return lines;
     }
 
     public override string ToString()
