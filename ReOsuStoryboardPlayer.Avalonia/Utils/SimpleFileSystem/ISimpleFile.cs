@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace ReOsuStoryboardPlayer.Avalonia.Utils.SimpleFileSystem;
@@ -14,8 +15,9 @@ public interface ISimpleFile : IDisposable
     /// </summary>
     string FileName { get; }
 
-    int FileLength { get; }
+    long FileLength { get; }
 
-    Task<string[]> ReadAllLines();
-    Task<byte[]> ReadAllBytes();
+    ValueTask<string[]> ReadAllLines();
+    ValueTask<byte[]> ReadAllBytes();
+    Task<Stream> OpenRead();
 }

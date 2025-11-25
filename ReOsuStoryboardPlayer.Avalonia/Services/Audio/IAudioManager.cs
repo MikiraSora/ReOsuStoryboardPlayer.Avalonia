@@ -11,14 +11,13 @@ public interface IAudioManager
 
     async Task<IAudioPlayer> LoadAudio(ISimpleFile file, double prependLeadInSeconds)
     {
-        using var fs = new MemoryStream(await file.ReadAllBytes());
-        return await LoadAudio(fs, prependLeadInSeconds);
+        return await LoadAudio(await file.OpenRead(), prependLeadInSeconds);
     }
 
     async Task<IAudioPlayer> LoadAudio(StoryboardInstance storyboardInstance)
     {
         var audioFilePath = storyboardInstance.Info.audio_file_path;
-        using var fs = await SimpleIO.OpenRead(storyboardInstance.FileSystemFolder, audioFilePath);
+        var fs = await SimpleIO.OpenRead(storyboardInstance.FileSystemFolder, audioFilePath);
         return await LoadAudio(fs, storyboardInstance.Info.AudioLeadInSeconds);
     }
 }
